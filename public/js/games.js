@@ -64,8 +64,18 @@ async function initializePage() {
         
         if (!gamesList) {
             console.error('❌ Games list container not found');
-            showError('Page elements not found. Please refresh the page.');
+            showError('Page elements not found (gamesList missing). Please refresh the page.');
             return;
+        }
+        if (!searchInput || !searchDropdown || !searchResultsList) {
+             console.error('❌ Desktop search components not fully found (searchInput, searchDropdown, or searchResultsList).');
+             showError('Page structure error: Essential desktop search components are missing. Please refresh or contact support.');
+             return;
+        }
+        if (!mobileSearchInput || !mobileSearchDropdown || !mobileSearchResultsList) {
+             console.error('❌ Mobile search components not fully found (mobileSearchInput, mobileSearchDropdown, or mobileSearchResultsList).');
+             showError('Page structure error: Essential mobile search components are missing. Please refresh or contact support.');
+             return;
         }
         
         await fetchGames();
