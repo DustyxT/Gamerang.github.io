@@ -238,6 +238,7 @@ export class Forum {
 
             if (error) {
                 console.error('Error loading categories:', error);
+                this.showError('Failed to load forum categories. Some features may be unavailable.');
                 return;
             }
 

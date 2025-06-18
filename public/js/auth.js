@@ -283,20 +283,19 @@ export class Auth { // Export the class
     async checkAdminStatus(userId) {
         if (!userId) return false;
         try {
-            const { data: profile, error } = await this.supabase
+            const { data: profile, error } = await supabase
                 .from('profiles')
                 .select('role')
                 .eq('id', userId)
                 .single();
 
             if (error) {
-                // If profile not found or other error, assume not admin for safety
-                // console.warn('Error fetching profile for admin check:', error.message);
+                console.error('Error fetching profile for admin check:', error.message);
                 return false;
             }
             return profile && profile.role === 'admin';
         } catch (err) {
-            // console.error('Exception in checkAdminStatus:', err.message);
+            console.error('Exception in checkAdminStatus:', err.message);
             return false;
         }
     }

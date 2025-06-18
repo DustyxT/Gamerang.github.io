@@ -29,13 +29,13 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Serve static files from the root directory
-app.use(express.static(__dirname));
+// Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes
-// Default route - serve index.html
+// Default route - serve index.html from 'public'
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Submit game route - now accepts JSON data with Supabase storage URLs
@@ -122,10 +122,14 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: err.message });
 });
 
-// Handle other routes
+// Handle other routes by serving files from 'public'
 app.get('/:page', (req, res) => {
     const page = req.params.page;
-    const filePath = path.join(__dirname, page);
+    // Security check: ensure 'page' does not contain '..' to prevent directory traversal
+    if (page.includes('..')) {
+        return res.status(400).send('Invalid path');
+    }
+    const filePath = path.join(__dirname, 'public', page);
     res.sendFile(filePath, (err) => {
         if (err) {
             console.error(`Error serving ${page}:`, err);
