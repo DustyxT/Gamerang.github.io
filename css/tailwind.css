@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-dark-bg text-white font-sans min-h-screen overflow-x-hidden relative;
+    background-image: url('../images/backgroundimg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  .neon-text {
+    text-shadow: 0 0 5px theme('colors.neon-blue'), 0 0 10px theme('colors.neon-blue');
+  }
+  
+  .neon-border {
+    @apply border border-[rgba(157,0,255,0.3)];
+    box-shadow: 0 0 10px theme('colors.neon-blue'), 0 0 20px theme('colors.neon-purple');
+  }
+  
+  .neon-card {
+    @apply transition-all duration-300;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    background: rgba(26, 26, 46, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 200, 255, 0.2);
+  }
+  
+  .neon-card:hover {
+    @apply -translate-y-2.5;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3), 0 0 15px rgba(0, 247, 255, 0.3);
+  }
+  
+  .nav-link {
+    @apply relative pb-1.5;
+  }
+  
+  .nav-link::after {
+    content: '';
+    @apply absolute w-0 h-0.5 bottom-0 left-0 bg-gradient-to-r from-neon-blue to-neon-purple transition-all duration-300;
+  }
+  
+  .nav-link:hover::after {
+    @apply w-full;
+  }
+}
+
+/* Custom styles */
+:root {
+    --neon-blue: #00f7ff;
+    --neon-pink: #ff00f7;
+    --neon-purple: #9d00ff;
+    --dark-bg: #0f0f1a;
+    --card-bg: #1a1a2e;
+    --text-primary: #ffffff;
+    --text-secondary: #b8b8d4;
+}
+
+/* Add any custom styles here */
+.neon-text { text-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue); }
+.neon-border { box-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-purple); border: 1px solid rgba(157, 0, 255, 0.3); }
+.neon-card { 
+    transition: all 0.3s ease; 
+    transform-style: preserve-3d; 
+    perspective: 1000px; 
+    background: rgba(26, 26, 46, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 200, 255, 0.2);
+}
+.neon-card:hover { 
+    transform: translateY(-5px); 
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3), 0 0 15px rgba(0, 247, 255, 0.3); 
+} 

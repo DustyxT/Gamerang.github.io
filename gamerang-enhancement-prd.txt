@@ -1,0 +1,285 @@
+# PRODUCT REQUIREMENTS DOCUMENT (PRD): GAMERANG WEBSITE ENHANCEMENT
+
+## 1. EXECUTIVE SUMMARY
+
+This PRD outlines the remaining fixes and enhancements needed for the Gamerang gaming website, with a focus on improving the community forum functionality, thread creation process, and overall user experience. The document addresses current issues and proposes new features to create a more engaging and reliable platform for gamers.
+
+## 2. CURRENT ISSUES & OPPORTUNITIES
+
+### 2.1 Thread Creation Issues
+- Thread creation modal is currently in a portrait orientation, making it difficult to view on wider screens
+- Image upload functionality is unreliable, with potential issues in storing and displaying uploaded images
+- Form validation is minimal, allowing for potential submission of incomplete or invalid data
+- Mobile responsiveness issues with the thread creation form
+
+### 2.2 Video Background Issues
+- Video background disappears after page reload (recently fixed but requires monitoring)
+- Potential performance issues on lower-end devices
+- Lack of fallback options for browsers that don't support video backgrounds
+
+### 2.3 User Experience Gaps
+- Limited feedback during thread creation process
+- No preview functionality for thread content before submission
+- Inconsistent UI elements across different pages
+- Limited moderation tools for community management
+
+## 3. PROPOSED ENHANCEMENTS
+
+### 3.1 Thread Creation Redesign
+
+#### 3.1.1 Landscape Wireframe Implementation
+**Priority: High**
+
+Transform the thread creation modal from portrait to landscape orientation with the following layout:
+
++-----------------------------------------------------------------------+
+|                          Create New Thread                        [X]  |
++-----------------------------------------------------------------------+
+|                        |                                               |
+|                        |  Title: [________________________]            |
+|                        |                                               |
+|   Thread Guidelines    |  Category: [Dropdown_________________▼]       |
+|                        |                                               |
+|   • Keep it civil      |  Tags: [_______________________________]      |
+|   • No spam            |                                               |
+|   • Relevant content   |  Content:                                     |
+|   • Format properly    |  +------------------------------------------+ |
+|                        |  |                                          | |
+|                        |  |                                          | |
+|   Preview Thread →     |  |                                          | |
+|                        |  |                                          | |
+|                        |  +------------------------------------------+ |
+|                        |                                               |
+|                        |  Images:                                      |
+|                        |  [Select Files] or Drag & Drop                |
+|                        |  [Preview Area for Selected Images]           |
+|                        |                                               |
+|                        |                       [Cancel] [Create Thread]|
++-----------------------------------------------------------------------+
+
+#### 3.1.2 Thread Creation Reliability Improvements
+**Priority: Critical**
+
+1. **Enhanced Form Validation**
+   - Real-time validation for all required fields
+   - Character limits for title (3-100 chars) and content (10-10000 chars)
+   - Tag validation (max 5 tags, alphanumeric characters only)
+   - Proper error messaging with visual indicators
+
+2. **Image Upload Optimization**
+   - Client-side image compression before upload
+   - Progress indicators for uploads
+   - Preview functionality with delete option
+   - Proper error handling for failed uploads
+   - Automatic retry mechanism for failed uploads
+
+3. **Database Integration**
+   - Implement transaction-based thread creation
+   - Ensure proper error handling for database operations
+   - Implement retry logic for failed operations
+   - Log all errors for debugging purposes
+
+### 3.2 Thread Preview & Formatting
+
+#### 3.2.1 Live Preview
+**Priority: Medium**
+
+Implement a live preview functionality that shows how the thread will appear when posted:
+- Split-screen view showing input on one side and rendered preview on the other
+- Toggle between edit and preview modes
+- Preview updates in real-time as content is typed
+
+#### 3.2.2 Rich Text Formatting
+**Priority: Medium**
+
+Add basic rich text formatting options:
+- Bold, italic, underline
+- Bulleted and numbered lists
+- Code blocks for sharing game codes/commands
+- Hyperlinks
+- Simple table formatting
+
+### 3.3 User Experience Enhancements
+
+#### 3.3.1 Thread Management
+**Priority: High**
+
+1. **Thread Moderation Tools**
+   - Pin/unpin important threads
+   - Lock threads to prevent further replies
+   - Move threads between categories
+   - Merge similar threads
+
+2. **User Notifications**
+   - Notify users when someone replies to their thread
+   - Notify users when their thread is moved/edited by moderators
+   - Email notification options
+
+#### 3.3.2 Mobile Responsiveness
+**Priority: High**
+
+Ensure all forum components work well on mobile devices:
+- Responsive thread creation form
+- Touch-friendly UI elements
+- Optimized image uploads for mobile
+- Simplified navigation for smaller screens
+
+## 4. TECHNICAL REQUIREMENTS
+
+### 4.1 Frontend Enhancements
+
+1. **Thread Creation Form**
+   - Refactor the `newThreadModal` in forum.html to use a landscape layout
+   - Implement client-side validation using JavaScript
+   - Add image preview and compression functionality
+   - Create responsive design for all screen sizes
+
+2. **Rich Text Editor**
+   - Integrate a lightweight rich text editor (e.g., TinyMCE, Quill)
+   - Implement custom styling to match site theme
+   - Ensure proper sanitization of user input
+
+### 4.2 Backend Enhancements
+
+1. **Database Modifications**
+   - Update the `threads` table to support rich text content
+   - Add additional fields for thread status (pinned, locked)
+   - Implement proper indexing for better performance
+
+2. **API Improvements**
+   - Enhance error handling in thread creation
+   - Implement transaction-based operations
+   - Add rate limiting to prevent spam
+   - Optimize image storage and retrieval
+
+### 4.3 Performance Optimizations
+
+1. **Video Background**
+   - Implement adaptive quality based on device capabilities
+   - Add more robust fallback options
+   - Optimize video loading and playback
+
+2. **Image Handling**
+   - Implement client-side image compression
+   - Create multiple resolutions for different device sizes
+   - Use lazy loading for thread images
+
+## 5. IMPLEMENTATION PLAN
+
+### 5.1 Phase 1: Critical Fixes (1-2 weeks)
+1. Redesign thread creation modal to landscape layout
+2. Implement robust form validation
+3. Fix image upload reliability issues
+4. Ensure thread creation works 100% of the time
+
+### 5.2 Phase 2: User Experience Improvements (2-3 weeks)
+1. Implement rich text editor
+2. Add thread preview functionality
+3. Enhance mobile responsiveness
+4. Improve error messaging and user feedback
+
+### 5.3 Phase 3: Advanced Features (3-4 weeks)
+1. Implement thread moderation tools
+2. Add user notification system
+3. Enhance search functionality
+4. Implement user reputation system
+
+## 6. DESIGN SPECIFICATIONS
+
+### 6.1 Thread Creation Form Redesign
+
+#### Layout
+- Two-column layout with guidelines on the left and form on the right
+- Full-width modal with responsive breakpoints
+- Maintain consistent spacing and padding (16px standard)
+
+#### Colors
+- Background: #1a1a2e (dark blue)
+- Form fields: #112240 (slightly lighter blue)
+- Accent colors: #00f7ff (neon blue), #9d00ff (neon purple)
+- Text: #ffffff (white), #b8b8d4 (light gray)
+
+#### Typography
+- Headers: Orbitron font, 24px, bold
+- Form labels: Inter font, 14px, medium
+- Input text: Inter font, 16px, regular
+- Button text: Inter font, 16px, bold
+
+#### Animations
+- Smooth transitions for modal open/close (300ms)
+- Subtle hover effects for interactive elements
+- Loading indicators for asynchronous operations
+
+### 6.2 Mobile Adaptations
+- Stack columns vertically on screens smaller than 768px
+- Increase touch target sizes (min 44px)
+- Simplify UI elements where appropriate
+- Optimize image upload UI for touch interfaces
+
+## 7. SUCCESS METRICS
+
+### 7.1 Reliability Metrics
+- Thread creation success rate: >99.5%
+- Image upload success rate: >98%
+- Form validation error rate: <2%
+
+### 7.2 User Experience Metrics
+- Thread creation completion time: <2 minutes average
+- User satisfaction rating: >4.5/5 for thread creation process
+- Bounce rate reduction: 15% improvement
+
+### 7.3 Performance Metrics
+- Thread creation load time: <1 second
+- Image upload time: <3 seconds for images under 2MB
+- Page responsiveness score: >90/100 on Google PageSpeed
+
+## 8. TESTING REQUIREMENTS
+
+### 8.1 Functional Testing
+- Verify all form fields validate correctly
+- Test image upload with various file types and sizes
+- Ensure thread creation works across all supported browsers
+- Validate rich text formatting preserves correctly
+
+### 8.2 Compatibility Testing
+- Test on major browsers (Chrome, Firefox, Safari, Edge)
+- Verify functionality on mobile devices (iOS, Android)
+- Test on various screen sizes and resolutions
+
+### 8.3 Performance Testing
+- Load testing for concurrent thread creation
+- Image upload performance under various network conditions
+- Database query performance with increased thread count
+
+## 9. APPENDIX
+
+### 9.1 Database Schema Updates
+
+```sql
+-- Add new fields to threads table
+ALTER TABLE public.threads
+ADD COLUMN IF NOT EXISTS is_pinned BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS is_locked BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS formatted_content TEXT,
+ADD COLUMN IF NOT EXISTS last_activity_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW());
+
+-- Create index for improved performance
+CREATE INDEX IF NOT EXISTS idx_threads_last_activity ON public.threads(last_activity_at DESC);
+```
+
+### 9.2 API Endpoints
+
+1. **Create Thread**
+   - `POST /api/threads`
+   - Request body includes title, content, category, tags, images
+   - Returns thread ID and status
+
+2. **Update Thread**
+   - `PUT /api/threads/:id`
+   - Request body includes updated fields
+   - Returns updated thread data
+
+3. **Thread Moderation**
+   - `PATCH /api/threads/:id/pin` - Pin/unpin thread
+   - `PATCH /api/threads/:id/lock` - Lock/unlock thread
+   - `PATCH /api/threads/:id/move` - Move thread to different category 

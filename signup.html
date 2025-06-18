@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | Gamerang</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <!-- Tailwind and styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/transitions.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Initialize Supabase client with production instance
+        const supabaseUrl = 'https://pjlzzuoplxrftrqbhbfl.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqbHp6dW9wbHhyZnRycWJoYmZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzMTcwNjgsImV4cCI6MjA2Mzg5MzA2OH0.1U-dUVRY3qDPYsHEa0EttgKWpCRnlX3BS5SPE2qBExA';
+        window.supabase = supabase.createClient(supabaseUrl, supabaseKey, {
+            auth: {
+                autoRefreshToken: true,
+                persistSession: true,
+                detectSessionInUrl: true
+            }
+        });
+    </script>
+    <style>
+        body {
+            background-color: #18120c;
+            color: #f5e6c8;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #233554 0%, #0a192f 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans">
+    <!-- Header -->
+    <header class="gradient-bg sticky top-0 z-50 shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-gamepad text-2xl text-purple-400"></i>
+                <a href="index.html" class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">Gamerang</a>
+            </div>
+            
+            <div class="hidden md:flex space-x-6">
+                <a href="index.html" class="hover:text-purple-400 transition">Home</a>
+                <a href="games.html" class="hover:text-purple-400 transition">Games</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="max-w-md mx-auto">
+            <div id="signupContainer">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold mb-2">Create Account</h1>
+                    <p class="text-gray-400">Sign up to submit games</p>
+                </div>
+
+                <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+                    <form id="signupForm" class="space-y-4">
+                        <div>
+                            <label for="email" class="block text-gray-300 mb-2">Email</label>
+                            <input type="email" id="email" name="email" required
+                                   class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+
+                        <div>
+                            <label for="password" class="block text-gray-300 mb-2">Password</label>
+                            <input type="password" id="password" name="password" required
+                                   class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+
+                        <button type="submit" id="submitButton" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition">
+                            Create Account
+                        </button>
+                    </form>
+
+                    <div class="mt-4 text-center">
+                        <p class="text-gray-400">Already have an account? <a href="login.html" class="text-purple-400 hover:text-purple-300">Sign In</a></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Verification Message (Hidden by default) -->
+            <div id="verificationContainer" class="hidden">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold mb-2">Check Your Email</h1>
+                    <p class="text-gray-400">We've sent you a verification link</p>
+                </div>
+
+                <div class="bg-gray-800 rounded-lg p-6 shadow-lg text-center">
+                    <i class="fas fa-envelope-open-text text-6xl text-purple-400 mb-4"></i>
+                    <p class="mb-4">Please check your email and click the verification link to complete your registration.</p>
+                    <p class="text-sm text-gray-400">After verifying your email, you can <a href="login.html" class="text-purple-400 hover:text-purple-300">sign in</a> to your account.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Check if user is already logged in or just verified email
+        window.supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' && session) {
+                window.location.href = 'gamesubmit.html';
+            } else if (event === 'USER_UPDATED' && session) {
+                // This event occurs after email verification
+                window.location.href = 'gamesubmit.html';
+            }
+        });
+
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const submitButton = document.getElementById('submitButton');
+
+            try {
+                // Disable button and show loading state
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+
+                console.log('Attempting signup with:', { email, passwordLength: password.length });
+
+                // First try normal signup
+                const { data, error } = await window.supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        emailRedirectTo: `${window.location.origin}/login.html`
+                    }
+                });
+
+                console.log('signup.html - Supabase signUp response:', { data, error });
+
+                if (error) {
+                    console.error('Signup error details:', {
+                        message: error.message,
+                        status: error.status,
+                        statusCode: error.statusCode,
+                        name: error.name,
+                        code: error.code
+                    });
+                    
+                    // Check if it's the database error we know about
+                    if (error.message.includes('Database error saving new user')) {
+                        // Show a more helpful message with instructions
+                        alert(`❌ DATABASE SETUP REQUIRED
+
+The authentication system needs to be configured in your Supabase dashboard.
+
+Please:
+1. Go to https://pjlzzuoplxrftrqbhbfl.supabase.co
+2. Navigate to SQL Editor  
+3. Run the SQL commands from the fix-database.sql file
+
+After that, user registration will work properly.
+
+For now, you can still:
+- Browse the website
+- Submit games (if you have an existing account)
+- Test other features`);
+                    } else if (error.message.includes('User already registered')) {
+                        alert('An account with this email already exists. Please sign in instead.');
+                    } else if (error.message.includes('Password should be')) {
+                        alert('Password is too weak. Please use at least 6 characters.');
+                    } else if (error.message.includes('Invalid email')) {
+                        alert('Please enter a valid email address.');
+                    } else if (error.message.includes('Signup is disabled')) {
+                        alert('Account creation is currently disabled. Please contact support.');
+                    } else {
+                        alert(`Signup failed: ${error.message}`);
+                    }
+                    
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = 'Create Account';
+                    return; 
+                }
+
+                if (data.session) {
+                    // User is signed up and a session is created (email verification disabled)
+                    console.log('signup.html: Sign up successful, session created immediately. Redirecting to gamesubmit.html');
+                    window.location.href = 'gamesubmit.html';
+                } else if (data.user && !data.user.email_confirmed_at) {
+                    // User is signed up, but email verification is required
+                    console.log('signup.html: Sign up successful, email verification required. User:', data.user);
+                    document.getElementById('signupContainer').classList.add('hidden');
+                    document.getElementById('verificationContainer').classList.remove('hidden');
+                } else if (data.user) {
+                    // User created successfully, but no session yet
+                    console.log('signup.html: User created successfully:', data.user);
+                    alert('Account created successfully! Please check your email for verification, then sign in.');
+                    window.location.href = 'login.html';
+                } else {
+                    // Unexpected response from Supabase
+                    console.error('signup.html: Unexpected response from signUp.', data);
+                    alert('Sign up completed, but there was an issue with the session. Please try signing in.');
+                    window.location.href = 'login.html';
+                }
+
+            } catch (error) { // Catch for any other unexpected errors in the try block
+                console.error('Outer signup error catch:', error);
+                alert(`An unexpected error occurred: ${error.message || 'Please try again.'}`);
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Create Account';
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,54 @@
+
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <title>Create Video Poster</title>
+    <style>
+      body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+      video { width: 100%; max-height: 400px; }
+      button { padding: 10px 20px; background: #0066cc; color: white; border: none; cursor: pointer; }
+      canvas { display: none; }
+      .instructions { background: #f0f0f0; padding: 15px; border-radius: 5px; margin: 20px 0; }
+    </style>
+  </head>
+  <body>
+    <h1>Create Video Poster Image</h1>
+    <div class="instructions">
+      <h3>Instructions:</h3>
+      <ol>
+        <li>Play the video below</li>
+        <li>Pause at a frame you want to use as poster</li>
+        <li>Click "Capture Frame as Poster"</li>
+        <li>The image will be downloaded as "poster.jpg"</li>
+        <li>Move the downloaded image to the "temp" folder in your project</li>
+      </ol>
+    </div>
+    <video id="video" controls>
+      <source src="video.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <div style="margin: 20px 0;">
+      <button id="captureBtn">Capture Frame as Poster</button>
+    </div>
+    <canvas id="canvas"></canvas>
+    <script>
+      const video = document.getElementById('video');
+      const canvas = document.getElementById('canvas');
+      const captureBtn = document.getElementById('captureBtn');
+      
+      captureBtn.addEventListener('click', () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        const link = document.createElement('a');
+        link.download = 'poster.jpg';
+        link.href = canvas.toDataURL('image/jpeg', 0.8);
+        link.click();
+        
+        alert('Poster image downloaded! Move it to the "temp" folder in your project.');
+      });
+    </script>
+  </body>
+  </html>
+  

@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply bg-dark text-gray-100;
+    }
+}
+
+@layer components {
+    .game-card {
+        @apply bg-secondary rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition;
+    }
+    
+    .game-image {
+        @apply transition-all duration-300;
+    }
+    
+    .gradient-bg {
+        @apply bg-gradient-to-br from-secondary to-darker;
+    }
+    
+    .hero-gradient {
+        @apply bg-gradient-to-br from-primary/10 to-darker/95;
+    }
+    
+    .glow-text {
+        @apply shadow-lg shadow-primary/50;
+    }
+    
+    .glow-box {
+        @apply shadow-lg;
+    }
+} 

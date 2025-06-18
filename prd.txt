@@ -1,0 +1,246 @@
+# PRODUCT REQUIREMENTS DOCUMENT (PRD): GAMERANG WEBSITE ENHANCEMENT V2
+
+## 1. EXECUTIVE SUMMARY
+
+This PRD (Version 2) outlines further fixes and enhancements for the Gamerang gaming website. It builds upon the previous PRD by incorporating findings from a more in-depth codebase analysis. The focus remains on improving community forum functionality, thread creation, game submission, overall user experience, and addressing newly identified bugs and areas for improvement to create a robust, engaging, and reliable platform.
+
+## 2. CURRENT STATE & PREVIOUSLY IDENTIFIED ISSUES
+
+*(This section summarizes issues from the original PRD for context)*
+
+### 2.1 Thread Creation Issues (from PRD V1)
+-   Modal in portrait orientation.
+-   Image upload unreliability.
+-   Minimal form validation.
+-   Mobile responsiveness gaps.
+
+### 2.2 Video Background Issues (from PRD V1)
+-   Disappearing on reload (largely addressed, needs monitoring).
+-   Performance on low-end devices.
+-   Lack of fallback options.
+
+### 2.3 User Experience Gaps (from PRD V1)
+-   Limited feedback during thread creation.
+-   No thread preview.
+-   Inconsistent UI.
+-   Limited moderation tools.
+
+## 3. NEWLY IDENTIFIED BUGS, ERRORS, AND AREAS FOR IMPROVEMENT (FROM DEEPER ANALYSIS)
+
+### 3.1 JavaScript & Client-Side Logic
+1.  **Profile Creation Atomicity (`js/auth.js`):**
+    *   **Issue:** If Supabase `auth.users` entry is created but subsequent `profiles` table insertion fails (e.g., due to a race condition on username uniqueness despite prior check), the user account is left in an inconsistent state.
+    *   **Recommendation:** Investigate making profile creation atomic with user authentication, possibly via a Supabase Edge Function (server-side) triggered on new user creation, or implement more robust client-side cleanup/retry logic if server-side is not feasible.
+2.  **RPC Call Data Validation (`js/forum.js`):**
+    *   **Issue:** Client-side code assumes specific data structures from RPC calls (`get_thread_list`, `get_comment_tree`). Changes in RPC output without corresponding client-side updates could lead to UI errors.
+    *   **Recommendation:** Implement client-side validation of the structure of data returned from RPC calls before use, or more defensive programming when accessing properties. Log unexpected structures.
+3.  **Invalid `categoryId` Parsing (`js/forum.js`):**
+    *   **Issue:** `categoryId` from the new thread form is parsed using `parseInt()`. If the value is not a valid number string (e.g., empty or non-numeric), `parseInt()` yields `NaN`, causing database insertion failure for `category_id`.
+    *   **Recommendation:** Add specific validation to ensure `categoryId` is a non-empty, valid integer string before parsing and submission.
+4.  **`beforeunload` Transition Flaw (`js/transitions.js`):**
+    *   **Issue:** The loading screen activated by the `beforeunload` event may persist if user cancels navigation (e.g., from a browser's "Are you sure you want to leave?" dialog).
+    *   **Recommendation:** Re-evaluate the `beforeunload` loading screen trigger. Consider removing it or finding a more reliable way to hide the loading screen if navigation is aborted (though this is notoriously difficult). Simpler page-to-page transitions might be more robust.
+5.  **Genre Filtering Logic (`js/games.js`):**
+    *   **Issue:** Current genre filtering (`.includes()`) is fuzzy and can lead to inaccurate matches (e.g., "Strategy" matching "RPG Strategy"). The splitting logic for multi-genres (`split(/[,&]|\sand\s/)`) might also miss some delimiter patterns.
+    *   **Recommendation:** Transition to a tag-based genre system where games have an array of distinct genre tags. Filtering should perform case-insensitive exact matches against these tags. Standardize genre delimiters or ensure the splitting logic is comprehensive.
+6.  **Search Debouncing (`js/games.js`, `forum.html`):**
+    *   **Issue:** Search input fields (both in `games.js` and potentially `forum.html` header search) trigger filtering/API calls on every keystroke.
+    *   **Recommendation:** Implement debouncing for all search input fields to reduce load and improve performance (a debounce utility exists in `js/forum.js` that can be reused).
+7.  **Global Supabase Client Usage (`js/games.js`, `js/gamesubmit.js`):**
+    *   **Issue:** Some JS files rely on `window.supabaseClient` or `window.supabase`.
+    *   **Recommendation:** Consistently import the `supabase` client from `./supabase-config.js` in all ES modules for cleaner code and better maintainability, as done in `auth.js` and `forum.js`.
+8.  **Error/Success Toast Overlap (`js/auth.js`, `js/forum.js`):**
+    *   **Issue:** `showError` and `showSuccess` functions create new toast divs. If multiple toasts are triggered quickly, they might overlap or stack awkwardly.
+    *   **Recommendation:** Implement a more robust toast notification system that queues messages or manages the display of multiple toasts gracefully (e.g., stacking them neatly, ensuring only one of each type (error/success) is visible at a time, or using a dedicated toast library). The current ID-based removal helps but might not cover all rapid-fire scenarios.
+
+### 3.2 Database & SQL
+1.  **Denormalized `author_username` (`threads`, `thread_replies` tables):**
+    *   **Issue:** `author_username` is stored directly in `threads` and `thread_replies`. If a user updates their username in the `profiles` table, these stored usernames become stale.
+    *   **Recommendation:** Modify queries to `JOIN` with the `profiles` table on `user_id` to fetch the current username at display time. This is generally preferred over denormalization for data that can change. Evaluate removing the `author_username` columns from `threads` and `thread_replies` after this change.
+2.  **Username Fallback (`handle_new_user` trigger):**
+    *   **Issue:** The `handle_new_user` trigger uses `COALESCE(new.raw_user_meta_data->>'username', new.email)` for the profile's username.
+    *   **Recommendation:** While a good fallback, ensure the signup UI clearly informs the user if their email will be used as their username (e.g., if the username field is left blank or is invalid and the system defaults to email).
+
+### 3.3 Game Submission Process (`js/gamesubmit.js`)
+1.  **Dependency on External API (`/api/submit-game`):**
+    *   **Issue:** Game submission relies on a custom backend endpoint `/api/submit-game`. The PRD should acknowledge that the stability and security of this endpoint are crucial.
+    *   **Recommendation:** While its code isn't visible, if this is a Node.js server (implied by `server.js`), ensure it has proper input validation, error handling, and security measures (e.g., authentication checks matching the client-side Supabase session).
+2.  **File Path on Duplicate Upload:**
+    *   **Issue:** `uploadFileWithRetry` generates a new file path if a duplicate is detected. This is functionally sound for ensuring upload success.
+    *   **Recommendation:** No change needed, but this behavior should be understood: the final stored path might differ from an initially intended one if collisions occur. The system correctly uses the final public URL.
+
+### 3.4 HTML Structure & Initialization
+1.  **Inline Class Instantiation (e.g., `forum.html`):**
+    *   **Issue:** Classes like `Auth` and `Forum` are instantiated in inline `<script>` tags in HTML files.
+    *   **Recommendation:** (Minor/Stylistic) For cleaner HTML and better separation of concerns, consider moving this initialization logic into the main entry point of the relevant JS modules (e.g., `forum.js` could self-initialize or be initialized by a main `app.js` if one exists). This applies if these classes are always needed for the page.
+
+## 4. PROPOSED ENHANCEMENTS (Incorporating V1 and New Findings)
+
+*(This section merges V1 proposals with refinements based on new findings)*
+
+### 4.1 Thread Creation & Management (Critical Priority)
+
+#### 4.1.1 UI/UX Redesign (Landscape Wireframe & Mobile Responsiveness)
+*   **(From V1, Priority: High)** Transform thread creation modal to landscape (as per V1 wireframe).
+*   **(From V1, Priority: High)** Ensure full mobile responsiveness for the new modal and all forum components.
+*   **Enhanced Guidelines Display:** Make thread guidelines (Keep it civil, etc.) more prominent and readable within the new landscape layout.
+
+#### 4.1.2 Reliability & Validation
+*   **(From V1 & New, Priority: Critical)** Implement robust, real-time client-side form validation:
+    *   Required fields (title, content, category).
+    *   Character limits: title (3-100), content (10-10,000).
+    *   Category: Must be a valid selection (ensure `categoryId` is an integer string).
+    *   Tags: Max 5 tags, alphanumeric, clear visual feedback on validation.
+*   **(From V1 & New, Priority: Critical)** Optimize image uploads:
+    *   Client-side image compression.
+    *   Progress indicators.
+    *   Preview with delete option.
+    *   Robust error handling (failed uploads, size limits, type validation) with user-friendly messages and retry options.
+*   **(New, Priority: High)** Improve Error/Success Toast Notifications: Implement a system to manage multiple toast notifications gracefully, preventing overlap.
+
+#### 4.1.3 Backend & Database Integration
+*   **(From V1 & New, Priority: Critical)** Ensure atomic thread creation:
+    *   If using Supabase directly, wrap related operations carefully.
+    *   **RECOMMENDATION:** Explore using a Supabase Edge Function for thread creation (including image URL updates to the thread row) to make the entire operation a single atomic transaction. This would also handle the profile creation atomicity concern if user signup is linked.
+*   **(From V1, Priority: High)** Log all significant errors (client and server-side if applicable) for easier debugging.
+*   **(New, Priority: Medium)** Refactor Author Username: Modify backend/queries to fetch `author_username` by joining with `profiles` table for `threads` and `thread_replies` at display time, instead of relying on potentially stale denormalized usernames. Evaluate removing `author_username` columns from `threads` and `thread_replies`.
+
+### 4.2 Thread Viewing & Interaction
+
+#### 4.2.1 Live Preview & Formatting
+*   **(From V1, Priority: Medium)** Implement live preview for thread content.
+*   **(From V1, Priority: Medium)** Add basic rich text formatting options (Bold, Italic, Lists, Code Blocks, Links). Ensure proper sanitization of generated HTML.
+
+#### 4.2.2 Moderation & Notifications
+*   **(From V1, Priority: High)** Implement thread moderation tools (Pin, Lock, Move, Merge - consider phasing Merge for later due to complexity).
+*   **(From V1, Priority: Medium)** Implement user notifications (replies, moderation actions).
+
+### 4.3 Game Platform Enhancements
+
+#### 4.3.1 Game Filtering & Search
+*   **(New, Priority: Medium)** Refine Genre Filtering (`js/games.js`):
+    *   Move towards a tag-based system for genres if feasible (requires DB schema change for `games` table to store genres as an array or linked tags).
+    *   If sticking to string-based genres, improve splitting logic and use exact (case-insensitive) matches for selected categories.
+*   **(New, Priority: Medium)** Implement Search Debouncing: Apply debouncing to game search and forum search fields to improve performance.
+
+#### 4.3.2 Game Submission (`js/gamesubmit.js`)
+*   **(New, Priority: Medium)** Review and Secure `/api/submit-game` Endpoint: If this is a custom Node.js server, ensure robust server-side validation, authentication checks (verifying Supabase JWT), and error handling.
+*   **(No change needed)** File path generation on duplicate is acceptable.
+
+### 4.4 General UI/UX & Performance
+
+#### 4.4.1 Video Background
+*   **(From V1 & Ongoing, Priority: Medium)** Continue monitoring video background stability.
+*   **(From V1, Priority: Medium)** Explore adaptive quality/fallbacks for performance.
+
+#### 4.4.2 Code Structure and Maintainability
+*   **(New, Priority: Low/Medium)** Refactor JS to consistently import Supabase client from `supabase-config.js` module.
+*   **(New, Priority: Low)** Consider refactoring inline script class instantiations in HTML files into their respective JS modules for cleaner HTML.
+*   **(New, Priority: Low)** Evaluate `beforeunload` transition (`js/transitions.js`) for potential issues and simplify if necessary.
+
+## 5. IMPLEMENTATION PLAN (Revised)
+
+### 5.1 Phase 1: Critical Core Functionality (2-3 weeks)
+1.  **Thread Creation Overhaul (Critical):**
+    *   Redesign modal to landscape UI.
+    *   Implement robust client-side form validation (including `categoryId` integer check).
+    *   Fix image upload reliability (compression, progress, preview, error handling).
+    *   Ensure thread creation backend logic is atomic (preferably via Supabase Edge Function).
+2.  **Auth Robustness (Critical):**
+    *   Address profile creation atomicity with user signup (link with Edge Function if used for thread creation).
+3.  **Initial Bug Squashing (High):**
+    *   Fix genre filtering logic for more accuracy.
+    *   Implement search debouncing for games and forum.
+
+### 5.2 Phase 2: User Experience Enhancements (2-3 weeks)
+1.  **Rich Text & Preview (Medium):**
+    *   Implement rich text editor for thread content.
+    *   Add live preview functionality.
+2.  **Mobile Responsiveness (High):**
+    *   Thoroughly test and refine mobile responsiveness for all new and existing forum components.
+3.  **Improved Notifications (Medium):**
+    *   Implement a better toast notification system.
+    *   Basic user notifications (e.g., for replies).
+4.  **Data Integrity (Medium):**
+    *   Refactor `author_username` to use JOINs for fresh data.
+
+### 5.3 Phase 3: Advanced Features & Polish (3-4 weeks)
+1.  **Moderation Tools (High):** Implement Pin, Lock, Move thread features.
+2.  **Further UX (Medium):**
+    *   Email notification options.
+    *   Video background optimization.
+3.  **Code Refinements (Low/Medium):**
+    *   Consistent Supabase client import.
+    *   Refactor inline script instantiations.
+    *   Review/simplify page transitions.
+
+## 6. DESIGN SPECIFICATIONS (As per V1, with emphasis on Landscape Modal)
+
+*(Refer to V1 for color, typography, animation details. Key focus on applying these to the new landscape modal.)*
+
+### 6.1 Landscape Thread Creation Modal
+*   **Layout:** Two-column as per V1 wireframe: Guidelines/Tips on one side, main form fields (Title, Category, Tags, Content, Image Upload) on the other. Preview toggle/area integrated.
+*   **Responsiveness:** Must gracefully adapt to tablet and mobile views (likely stacking columns).
+
+## 7. SUCCESS METRICS (As per V1)
+
+*(No changes to V1 success metrics: Reliability, UX, Performance.)*
+
+## 8. TESTING REQUIREMENTS (As per V1, plus new areas)
+
+### 8.1 Functional Testing
+*   **(New)** Test atomicity of user signup + profile creation.
+*   **(New)** Test atomicity of thread creation + image URL updates.
+*   **(New)** Verify accuracy of refined genre filtering.
+*   **(New)** Test search debouncing effectiveness.
+*   All V1 functional tests remain relevant.
+
+### 8.2 Compatibility Testing (As per V1)
+
+### 8.3 Performance Testing (As per V1, plus)
+*   **(New)** Test performance of RPC calls and database JOINs (for author username).
+
+## 9. APPENDIX
+
+### 9.1 Database Schema Updates (Consolidated)
+```sql
+-- From V1: Add new fields to threads table for moderation & activity
+ALTER TABLE public.threads
+ADD COLUMN IF NOT EXISTS is_pinned BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS is_locked BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS formatted_content TEXT, -- For rich text, if storing rendered HTML
+ADD COLUMN IF NOT EXISTS last_activity_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW());
+
+CREATE INDEX IF NOT EXISTS idx_threads_last_activity ON public.threads(last_activity_at DESC);
+
+-- Recommendation from V2: Consider removing author_username IF switching to JOINs
+-- ALTER TABLE public.threads DROP COLUMN IF EXISTS author_username;
+-- ALTER TABLE public.thread_replies DROP COLUMN IF EXISTS author_username;
+
+-- Recommendation from V2: If implementing tag-based genres for games table
+-- This would be a new table or an array column in `games`
+-- CREATE TABLE IF NOT EXISTS game_genres (
+--   id SERIAL PRIMARY KEY,
+--   name TEXT UNIQUE NOT NULL
+-- );
+-- CREATE TABLE IF NOT EXISTS game_to_genre_map (
+--   game_id UUID REFERENCES games(id) ON DELETE CASCADE,
+--   genre_id INTEGER REFERENCES game_genres(id) ON DELETE CASCADE,
+--   PRIMARY KEY (game_id, genre_id)
+-- );
+-- OR
+-- ALTER TABLE games ADD COLUMN IF NOT EXISTS genre_tags TEXT[];
+-- CREATE INDEX IF NOT EXISTS idx_games_genre_tags ON games USING GIN(genre_tags);
+```
+
+### 9.2 API Endpoints / Edge Functions (Conceptual - As per V1, with notes)
+1.  **Create Thread (Potentially Supabase Edge Function)**
+    *   `POST /api/threads` (or function call `create_thread`)
+    *   Handles: thread insertion, image URL updates, tag processing, ensuring atomicity.
+2.  **Update Thread (As per V1)**
+3.  **Thread Moderation (As per V1)**
+4.  **User Signup (Potentially Supabase Edge Function)**
+    *   Handles: `auth.users` creation (by Supabase) and `profiles` table insertion atomically.
+    *   RPC `check_username_available` remains useful for client-side pre-check.
+
+This updated PRD should provide a solid foundation for the next phase of development. 

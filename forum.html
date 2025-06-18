@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forum | Gamerang</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+        
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --dark-bg: #0f172a;
+            --darker-bg: #020617;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--darker-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .oxanium {
+            font-family: 'Oxanium', sans-serif;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .neon-glow {
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        }
+        
+        .neon-glow-hover:hover {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.7);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(90deg, var(--secondary), #db2777);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(236, 72, 153, 0.4);
+        }
+        
+        .forum-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(30, 41, 59, 0.5);
+        }
+        
+        .forum-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+        
+        .category-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+        }
+        
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -10;
+            overflow: hidden;
+        }
+        
+        .video-background video {
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.2;
+        }
+        
+        .nav-link {
+            position: relative;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: var(--text-primary);
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
+        }
+        
+        .mobile-menu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+        
+        .mobile-menu.open {
+            max-height: 500px;
+        }
+        
+        .form-input {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 8px;
+            padding: 12px 15px;
+            color: white;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(2, 6, 23, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .image-dropzone {
+            border: 2px dashed rgba(99, 102, 241, 0.3);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .image-dropzone:hover, .image-dropzone.drag-over {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+        
+        .thread-image-thumb {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .thread-image-thumb:hover {
+            transform: scale(1.05);
+        }
+        
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .lightbox.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+        }
+        
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 8px;
+        }
+        
+        .close-lightbox {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .close-lightbox:hover {
+            color: var(--primary);
+            transform: scale(1.1);
+        }
+        
+        .stat-card {
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .breadcrumb-item {
+            color: var(--primary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .breadcrumb-item:hover {
+            color: white;
+        }
+        
+        .current-breadcrumb {
+            color: white;
+            font-weight: 600;
+        }
+        
+        .game-card {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .game-card:hover {
+            background: rgba(30, 41, 59, 0.7);
+        }
+        
+        .game-card img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 12px;
+        }
+        
+        .floating-nav {
+            position: sticky;
+            top: 80px;
+            z-index: 40;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        
+        .floating-nav::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .floating-nav-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(30, 41, 59, 0.7);
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        
+        .floating-nav-btn:hover, .floating-nav-btn.active {
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+        
+        .featured-discussion {
+            border: 2px solid var(--primary);
+            position: relative;
+        }
+        
+        .featured-discussion::after {
+            content: 'FEATURED';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--secondary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        .pulse {
+            display: inline-block;
+            border-radius: 50%;
+            width: 10px;
+            height: 10px;
+            background: #10b981;
+            box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
+            animation: pulse-animation 2s infinite;
+        }
+        
+        @keyframes pulse-animation {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+        
+        .badge-primary {
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+        
+        .badge-secondary {
+            background: rgba(236, 72, 153, 0.2);
+            color: var(--secondary);
+        }
+        
+        .trending-tag {
+            position: relative;
+            padding: 6px 12px;
+            border-radius: 50px;
+            background: rgba(30, 41, 59, 0.5);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        
+        .trending-tag:hover {
+            background: rgba(99, 102, 241, 0.2);
+            color: white;
+        }
+        
+        .trending-tag::before {
+            content: '#';
+            margin-right: 3px;
+            color: var(--secondary);
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .forum-content-display p {
+            margin-bottom: 1em;
+        }
+        
+        .forum-content-display ul,
+        .forum-content-display ol {
+            margin-left: 1.5em;
+            margin-bottom: 1em;
+        }
+        
+        .forum-content-display li {
+            margin-bottom: 0.5em;
+        }
+        
+        .prose-invert a {
+            color: var(--primary);
+        }
+        
+        .prose-invert a:hover {
+            color: var(--secondary);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-gray-900">
+    <!-- Video Background -->
+    <div class="video-background">
+        <video autoplay muted loop id="background-video">
+            <source src="https://pjlzzuoplxrftrqbhbfl.supabase.co/storage/v1/object/public/background-video-forum-page/Background_vid_forumpg.mp4" type="video/mp4">
+        </video>
+    </div>
+    
+    <!-- Header -->
+    <header class="bg-slate-900/90 backdrop-blur-sm border-b border-slate-800 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center">
+                <div class="text-2xl font-bold oxanium text-white">
+                    <span class="gradient-text">GAMERANG</span>
+                </div>
+                <span class="ml-4 text-sm bg-indigo-600 text-white px-2 py-1 rounded">FORUM</span>
+            </div>
+            
+            <nav class="hidden md:flex space-x-1">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="games.html" class="nav-link">Games</a>
+                <a href="forum.html" class="nav-link active">Forum</a>
+                <a href="#" class="nav-link">News</a>
+                <a href="#" class="nav-link">Support</a>
+            </nav>
+            
+            <div id="authButtons" class="flex items-center">
+                <button onclick="document.getElementById('signInModal').classList.remove('hidden')" class="btn-primary mr-2">Sign In</button>
+                <button onclick="document.getElementById('signUpModal').classList.remove('hidden')" class="btn-secondary">Sign Up</button>
+            </div>
+            
+            <div id="userInfo" class="hidden flex items-center">
+                <div class="flex items-center mr-16">
+                    <div class="user-avatar"><span id="usernameInitials">U</span></div>
+                    <span id="username" class="ml-2 text-white font-medium">Username</span>
+                </div>
+                <button id="newThreadBtn" class="btn-primary" disabled><i class="fas fa-plus mr-2"></i> New Thread</button>
+                <button id="adminPanelBtn" class="hidden btn-primary bg-gradient-to-r from-yellow-500 to-orange-500"><i class="fas fa-crown mr-2"></i> Admin</button>
+                <button id="signOutBtn" class="btn-primary bg-gradient-to-r from-red-500 to-pink-500"><i class="fas fa-sign-out-alt mr-2"></i></button>
+            </div>
+            
+            <button id="mobileMenuButton" class="md:hidden text-white text-2xl"><i class="fas fa-bars"></i></button>
+        </div>
+        
+        <div id="mobileMenu" class="mobile-menu bg-slate-900">
+            <div class="container mx-auto px-4 py-3 flex flex-col space-y-3">
+                <a href="index.html" class="text-white py-2">Home</a>
+                <a href="games.html" class="text-white py-2">Games</a>
+                <a href="forum.html" class="text-indigo-400 font-bold py-2">Forum</a>
+                <a href="#" class="text-white py-2">News</a>
+                <a href="#" class="text-white py-2">Support</a>
+                
+                <div class="pt-4 border-t border-slate-800">
+                    <div id="mobileAuthButtons" class="flex flex-col space-y-2">
+                        <button onclick="document.getElementById('signInModal').classList.remove('hidden')" class="btn-primary">Sign In</button>
+                        <button onclick="document.getElementById('signUpModal').classList.remove('hidden')" class="btn-secondary">Sign Up</button>
+                    </div>
+                    
+                    <div id="mobileUserInfo" class="hidden">
+                        <div class="flex items-center mb-4">
+                            <div class="user-avatar"><span id="mobileUsernameInitials">U</span></div>
+                            <span id="mobileUsername" class="ml-2 text-white font-medium">Username</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="mobileNewThreadBtn" class="btn-primary" disabled><i class="fas fa-plus mr-2"></i> New Thread</button>
+                            <button id="mobileAdminPanelBtn" class="hidden btn-primary bg-gradient-to-r from-yellow-500 to-orange-500"><i class="fas fa-crown mr-2"></i> Admin</button>
+                            <button id="mobileSignOutBtn" class="btn-primary bg-gradient-to-r from-red-500 to-pink-500 col-span-2"><i class="fas fa-sign-out-alt mr-2"></i> Sign Out</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <div class="container mx-auto px-4 pt-6">
+        <div class="breadcrumb">
+            <a href="index.html" class="breadcrumb-item">Home</a>
+            <span class="text-slate-500 mx-2">/</span>
+            <a href="games.html" class="breadcrumb-item">Games</a>
+            <span class="text-slate-500 mx-2">/</span>
+            <span class="current-breadcrumb">Forum</span>
+        </div>
+    </div>
+    
+    <!-- Hero Section -->
+    <section class="py-16 text-center relative">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl md:text-6xl font-bold oxanium mb-6 gradient-text">GAMERANG COMMUNITY</h1>
+            <p class="text-xl max-w-2xl mx-auto text-slate-400">Join the conversation, share your gaming experiences, and connect with fellow gamers worldwide.</p>
+            
+            <div class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                <div class="stat-card neon-glow-hover">
+                    <div class="text-2xl font-bold oxanium text-indigo-400" id="threadCount">0</div>
+                    <div class="text-slate-400">Threads</div>
+                </div>
+                <div class="stat-card neon-glow-hover">
+                    <div class="text-2xl font-bold oxanium text-pink-500" id="replyCount">0</div>
+                    <div class="text-slate-400">Replies</div>
+                </div>
+                <div class="stat-card neon-glow-hover">
+                    <div class="text-2xl font-bold oxanium text-emerald-400" id="userCount">0</div>
+                    <div class="text-slate-400">Users</div>
+                </div>
+                <div class="stat-card neon-glow-hover">
+                    <div class="text-2xl font-bold oxanium text-amber-400" id="gameCount">0</div>
+                    <div class="text-slate-400">Games</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 flex-grow pb-16">
+        <div id="forumContentArea">
+            <div class="threads-grid grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <!-- Left Sidebar -->
+                <div class="lg:col-span-1">
+                    <div class="forum-card p-6 mb-8">
+                        <h2 class="text-xl font-bold oxanium mb-4 text-white flex items-center">
+                            <i class="fas fa-fire mr-2 text-orange-400"></i> Popular Games
+                        </h2>
+                        <div id="popularGamesList" class="space-y-3">
+                            <div class="animate-pulse space-y-3">
+                                <div class="h-12 bg-slate-800 rounded-lg"></div>
+                                <div class="h-12 bg-slate-800 rounded-lg"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Main Content -->
+                <div class="lg:col-span-2">
+                    <div class="threads-list-header flex flex-col md:flex-row justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold oxanium text-white mb-4 md:mb-0">Latest Discussions</h2>
+                        <div class="flex space-x-2">
+                            <div class="relative">
+                                <select id="sortSelect" class="form-input pr-10">
+                                    <option value="newest">Newest First</option>
+                                    <option value="most_comments">Most Comments</option>
+                                    <option value="most_views">Most Views</option>
+                                </select>
+                                <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400">
+                                    <i class="fas fa-sort"></i>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <select id="categorySelect" class="form-input pr-10">
+                                    <option value="">All Categories</option>
+                                </select>
+                                <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400">
+                                    <i class="fas fa-filter"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="threads-container space-y-6">
+                        <!-- Threads will be dynamically loaded here -->
+                    </div>
+                    <div id="pagination" class="mt-8 py-4 text-center">
+                        <!-- Pagination will be dynamically loaded here by js/forum.js -->
+                    </div>
+                </div>
+                
+                <!-- Right Sidebar -->
+                <div class="lg:col-span-1">
+                    <div class="forum-card p-6 mb-8">
+                        <h2 class="text-xl font-bold oxanium mb-4 text-white flex items-center">
+                            <i class="fas fa-plus-circle mr-2 text-indigo-400"></i> Start a Discussion
+                        </h2>
+                        <p class="text-slate-400 mb-4">Share your thoughts, ask questions, or start a new conversation.</p>
+                        <button id="newThreadBtnSidebar" class="btn-primary w-full" disabled>
+                            <i class="fas fa-plus mr-2"></i> Create New Thread
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="threadDetailViewContainer" class="hidden lg:col-span-4 space-y-6">
+                <!-- Single thread view will be dynamically loaded here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900/90 backdrop-blur-sm border-t border-slate-800 py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="text-xl font-bold oxanium gradient-text">GAMERANG</div>
+                    <p class="text-slate-400 text-sm mt-2">Your ultimate gaming community since 2023</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-slate-400 hover:text-indigo-400 transition"><i class="fab fa-discord text-xl"></i></a>
+                    <a href="#" class="text-slate-400 hover:text-indigo-400 transition"><i class="fab fa-twitter text-xl"></i></a>
+                    <a href="#" class="text-slate-400 hover:text-indigo-400 transition"><i class="fab fa-youtube text-xl"></i></a>
+                    <a href="#" class="text-slate-400 hover:text-indigo-400 transition"><i class="fab fa-instagram text-xl"></i></a>
+                </div>
+            </div>
+            <div class="border-t border-slate-800 mt-6 pt-6 text-center text-slate-400 text-sm">
+                &copy; 2023 Gamerang. All rights reserved. All game trademarks and copyrights are property of their respective owners.
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Modals -->
+    <div id="signInModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold oxanium text-white">Sign In</h3>
+                    <button onclick="document.getElementById('signInModal').classList.add('hidden')" class="text-slate-400 hover:text-white text-2xl">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="signInForm">
+                    <div class="mb-4">
+                        <label class="block text-slate-400 mb-2">Email</label>
+                        <input type="email" name="email" class="form-input" placeholder="your@email.com" required>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-slate-400 mb-2">Password</label>
+                        <input type="password" name="password" class="form-input" placeholder="••••••••" required>
+                    </div>
+                    
+                    <div id="signInError" class="text-red-400 text-sm mb-4 hidden"></div>
+                    
+                    <button type="submit" class="btn-primary w-full">Sign In</button>
+                    
+                    <div class="text-center mt-4 text-slate-400">
+                        Don't have an account? 
+                        <button type="button" onclick="document.getElementById('signInModal').classList.add('hidden'); document.getElementById('signUpModal').classList.remove('hidden')" class="text-indigo-400 hover:underline">
+                            Sign Up
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div id="signUpModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold oxanium text-white">Create Account</h3>
+                    <button onclick="document.getElementById('signUpModal').classList.add('hidden')" class="text-slate-400 hover:text-white text-2xl">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="signUpForm">
+                    <div class="mb-4">
+                        <label class="block text-slate-400 mb-2">Username</label>
+                        <input type="text" name="username" class="form-input" placeholder="Choose a username" required>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-slate-400 mb-2">Email</label>
+                        <input type="email" name="email" class="form-input" placeholder="your@email.com" required>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-slate-400 mb-2">Password</label>
+                        <input type="password" name="password" class="form-input" placeholder="••••••••" required>
+                    </div>
+                    
+                    <div id="signUpError" class="text-red-400 text-sm mb-4 hidden"></div>
+                    
+                    <button type="submit" class="btn-primary w-full">Create Account</button>
+                    
+                    <div class="text-center mt-4 text-slate-400">
+                        Already have an account? 
+                        <button type="button" onclick="document.getElementById('signUpModal').classList.add('hidden'); document.getElementById('signInModal').classList.remove('hidden')" class="text-indigo-400 hover:underline">
+                            Sign In
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="newThreadModal" class="modal-overlay hidden">
+        <div class="modal-content p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold oxanium text-white">Create New Thread</h3>
+                <button onclick="document.getElementById('newThreadModal').classList.add('hidden')" class="text-slate-400 hover:text-white text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="newThreadForm">
+                <div class="mb-4">
+                    <label for="threadTitle" class="block text-slate-400 mb-2">Title</label>
+                    <input type="text" id="threadTitle" name="title" class="form-input" placeholder="Enter a title for your thread" required>
+                    <p id="threadTitleError" class="text-red-400 text-sm mt-1 hidden"></p>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="threadCategory" class="block text-slate-400 mb-2">Category</label>
+                    <select id="threadCategory" name="category" class="form-input" required>
+                        <option value="">Select a category</option>
+                    </select>
+                    <p id="threadCategoryError" class="text-red-400 text-sm mt-1 hidden"></p>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="threadTags" class="block text-slate-400 mb-2">Tags (comma separated)</label>
+                    <input type="text" id="threadTags" name="tags" class="form-input" placeholder="e.g., RPG, Multiplayer, Strategy">
+                    <p id="threadTagsError" class="text-red-400 text-sm mt-1 hidden"></p>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="threadContent" class="block text-slate-400 mb-2">Content</label>
+                    <textarea id="threadContent" name="content" class="form-input h-32" placeholder="Write your thread content here..." required></textarea>
+                    <p id="threadContentError" class="text-red-400 text-sm mt-1 hidden"></p>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-slate-400 mb-2">Upload Images (max 5)</label>
+                    <div id="threadImageDropzone" class="image-dropzone">
+                        <input type="file" id="threadImages" class="hidden" accept="image/png, image/jpeg, image/gif" multiple>
+                        <div class="flex flex-col items-center justify-center">
+                            <i class="fas fa-cloud-upload-alt text-3xl text-indigo-400 mb-2"></i>
+                            <p class="text-slate-400">Drag & drop images here or click to browse</p>
+                            <p class="text-sm text-slate-400 mt-1">Supports JPG, PNG, GIF (max 10MB each)</p>
+                        </div>
+                    </div>
+                    <p id="imageError" class="text-red-400 text-sm mt-1 hidden"></p>
+                    <div id="imagePreview" class="flex flex-wrap gap-3 mt-3"></div>
+                </div>
+                
+                <p id="formError" class="text-red-400 text-sm mb-4 text-center hidden"></p>
+                <button type="submit" class="btn-primary w-full">Create Thread</button>
+            </form>
+        </div>
+    </div>
+    <div id="editThreadModal" class="modal-overlay hidden">
+        <div class="modal-content p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold oxanium text-white">Edit Thread</h3>
+                <button onclick="document.getElementById('editThreadModal').classList.add('hidden')" class="text-slate-400 hover:text-white text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="editThreadForm">
+                <div class="mb-4">
+                    <label for="editThreadTitle" class="block text-slate-400 mb-2">Title</label>
+                    <input type="text" id="editThreadTitle" name="title" class="form-input" placeholder="Enter a title for your thread" required>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="editThreadCategory" class="block text-slate-400 mb-2">Category</label>
+                    <select id="editThreadCategory" name="category" class="form-input" required>
+                        <option value="">Select a category</option>
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="editThreadTags" class="block text-slate-400 mb-2">Tags (comma separated)</label>
+                    <input type="text" id="editThreadTags" name="tags" class="form-input" placeholder="e.g., RPG, Multiplayer, Strategy">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="editThreadContent" class="block text-slate-400 mb-2">Content</label>
+                    <textarea id="editThreadContent" name="content" class="form-input h-32" placeholder="Write your thread content here..." required></textarea>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-slate-400 mb-2">Current Images</label>
+                    <div id="existingImagesPreviewEdit" class="flex flex-wrap gap-3 mb-2">
+                        <!-- Existing images will be populated here by JS -->
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-slate-400 mb-2">Add More Images (max 5 total)</label>
+                    <div id="editThreadImageDropzone" class="image-dropzone">
+                        <input type="file" id="editThreadNewImages" class="hidden" accept="image/png, image/jpeg, image/gif" multiple>
+                        <div class="flex flex-col items-center justify-center">
+                            <i class="fas fa-cloud-upload-alt text-3xl text-indigo-400 mb-2"></i>
+                            <p class="text-slate-400">Drag & drop new images or click</p>
+                            <p class="text-sm text-slate-400 mt-1">Supports JPG, PNG, GIF (max 10MB each)</p>
+                        </div>
+                    </div>
+                    <p id="editImageError" class="text-red-400 text-sm mt-1 hidden"></p>
+                    <div id="newImagePreviewEdit" class="flex flex-wrap gap-3 mt-3">
+                        <!-- Previews of newly added images for edit will appear here -->
+                    </div>
+                </div>
+                
+                <p id="editFormError" class="text-red-400 text-sm mb-4 hidden"></p>
+                <button type="submit" class="btn-primary w-full">Update Thread</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Lightbox -->
+    <div id="imageLightbox" class="lightbox">
+        <span id="closeLightbox" class="close-lightbox">
+            <i class="fas fa-times"></i>
+        </span>
+        <div class="lightbox-content">
+            <img id="lightboxImage" src="" alt="Enlarged view">
+        </div>
+    </div>
+
+    <script type="module">
+        // Importing Auth and Forum classes from their respective module files
+        import { Auth } from './js/auth.js';
+        import { Forum } from './js/forum.js';
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            window.auth = new Auth();
+            window.forum = new Forum();
+            
+            if (window.forum && typeof window.forum.setupEventListeners === 'function') {
+                window.forum.setupEventListeners();
+            }
+            
+            // Load categories from database
+            if(window.forum && typeof window.forum.loadCategories === 'function') {
+                window.forum.loadCategories();
+            }
+            
+            // Load initial data
+            if(window.forum && typeof window.forum.loadCommunityStats === 'function') {
+                window.forum.loadCommunityStats();
+            }
+            
+            if(window.forum && typeof window.forum.loadPopularGames === 'function') {
+                window.forum.loadPopularGames();
+            }
+            
+            // Mobile menu toggle
+            document.getElementById('mobileMenuButton').addEventListener('click', function() {
+                document.getElementById('mobileMenu').classList.toggle('open');
+            });
+            
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if(!document.getElementById('mobileMenu').contains(e.target) && 
+                    !document.getElementById('mobileMenuButton').contains(e.target)) {
+                    document.getElementById('mobileMenu').classList.remove('open');
+                }
+            });
+        });
+    </script>
+</body>
+</html> 
