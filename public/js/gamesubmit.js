@@ -151,26 +151,25 @@ async function uploadFileWithRetry(file, filePath, maxRetries = 3) {
 
 // Handle file input changes and preview
 function setupFileInputs() {
-    console.log('🎯 [v2] Setting up file inputs...');
+    console.log('🎯 [v3] Setting up file inputs...');
 
     // --- Cover Image Setup ---
     const coverInput = document.getElementById('coverImage');
     const coverPreview = document.getElementById('coverPreview');
+    const coverUploadArea = coverInput ? coverInput.closest('.file-upload') : null;
 
-    if (coverInput && coverPreview) {
-        console.log('📁 Cover input (#coverImage) and preview area (#coverPreview) found.');
-        const coverUploadArea = coverInput.closest('.file-upload');
-
-        if (coverUploadArea) {
-            console.log('📁 Cover upload area (.file-upload for cover) found.');
+    if (coverInput && coverPreview && coverUploadArea) {
+        console.log('📁 Cover input, preview, and upload area found.');
+        
+        // Prevent re-attaching listener
+        if (!coverUploadArea.dataset.listenerAttached) {
             coverUploadArea.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 console.log('🖱️ Cover upload area clicked. Triggering #coverImage.click()');
                 coverInput.click();
             });
-        } else {
-            console.error('❌ Cover upload area (.file-upload for cover) NOT found!');
+            coverUploadArea.dataset.listenerAttached = 'true';
         }
 
         coverInput.addEventListener('change', (e) => {
@@ -195,30 +194,39 @@ function setupFileInputs() {
     } else {
         if (!coverInput) console.error('❌ Cover input element (#coverImage) NOT found!');
         if (!coverPreview) console.error('❌ Cover preview element (#coverPreview) NOT found!');
+        if (!coverUploadArea) console.error('❌ Cover upload area (.file-upload for cover) NOT found!');
     }
 
     // --- Screenshots Setup ---
     const screenshotsInput = document.getElementById('screenshots');
     const screenshotsPreview = document.getElementById('screenshotsPreview');
+    // The 'screenshotsUploadArea' is now the <label for="screenshots">
+    const screenshotsUploadArea = document.querySelector('label[for="screenshots"]'); // More direct selection
 
-    if (screenshotsInput && screenshotsPreview) {
-        console.log('📷 Screenshots input (#screenshots) and preview area (#screenshotsPreview) found.');
-        const screenshotsUploadArea = screenshotsInput.closest('.file-upload');
+    if (screenshotsInput && screenshotsPreview && screenshotsUploadArea) {
+        console.log('📷 [v4] Screenshots input, preview, and new upload label found.');
 
-        if (screenshotsUploadArea) {
-            console.log('📷 Screenshots upload area (.file-upload for screenshots) found.');
+        // The following block might be redundant now due to the <label for="screenshots">
+        // It's commented out to rely on the native label behavior first.
+        /*
+        if (!screenshotsUploadArea.dataset.listenerAttached) {
             screenshotsUploadArea.addEventListener('click', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
-                console.log('🖱️ Screenshots upload area clicked. Triggering #screenshots.click()');
-                screenshotsInput.click(); // Using the variable which is confirmed to exist.
+                e.stopPropagation(); 
+                console.log('🖱️ [v4] Screenshots upload label clicked (JS listener). Attempting to trigger #screenshots.click()');
+                document.getElementById('screenshots').click(); 
             });
+            screenshotsUploadArea.dataset.listenerAttached = 'true';
+            console.log('📷 JS Click listener was attached to screenshotsUploadArea (label).');
         } else {
-            console.error('❌ Screenshots upload area (.file-upload for screenshots) NOT found!');
+            console.log('📷 JS Click listener for screenshotsUploadArea (label) already attached or not needed.');
         }
+        */
+        console.log('📷 [v4] Relying on native <label for=\"screenshots\"> behavior to trigger file dialog.');
 
+        // This event listener is still crucial for handling selected files
         screenshotsInput.addEventListener('change', (e) => {
-            console.log(`🖼️ Screenshots input changed. ${e.target.files.length} files selected.`);
+            console.log(`🖼️ [v4] Screenshots input changed. ${e.target.files.length} files selected.`);
             screenshotsPreview.innerHTML = '';
             const files = Array.from(e.target.files);
 
@@ -244,7 +252,7 @@ function setupFileInputs() {
 
             if (!allFilesValid) {
                 screenshotsInput.value = '';
-                screenshotsPreview.innerHTML = ''; // Clear preview if invalid files
+                screenshotsPreview.innerHTML = ''; 
                 return;
             }
 
@@ -265,6 +273,7 @@ function setupFileInputs() {
     } else {
         if (!screenshotsInput) console.error('❌ Screenshots input element (#screenshots) NOT found!');
         if (!screenshotsPreview) console.error('❌ Screenshots preview element (#screenshotsPreview) NOT found!');
+        if (!screenshotsUploadArea) console.error('❌ Screenshots upload area (.file-upload for screenshots) NOT found!');
     }
 }
 

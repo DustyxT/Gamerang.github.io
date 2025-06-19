@@ -243,13 +243,13 @@
                         
                         <div class="mb-4">
                             <label class="block text-gray-300 mb-2">Screenshots (Up to 10)</label>
-                            <div class="file-upload w-full bg-gray-700 border border-gray-600 rounded px-4 py-8 text-center cursor-pointer hover:bg-gray-600 transition">
+                            <label for="screenshots" class="file-upload w-full bg-gray-700 border border-gray-600 rounded px-4 py-8 text-center cursor-pointer hover:bg-gray-600 transition">
                                 <span class="block mb-2"><i class="fas fa-images text-3xl text-blue-400"></i></span>
                                 <span class="block">Click to upload multiple screenshots</span>
                                 <span class="block text-sm text-gray-400">Hold Ctrl/Cmd to select multiple files</span>
                                 <span class="block text-sm text-gray-400">Recommended size: 1280x720px • Max 10 files</span>
-                                <input type="file" id="screenshots" name="screenshots" accept="image/*" multiple class="hidden">
-                            </div>
+                            </label>
+                            <input type="file" id="screenshots" name="screenshots" accept="image/*" multiple style="display: none;">
                             <div id="screenshotsPreview" class="mt-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2"></div>
                         </div>
                     </div>
