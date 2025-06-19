@@ -1,14 +1,14 @@
 [build]
-  publish = "/"
-  # No build command needed for static site
+  publish = "public"
   command = ""
+  ignore = "exit 0"
 
 # Disable processing of package.json
 [build.environment]
-  NODE_VERSION = "16"
-  NPM_FLAGS = "--no-package-lock"
+  NODE_ENV = "production"
   
 [[redirects]]
   from = "/*"
   to = "/index.html"
-  status = 200 
+  status = 200
+  force = false 
