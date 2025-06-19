@@ -1753,9 +1753,8 @@ export class Forum {
         container.querySelectorAll('.delete-reply-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const replyId = e.currentTarget.dataset.replyId;
-                console.log('Delete reply clicked:', replyId); // Placeholder
-                // this.handleDeleteReply(replyId);
-                this.showError('Delete reply functionality not yet implemented.');
+                console.log('Delete reply clicked:', replyId);
+                this.handleDeleteReply(replyId);
             });
         });
     }
@@ -1802,6 +1801,53 @@ export class Forum {
         } catch (err) {
             console.error('Exception in handleNewReply:', err);
             this.showError('An unexpected error occurred while posting your reply.');
+        }
+    }
+
+    async handleDeleteReply(replyId) {
+        if (!replyId) {
+            this.showError("No reply selected to delete.");
+            return;
+        }
+
+        console.log(`🗑️ Attempting to delete reply: ${replyId}`);
+
+        // Check if user is authenticated
+        if (!window.auth || !window.auth.currentUser) {
+            this.showError('You must be signed in to delete replies.');
+            return;
+        }
+
+        // Confirm deletion
+        if (!confirm("Are you sure you want to delete this reply? This action cannot be undone.")) {
+            return;
+        }
+
+        try {
+            // Delete the reply from database
+            const { error } = await this.supabase
+                .from('thread_replies')
+                .delete()
+                .eq('id', replyId)
+                .eq('user_id', window.auth.currentUser.id); // Only allow users to delete their own replies
+
+            if (error) {
+                console.error('❌ Error deleting reply:', error);
+                this.showError(error.message || 'Failed to delete reply. You may not be the owner or an error occurred.');
+                return;
+            }
+
+            console.log('✅ Reply deleted successfully');
+            this.showSuccess('Reply deleted successfully.');
+
+            // Refresh replies for the current thread
+            if (this.currentThread && this.currentThread.id) {
+                this.loadReplies(this.currentThread.id);
+            }
+
+        } catch (err) {
+            console.error('❌ Exception during reply deletion:', err);
+            this.showError('An unexpected error occurred while deleting the reply.');
         }
     }
 
