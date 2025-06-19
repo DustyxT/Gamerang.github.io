@@ -738,16 +738,20 @@
 
             if (filteredGames.length > 0) {
                 suggestionsContainer.innerHTML = filteredGames.map(game => {
-                    // Highlight matching part (simple version)
-                    const title = game.title.replace(
-                        new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'ig'), '<strong class="suggestion-match">$1</strong>'
+                    const titleWithHighlight = game.title.replace(
+                        new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')})`, 'ig'),
+                        '<strong class="suggestion-match">$1</strong>'
                     );
+                    const placeholderImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwMCIgZmlsbD0iIzIzMzU1NCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjAiIGZpbGw9IiM2NGZmZGEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBDb3ZlciBJbWFnZTwvdGV4dD48L3N2Zz4=';
+
                     return `
-                        <a href="gamepage.html?id=${game.id}" class="suggestion-item flex items-center space-x-3 p-2 hover:bg-gray-700 rounded-md">
-                            <img src="${game.cover_image_url || './images/weblogo.png'}" alt="${game.title}" class="w-10 h-14 object-cover rounded-sm">
-                            <div>
-                                <span class="block text-sm font-medium text-white">${title}</span>
-                                <span class="block text-xs text-gray-400">${game.genre || 'Game'} - ${new Date(game.release_date || game.created_at).getFullYear()}</span>
+                        <a href="gamepage.html?id=${game.id}" class="block p-2 hover:bg-gray-800 rounded transition">
+                            <div class="flex items-center space-x-3">
+                                <img src="${game.cover_image_url || placeholderImage}" alt="${game.title}" class="w-12 h-12 object-cover rounded">
+                                <div>
+                                    <h4 class="text-white font-semibold">${titleWithHighlight}</h4>
+                                    <p class="text-sm text-gray-400">${game.genre || 'Unknown'} • ${new Date(game.release_date || game.created_at).getFullYear()}</p>
+                                </div>
                             </div>
                         </a>
                     `;
