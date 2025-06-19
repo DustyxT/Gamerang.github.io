@@ -151,9 +151,16 @@ async function uploadFileWithRetry(file, filePath, maxRetries = 3) {
 
 // Handle file input changes and preview
 function setupFileInputs() {
-    // Cover image preview
+    // Cover image setup and preview
     const coverInput = document.getElementById('coverImage');
     const coverPreview = document.getElementById('coverPreview');
+    const coverUploadArea = coverInput.closest('.file-upload');
+    
+    // Handle click on upload area for cover image
+    coverUploadArea.addEventListener('click', (e) => {
+        e.preventDefault();
+        coverInput.click();
+    });
     
     coverInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -179,13 +186,22 @@ function setupFileInputs() {
         }
     });
 
-    // Screenshots preview
+    // Screenshots setup and preview
     const screenshotsInput = document.getElementById('screenshots');
     const screenshotsPreview = document.getElementById('screenshotsPreview');
+    const screenshotsUploadArea = screenshotsInput.closest('.file-upload');
+    
+    // Handle click on upload area for screenshots
+    screenshotsUploadArea.addEventListener('click', (e) => {
+        e.preventDefault();
+        screenshotsInput.click();
+    });
     
     screenshotsInput.addEventListener('change', (e) => {
         screenshotsPreview.innerHTML = '';
         const files = Array.from(e.target.files);
+        
+        console.log(`📸 Selected ${files.length} screenshot files`);
         
         // Limit to 10 screenshots
         if (files.length > 10) {
@@ -194,22 +210,34 @@ function setupFileInputs() {
             return;
         }
         
-        // Validate each file
-        for (let file of files) {
+        // Show file count message
+        if (files.length > 0) {
+            const countMessage = document.createElement('div');
+            countMessage.className = 'mb-2 text-sm text-blue-400';
+            countMessage.textContent = `${files.length} screenshot${files.length > 1 ? 's' : ''} selected`;
+            screenshotsPreview.appendChild(countMessage);
+        }
+        
+        // Validate each file and create previews
+        files.forEach((file, index) => {
             if (file.size > 52428800) {
                 alert(`Screenshot "${file.name}" must be smaller than 50MB`);
                 screenshotsInput.value = '';
                 return;
             }
-        }
+        });
         
-        files.forEach(file => {
+        // Create preview for each valid file
+        files.forEach((file, index) => {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const div = document.createElement('div');
                 div.className = 'relative';
                 div.innerHTML = `
-                    <img src="${e.target.result}" alt="Screenshot Preview" class="preview-image w-full">
+                    <img src="${e.target.result}" alt="Screenshot Preview ${index + 1}" class="preview-image w-full rounded border-2 border-gray-600">
+                    <div class="absolute top-1 left-1 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+                        ${index + 1}
+                    </div>
                 `;
                 screenshotsPreview.appendChild(div);
             };
