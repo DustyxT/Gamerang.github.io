@@ -308,6 +308,9 @@
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 font-sans">
+    <div id="pageTransitionPreloader" class="page-preloader">
+        <img src="./images/weblogo.png" alt="Gamerang Loading..." class="preloader-logo">
+    </div>
     <!-- Background elements -->
     <div class="background-overlay"></div>
     <div class="blurry-bg"></div>
@@ -332,7 +335,7 @@
                 <div class="relative group">
                     <div class="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
                     <div class="relative flex items-center space-x-2 bg-black px-3 py-1.5 rounded-lg">
-                        <img src="./images/weblogo.png" alt="Gamerang Logo" class="h-6 w-auto">
+                        <img src="./images/weblogo.png" alt="Gamerang Logo" class="h-6 w-auto" id="siteLogo">
                         <a href="index.html" class="text-2xl font-black text-white hover:text-blue-300 transition-all duration-300 header-font neon-text">GAMERANG</a>
                     </div>
                 </div>

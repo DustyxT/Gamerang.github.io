@@ -1,53 +1,63 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Add the loading screen element if it doesn't exist
-    if (!document.querySelector('.loading-screen')) {
-        const loadingScreen = document.createElement('div');
-        loadingScreen.className = 'loading-screen';
-        loadingScreen.innerHTML = `
-            <img src="./images/weblogo.png" alt="Gamerang Logo" class="loading-logo">
-            <div class="loading-spinner"></div>
-            <div class="loading-text">Loading...</div>
-            <div class="loading-progress">
-                <div class="loading-progress-bar"></div>
-            </div>
-        `;
-        document.body.appendChild(loadingScreen);
+    const preloader = document.getElementById('pageTransitionPreloader');
+    const navLinks = document.querySelectorAll('a[href]');
+
+    if (!preloader) {
+        console.warn('Page Transition Preloader element not found. Animations will not run.');
+        return;
     }
 
-    // Get all navigation links
-    const navLinks = document.querySelectorAll('a[href]');
-    const loadingScreen = document.querySelector('.loading-screen');
+    // Function to show the preloader
+    function showPreloader() {
+        preloader.classList.add('visible');
+    }
 
-    // Add click event listener to all navigation links
+    // Function to hide the preloader
+    function hidePreloader() {
+        preloader.classList.remove('visible');
+    }
+
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
-            // Only handle internal links
-            if (link.hostname === window.location.hostname) {
-                e.preventDefault();
-                const targetUrl = link.href;
+            const targetUrl = link.href;
+            const currentUrl = window.location.href;
+            const currentPath = new URL(currentUrl).pathname;
+            const targetPath = new URL(targetUrl).pathname;
 
-                // Fade out the page
-                document.body.classList.add('fade-out');
+            // Only handle internal links that are not hash links on the same page,
+            // not links that open in a new tab,
+            // and actual page changes (not just query params on the same page if that's not desired).
+            if (link.hostname === window.location.hostname &&
+                link.getAttribute('href') && // Ensure href exists
+                !link.getAttribute('href').startsWith('#') && // Exclude same-page hash links
+                link.target !== '_blank' && // Exclude links opening in new tabs
+                targetUrl !== currentUrl && // Exclude links that are identical (e.g. re-clicking current page link)
+                !targetUrl.includes('#') // A more robust check for hash links that might be appended
+            ) {
                 
-                // Show the loading screen
-                loadingScreen.classList.add('active');
+                // Prevent default navigation if it's a different page path
+                if (targetPath !== currentPath || new URL(targetUrl).search !== new URL(currentUrl).search) {
+                    e.preventDefault();
+                    showPreloader();
 
-                // Navigate after a short delay
-                setTimeout(() => {
-                    window.location.href = targetUrl;
-                }, 500);
+                    setTimeout(() => {
+                        window.location.href = targetUrl;
+                    }, 500); // Adjust delay as needed for animation
+                }
             }
         });
     });
 
-    // Reset transitions when page loads
+    // Ensure preloader is hidden on page load (e.g., after navigation or back/forward)
     window.addEventListener('load', () => {
-        document.body.classList.remove('fade-out');
-        loadingScreen.classList.remove('active');
+        hidePreloader();
     });
 
-    // Show loading screen when page is unloading
-    window.addEventListener('beforeunload', () => {
-        loadingScreen.classList.add('active');
+    // Handle back/forward browser navigation to hide preloader
+    window.addEventListener('pageshow', (event) => {
+        // event.persisted is true if the page is loaded from the bfcache (back/forward cache)
+        if (event.persisted) {
+            hidePreloader();
+        }
     });
 }); 
