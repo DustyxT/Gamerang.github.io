@@ -230,12 +230,12 @@
                         
                         <div class="mb-4">
                             <label class="block text-gray-300 mb-2">Cover Image *</label>
-                            <div class="file-upload w-full bg-gray-700 border border-gray-600 rounded px-4 py-8 text-center cursor-pointer hover:bg-gray-600 transition">
+                            <label for="coverImage" class="file-upload w-full bg-gray-700 border border-gray-600 rounded px-4 py-8 text-center cursor-pointer hover:bg-gray-600 transition">
                                 <span class="block mb-2"><i class="fas fa-image text-3xl text-purple-400"></i></span>
                                 <span class="block">Click to upload cover image</span>
                                 <span class="block text-sm text-gray-400">Recommended size: 600x900px</span>
-                                <input type="file" id="coverImage" name="coverImage" accept="image/*" required class="hidden">
-                            </div>
+                            </label>
+                            <input type="file" id="coverImage" name="coverImage" accept="image/*" required style="display: none;">
                             <div id="coverPreview" class="mt-2 hidden">
                                 <img src="#" alt="Cover Preview" class="preview-image">
                             </div>

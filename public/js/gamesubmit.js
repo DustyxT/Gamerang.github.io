@@ -153,24 +153,29 @@ async function uploadFileWithRetry(file, filePath, maxRetries = 3) {
 function setupFileInputs() {
     console.log('🎯 [v3] Setting up file inputs...');
 
-    // --- Cover Image Setup ---
+        // --- Cover Image Setup ---
     const coverInput = document.getElementById('coverImage');
     const coverPreview = document.getElementById('coverPreview');
-    const coverUploadArea = coverInput ? coverInput.closest('.file-upload') : null;
+    // The 'coverUploadArea' is now the <label for="coverImage">
+    const coverUploadArea = document.querySelector('label[for="coverImage"]'); // More direct selection
 
     if (coverInput && coverPreview && coverUploadArea) {
-        console.log('📁 Cover input, preview, and upload area found.');
-        
-        // Prevent re-attaching listener
+        console.log('📁 [v5] Cover input, preview, and new upload label found.');
+
+        // The following block is now redundant due to the <label for="coverImage">
+        // The native label behavior should handle the click automatically.
+        // Commenting out to rely on native label behavior first.
+        /*
         if (!coverUploadArea.dataset.listenerAttached) {
             coverUploadArea.addEventListener('click', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
+                e.stopPropagation(); 
                 console.log('🖱️ Cover upload area clicked. Triggering #coverImage.click()');
                 coverInput.click();
             });
             coverUploadArea.dataset.listenerAttached = 'true';
         }
+        */
 
         coverInput.addEventListener('change', (e) => {
             console.log('🖼️ Cover input changed.');
