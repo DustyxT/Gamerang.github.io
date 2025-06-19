@@ -3,15 +3,6 @@
   command = ""
   ignore = "exit 0"
 
-# Disable processing of package.json
-[build.environment]
-  NODE_ENV = "production"
-  NODE_VERSION = "18"
-  
-# Skip processing entirely
-[build.processing]
-  skip_processing = true
-
 [[redirects]]
   from = "/*"
   to = "/index.html"
