@@ -1013,15 +1013,27 @@ export class Forum {
 
     // Method to switch views between main forum and thread detail
     switchView(viewName) {
-        const mainForumViewElements = document.querySelectorAll('.main-forum-view');
+        const threadsGrid = document.querySelector('.threads-grid');
         const threadDetailViewContainer = document.getElementById('threadDetailViewContainer');
 
         if (viewName === 'detail') {
-            mainForumViewElements.forEach(el => el.classList.add('hidden'));
-            threadDetailViewContainer.classList.remove('hidden');
+            // Hide the main threads grid and show thread detail
+            if (threadsGrid) threadsGrid.classList.add('hidden');
+            if (threadDetailViewContainer) {
+                threadDetailViewContainer.classList.remove('hidden');
+                threadDetailViewContainer.classList.remove('lg:col-span-4');
+                threadDetailViewContainer.classList.add('w-full');
+                // Scroll to top of the detail view
+                threadDetailViewContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         } else { // 'main' or default
-            mainForumViewElements.forEach(el => el.classList.remove('hidden'));
-            threadDetailViewContainer.classList.add('hidden');
+            // Show the main threads grid and hide thread detail
+            if (threadsGrid) threadsGrid.classList.remove('hidden');
+            if (threadDetailViewContainer) {
+                threadDetailViewContainer.classList.add('hidden');
+                threadDetailViewContainer.classList.add('lg:col-span-4');
+                threadDetailViewContainer.classList.remove('w-full');
+            }
         }
     }
 
@@ -1109,15 +1121,189 @@ export class Forum {
             console.log('[Forum.js] renderThreadDetail - No images to display');
         }
 
-        // Reply Form HTML
+        // Premium Enhanced Reply Form HTML
         const replyFormHtml = window.auth && window.auth.currentUser ? `
-            <form id="newReplyForm" class="mt-6">
-                <h4 class="text-lg font-semibold orbitron mb-3">Post a Reply</h4>
-                <textarea name="replyContent" class="form-input h-24" placeholder="Write your reply here..." required></textarea>
-                <input type="hidden" name="threadId" value="${thread.id}">
-                <button type="submit" class="btn-neon mt-3">Submit Reply</button>
-            </form>
-        ` : '<p class="mt-6 text-[#a0a0d0]">Please <button onclick="document.getElementById(\'signInModal\').classList.remove(\'hidden\')" class="text-[#00c3ff] hover:underline">sign in</button> to reply.</p>';
+            <div class="mt-12 relative">
+                <!-- Elegant Separator -->
+                <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 flex items-center justify-center">
+                    <div class="w-12 h-0.5 bg-gradient-to-r from-transparent via-[#00c3ff] to-transparent"></div>
+                    <div class="mx-4 w-3 h-3 bg-gradient-to-r from-[#00c3ff] to-[#ec4899] rounded-full shadow-lg shadow-[#00c3ff]/50"></div>
+                    <div class="w-12 h-0.5 bg-gradient-to-r from-transparent via-[#00c3ff] to-transparent"></div>
+                </div>
+                
+                <!-- Main Container with Premium Styling -->
+                <div class="bg-gradient-to-br from-[#1e1e2e]/90 via-[#161629]/95 to-[#0f0f23]/90 backdrop-blur-xl rounded-2xl border border-[#00c3ff]/20 shadow-2xl shadow-[#00c3ff]/10 overflow-hidden">
+                    <!-- Header Section with Neon Accent -->
+                    <div class="relative bg-gradient-to-r from-[#1a1a2e]/80 to-[#16213e]/80 px-8 py-6 border-b border-[#00c3ff]/10">
+                        <div class="absolute inset-0 bg-gradient-to-r from-[#00c3ff]/5 to-[#ec4899]/5"></div>
+                        <div class="relative flex items-center space-x-4">
+                            <div class="relative">
+                                <div class="w-14 h-14 bg-gradient-to-br from-[#00c3ff] to-[#ec4899] rounded-full flex items-center justify-center shadow-lg shadow-[#00c3ff]/30">
+                                    <i class="fas fa-comments text-white text-xl"></i>
+                                </div>
+                                <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-[#1a1a2e] flex items-center justify-center">
+                                    <i class="fas fa-plus text-white text-xs"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-2xl font-bold text-white orbitron tracking-wide">
+                                    <span class="bg-gradient-to-r from-[#00c3ff] to-[#ec4899] bg-clip-text text-transparent">
+                                        Join the Discussion
+                                    </span>
+                                </h3>
+                                <p class="text-[#a0a0d0] text-sm mt-1 font-medium">Share your insights with the gaming community</p>
+                            </div>
+                            <div class="hidden md:flex items-center space-x-2 px-4 py-2 bg-[#00c3ff]/10 rounded-full border border-[#00c3ff]/20">
+                                <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                                <span class="text-emerald-400 text-xs font-semibold">LIVE</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Form Content -->
+                    <div class="p-8">
+                        <form id="newReplyForm" class="space-y-6">
+                            <!-- User Info Bar -->
+                            <div class="flex items-center justify-between p-4 bg-gradient-to-r from-[#1a1a2e]/50 to-[#16213e]/50 rounded-xl border border-[#00c3ff]/10">
+                                <div class="flex items-center space-x-3">
+                                    <div class="relative">
+                                        <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center shadow-lg">
+                                            <span class="text-white text-sm font-bold">${window.auth.currentUser.user_metadata?.username?.[0]?.toUpperCase() || window.auth.currentUser.email?.[0]?.toUpperCase() || 'U'}</span>
+                                        </div>
+                                        <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border border-[#1a1a2e]"></div>
+                                    </div>
+                                    <div>
+                                        <span class="text-white font-semibold">${window.auth.currentUser.user_metadata?.username || window.auth.currentUser.email?.split('@')[0] || 'User'}</span>
+                                        <div class="text-xs text-[#a0a0d0]">Community Member</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2 text-xs text-[#a0a0d0]">
+                                    <i class="fas fa-shield-alt text-emerald-400"></i>
+                                    <span>Verified</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Enhanced Textarea -->
+                            <div class="relative">
+                                <label class="block text-sm font-semibold text-[#a0a0d0] mb-3 flex items-center space-x-2">
+                                    <i class="fas fa-pen-fancy text-[#00c3ff]"></i>
+                                    <span>Your Response</span>
+                                </label>
+                                <div class="relative group">
+                                    <textarea 
+                                        name="replyContent" 
+                                        class="w-full bg-gradient-to-br from-[#1a1a2e]/80 to-[#16213e]/80 border border-[#00c3ff]/20 rounded-xl px-6 py-4 text-white placeholder-[#6b7280] focus:border-[#00c3ff] focus:ring-2 focus:ring-[#00c3ff]/20 focus:outline-none transition-all duration-500 resize-none min-h-[140px] shadow-inner backdrop-blur-sm group-hover:border-[#00c3ff]/40" 
+                                        placeholder="Share your thoughts, strategies, experiences, or ask questions about this topic..."
+                                        required
+                                    ></textarea>
+                                    <div class="absolute top-4 right-4 opacity-20 group-hover:opacity-40 transition-opacity">
+                                        <i class="fas fa-quote-right text-2xl text-[#00c3ff]"></i>
+                                    </div>
+                                    <!-- Character Counter -->
+                                    <div class="absolute bottom-4 right-4 flex items-center space-x-2">
+                                        <div class="px-3 py-1 bg-[#1a1a2e]/80 rounded-full border border-[#00c3ff]/20 backdrop-blur-sm">
+                                            <span id="charCount" class="text-xs font-mono text-[#a0a0d0]">0</span>
+                                            <span class="text-xs text-[#6b7280]">/1000</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Guidelines & Actions -->
+                            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 pt-2">
+                                <div class="flex items-center space-x-6 text-sm">
+                                    <div class="flex items-center space-x-2 text-[#a0a0d0]">
+                                        <i class="fas fa-heart text-rose-400"></i>
+                                        <span>Be respectful</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2 text-[#a0a0d0]">
+                                        <i class="fas fa-lightbulb text-amber-400"></i>
+                                        <span>Stay constructive</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2 text-[#a0a0d0]">
+                                        <i class="fas fa-gamepad text-[#00c3ff]"></i>
+                                        <span>Game on!</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center space-x-3">
+                                    <button 
+                                        type="button" 
+                                        class="px-5 py-2.5 bg-gradient-to-r from-slate-700/80 to-slate-600/80 hover:from-slate-600/80 hover:to-slate-500/80 text-slate-300 rounded-lg transition-all duration-300 flex items-center space-x-2 border border-slate-600/50 hover:border-slate-500/50 shadow-lg hover:shadow-xl font-medium"
+                                        onclick="document.getElementById('newReplyForm').reset(); document.getElementById('charCount').textContent = '0';"
+                                    >
+                                        <i class="fas fa-eraser text-sm"></i>
+                                        <span>Clear</span>
+                                    </button>
+                                    <button 
+                                        type="submit" 
+                                        class="px-8 py-2.5 bg-gradient-to-r from-[#00c3ff] to-[#ec4899] hover:from-[#0099cc] hover:to-[#d63384] text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 shadow-lg hover:shadow-2xl hover:shadow-[#00c3ff]/30 border border-[#00c3ff]/20 relative overflow-hidden group"
+                                    >
+                                        <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                                        <i class="fas fa-paper-plane text-sm relative z-10"></i>
+                                        <span class="relative z-10">Post Reply</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <input type="hidden" name="threadId" value="${thread.id}">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        ` : `
+            <!-- Premium Sign-in Prompt -->
+            <div class="mt-12 relative">
+                <!-- Elegant Separator -->
+                <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 flex items-center justify-center">
+                    <div class="w-12 h-0.5 bg-gradient-to-r from-transparent via-[#00c3ff] to-transparent"></div>
+                    <div class="mx-4 w-3 h-3 bg-gradient-to-r from-[#00c3ff] to-[#ec4899] rounded-full shadow-lg shadow-[#00c3ff]/50"></div>
+                    <div class="w-12 h-0.5 bg-gradient-to-r from-transparent via-[#00c3ff] to-transparent"></div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-[#1e1e2e]/90 via-[#161629]/95 to-[#0f0f23]/90 backdrop-blur-xl rounded-2xl border border-[#00c3ff]/20 shadow-2xl shadow-[#00c3ff]/10 overflow-hidden">
+                    <div class="text-center p-12">
+                        <div class="relative inline-block mb-6">
+                            <div class="w-20 h-20 bg-gradient-to-br from-[#00c3ff] to-[#ec4899] rounded-full flex items-center justify-center shadow-2xl shadow-[#00c3ff]/30 mx-auto">
+                                <i class="fas fa-sign-in-alt text-3xl text-white"></i>
+                            </div>
+                            <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-emerald-500 rounded-full border-3 border-[#1a1a2e] flex items-center justify-center">
+                                <i class="fas fa-plus text-white text-sm"></i>
+                            </div>
+                        </div>
+                        
+                        <h3 class="text-3xl font-bold orbitron mb-4">
+                            <span class="bg-gradient-to-r from-[#00c3ff] to-[#ec4899] bg-clip-text text-transparent">
+                                Join the Gaming Community
+                            </span>
+                        </h3>
+                        <p class="text-[#a0a0d0] text-lg mb-8 max-w-md mx-auto leading-relaxed">
+                            Connect with fellow gamers, share strategies, and be part of epic discussions
+                        </p>
+                        
+                        <button 
+                            onclick="document.getElementById('signInModal').classList.remove('hidden')" 
+                            class="px-10 py-4 bg-gradient-to-r from-[#00c3ff] to-[#ec4899] hover:from-[#0099cc] hover:to-[#d63384] text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center space-x-3 mx-auto shadow-2xl hover:shadow-[#00c3ff]/30 border border-[#00c3ff]/20 relative overflow-hidden group"
+                        >
+                            <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                            <i class="fas fa-rocket text-xl relative z-10"></i>
+                            <span class="text-lg relative z-10">Sign In to Join</span>
+                        </button>
+                        
+                        <div class="mt-8 flex items-center justify-center space-x-6 text-sm text-[#a0a0d0]">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-users text-[#00c3ff]"></i>
+                                <span>Active Community</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-shield-alt text-emerald-400"></i>
+                                <span>Safe Environment</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
 
         container.innerHTML = `
             <div class="neon-card p-6">
@@ -1161,6 +1347,42 @@ export class Forum {
         const newReplyForm = document.getElementById('newReplyForm');
         if (newReplyForm) {
             newReplyForm.addEventListener('submit', this.handleNewReply.bind(this));
+            
+            // Add character counter functionality
+            const textarea = newReplyForm.querySelector('textarea[name="replyContent"]');
+            const charCount = document.getElementById('charCount');
+            
+            if (textarea && charCount) {
+                // Update character count on input
+                textarea.addEventListener('input', () => {
+                    const currentLength = textarea.value.length;
+                    charCount.textContent = currentLength;
+                    
+                    // Color coding based on character count
+                    if (currentLength > 800) {
+                        charCount.classList.add('text-red-400');
+                        charCount.classList.remove('text-slate-500', 'text-yellow-400');
+                    } else if (currentLength > 600) {
+                        charCount.classList.add('text-yellow-400');
+                        charCount.classList.remove('text-slate-500', 'text-red-400');
+                    } else {
+                        charCount.classList.add('text-slate-500');
+                        charCount.classList.remove('text-yellow-400', 'text-red-400');
+                    }
+                    
+                    // Enforce max character limit
+                    if (currentLength > 1000) {
+                        textarea.value = textarea.value.substring(0, 1000);
+                        charCount.textContent = '1000';
+                    }
+                });
+                
+                // Add auto-resize functionality
+                textarea.addEventListener('input', () => {
+                    textarea.style.height = 'auto';
+                    textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
+                });
+            }
         }
     }
 
@@ -1769,11 +1991,17 @@ export class Forum {
         const form = e.target;
         const content = form.elements.replyContent.value.trim();
         const threadId = form.elements.threadId.value;
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.innerHTML;
 
         if (!content) {
             this.showError('Reply content cannot be empty.');
             return;
         }
+
+        // Disable submit button and show loading state
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin text-sm mr-2"></i><span>Posting...</span>';
 
         try {
             const { data: newReply, error } = await this.supabase
@@ -1794,13 +2022,49 @@ export class Forum {
                 return;
             }
 
+            // Success feedback with animation
+            submitButton.innerHTML = '<i class="fas fa-check text-sm mr-2"></i><span>Posted!</span>';
+            submitButton.classList.add('from-green-600', 'to-emerald-600');
+            submitButton.classList.remove('from-indigo-600', 'to-purple-600');
+            
             this.showSuccess('Reply posted successfully!');
             form.elements.replyContent.value = ''; // Clear textarea
+            
+            // Reset character counter
+            const charCount = document.getElementById('charCount');
+            if (charCount) {
+                charCount.textContent = '0';
+                charCount.classList.add('text-slate-500');
+                charCount.classList.remove('text-yellow-400', 'text-red-400');
+            }
+            
+            // Reset textarea height
+            const textarea = form.elements.replyContent;
+            if (textarea) {
+                textarea.style.height = 'auto';
+            }
+            
             this.loadReplies(threadId); // Refresh replies for the current thread
+
+            // Reset button after a delay
+            setTimeout(() => {
+                submitButton.innerHTML = originalButtonText;
+                submitButton.classList.remove('from-green-600', 'to-emerald-600');
+                submitButton.classList.add('from-indigo-600', 'to-purple-600');
+                submitButton.disabled = false;
+            }, 2000);
 
         } catch (err) {
             console.error('Exception in handleNewReply:', err);
             this.showError('An unexpected error occurred while posting your reply.');
+        } finally {
+            // Ensure button is re-enabled if there was an error
+            if (submitButton.disabled) {
+                setTimeout(() => {
+                    submitButton.innerHTML = originalButtonText;
+                    submitButton.disabled = false;
+                }, 1000);
+            }
         }
     }
 
