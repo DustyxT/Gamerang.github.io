@@ -1,7 +1,8 @@
 // Import Supabase configuration
 import { supabase } from './supabase-config.js';
 
-// Make supabase available globally if needed by other non-module scripts, though direct import is preferred.
+// Make supabase available globally for backwards compatibility with legacy scripts only.
+// NOTE: New modules should use: import { supabase } from './supabase-config.js'
 window.supabase = supabase;
 
 // Authentication functionality

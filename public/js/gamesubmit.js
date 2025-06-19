@@ -1,5 +1,8 @@
-// Use global Supabase instance
-const supabaseClient = window.supabase;
+// Import Supabase configuration
+import { supabase } from './supabase-config.js';
+
+// Use consistent naming with other modules
+const supabaseClient = supabase;
 
 // Check authentication status
 async function checkAuth() {
