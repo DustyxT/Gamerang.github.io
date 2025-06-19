@@ -177,14 +177,14 @@
                     <div class="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
                     <div class="relative flex items-center space-x-2 bg-gray-900 px-3 py-1.5 rounded-lg">
                         <img src="./images/weblogo.png" alt="Gamerang Logo" class="h-6 w-auto" id="siteLogo">
-                        <a href="index.html" class="text-2xl font-black text-white hover:text-blue-300 transition-all duration-300 header-font neon-text">Gamerang</a>
+                        <a href="index.html" class="text-2xl font-black text-white hover:text-blue-300 transition-all duration-300 header-font neon-text decrypt-on-load">Gamerang</a>
                     </div>
                 </div>
             </div>
             <div class="hidden md:flex space-x-8">
-                <a href="index.html" class="nav-link hover:text-cyan-400 transition">Home</a>
-                <a href="games.html" class="nav-link hover:text-cyan-400 transition">Games</a>
-                <a href="forum.html" class="nav-link hover:text-neon-blue transition text-white hover:neon-text">Community</a>
+                <a href="index.html" class="nav-link hover:text-cyan-400 transition decrypt-on-load">Home</a>
+                <a href="games.html" class="nav-link hover:text-cyan-400 transition decrypt-on-load">Games</a>
+                <a href="forum.html" class="nav-link hover:text-neon-blue transition text-white hover:neon-text decrypt-on-load">Community</a>
             </div>
             <div class="flex items-center space-x-4">
                 <button class="md:hidden text-xl focus:outline-none hover:text-cyan-400 transition" id="mobileMenuButton">
@@ -196,6 +196,9 @@
                     </div>
                     <input type="text" id="searchInput" placeholder="Search games..."
                            class="bg-gray-800 rounded-full py-2 px-10 focus:outline-none focus:ring-2 focus:ring-cyan-500 w-64 placeholder-gray-400 transition-all duration-300 hover:w-72 border border-cyan-500/30">
+                    <div id="searchSuggestionsDesktop" class="absolute mt-1 w-full rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 z-50 hidden overflow-y-auto max-h-60">
+                        {/* Suggestions will be populated here by JavaScript */}
+                    </div>
                 </div>
             </div>
         </div>
@@ -208,6 +211,9 @@
                     </div>
                     <input type="text" id="mobileSearchInput" placeholder="Search games..."
                            class="bg-gray-700 rounded-full py-2 px-10 focus:outline-none focus:ring-2 focus:ring-cyan-500 w-full mb-2 border border-cyan-500/30">
+                    <div id="searchSuggestionsMobile" class="absolute mt-1 w-full rounded-md shadow-lg bg-gray-700 ring-1 ring-black ring-opacity-5 z-50 hidden overflow-y-auto max-h-60">
+                        {/* Suggestions will be populated here by JavaScript */}
+                    </div>
                 </div>
                 <a href="index.html" class="block py-2 hover:text-cyan-400 border-b border-cyan-500/20">Home</a>
                 <a href="games.html" class="block py-2 hover:text-cyan-400 border-b border-cyan-500/20">Games</a>
@@ -447,6 +453,8 @@
                 detectSessionInUrl: true
             }
         });
+
+        let allGameTitlesForSuggestions = []; // For search suggestions
 
         // Improved slider functionality
         function initSlider() {
@@ -688,155 +696,192 @@
             }
         }
 
-        // Search functionality
-        async function searchGames(query, page = 1) {
-            console.log('Searching for:', query, 'Page:', page)
-            if (!query || query.length < 2) {
-                console.log('Query too short, hiding search results')
-                document.getElementById('searchResults').style.display = 'none'
-                document.getElementById('latestReleases').style.display = 'grid'
-                return
-            }
+        // Fetch all game titles for search suggestions
+        async function fetchAllGameTitles() {
             try {
-                // Show search results container first
-                const searchResults = document.getElementById('searchResults')
-                searchResults.style.display = 'block'
-                // Show loading state
-                document.getElementById('searchLoading').style.display = 'block'
-                document.getElementById('searchResultsGrid').style.display = 'none'
-                document.getElementById('noResults').style.display = 'none'
-                document.getElementById('searchError').style.display = 'none'
-                document.getElementById('pagination').style.display = 'none'
-                // Hide latest releases
-                document.getElementById('latestReleases').style.display = 'none'
-                // Build the search query
-                let searchQuery = window.supabaseClient
+                console.log('Fetching all game titles for suggestions...');
+                const { data, error } = await window.supabaseClient
                     .from('games')
-                    .select('*', { count: 'exact' })
-                    .or(`title.ilike.%${query}%,description.ilike.%${query}%,genre.ilike.%${query}%`)
-                    .order('created_at', { ascending: false })
-                // Apply pagination
-                const perPage = 9
-                const from = (page - 1) * perPage
-                const to = from + perPage - 1
-                searchQuery = searchQuery.range(from, to)
-                console.log('Executing search query...')
-                const { data: games, error, count } = await searchQuery
-                console.log('Search results:', games)
-                // Hide loading state
-                document.getElementById('searchLoading').style.display = 'none'
+                    .select('id, title, cover_image_url, genre, release_date, created_at') // Fetch a bit more for richer suggestions
+                    .order('title', { ascending: true });
+
                 if (error) {
-                    console.error('Search error:', error)
-                    document.getElementById('searchError').style.display = 'block'
-                    throw error
+                    console.error('Error fetching game titles for suggestions:', error);
+                    throw error;
                 }
-                const searchResultsGrid = document.getElementById('searchResultsGrid')
-                const searchCount = document.getElementById('searchCount')
-                if (!games || games.length === 0) {
-                    console.log('No results found')
-                    document.getElementById('noResults').style.display = 'block'
-                    searchResultsGrid.innerHTML = ''
-                } else {
-                    console.log('Displaying results')
-                    // Update search count
-                    searchCount.textContent = count
-                    // Display results
-                    searchResultsGrid.innerHTML = games.map(game => `
-                        <div class="game-card steam-gradient rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition">
-                            <div class="relative overflow-hidden h-48">
-                                <img src="${game.cover_image_url || ''}"
-                                    alt="${game.title}"
-                                    class="game-image w-full h-full object-cover"
-                                    onerror="this.onerror=null;this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwMCIgZmlsbD0iIzIzMzU1NCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjAiIGZpbGw9IiM2NGZmZGEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBDb3ZlciBJbWFnZTwvdGV4dD48L3N2Zz4='">
-                            </div>
-                            <div class="p-6">
-                                <h3 class="text-xl font-bold mb-2">${game.title}</h3>
-                                <p class="text-gray-400 text-sm mb-2">${game.genre || 'Action'}</p>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-purple-400 text-sm">${game.repack_size || '10'} ${game.repack_size_unit || 'GB'}</span>
-                                    <a href="gamepage.html?id=${game.id}" class="btn-steam px-4 py-2 rounded transition">
-                                        View Details
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')
-                    // Show pagination if needed
-                    if (count > perPage) {
-                        document.getElementById('pagination').style.display = 'flex'
-                        const totalPages = Math.ceil(count / perPage)
-                        const pageNumbers = document.getElementById('pageNumbers')
-                        pageNumbers.innerHTML = ''
-                        for (let i = 1; i <= totalPages; i++) {
-                            const pageBtn = document.createElement('button')
-                            pageBtn.className = `px-4 py-2 rounded-lg ${i === page ? 'bg-cyan-600 text-white' : 'bg-gray-800 hover:bg-gray-700'} transition`
-                            pageBtn.textContent = i
-                            pageBtn.addEventListener('click', () => searchGames(query, i))
-                            pageNumbers.appendChild(pageBtn)
-                        }
-                        document.getElementById('prevPage').disabled = page === 1
-                        document.getElementById('nextPage').disabled = page === totalPages
-                        document.getElementById('prevPage').onclick = () => searchGames(query, page - 1)
-                        document.getElementById('nextPage').onclick = () => searchGames(query, page + 1)
-                    }
-                }
-                document.getElementById('searchResultsGrid').style.display = 'grid'
+                allGameTitlesForSuggestions = data || [];
+                console.log(`Fetched ${allGameTitlesForSuggestions.length} titles for suggestions.`);
             } catch (error) {
-                console.error('Error searching games:', error)
-                document.getElementById('searchError').style.display = 'block'
+                console.error('Could not fetch game titles for suggestions:', error);
+                // Suggestions might not work, but page can still load
             }
         }
+
+        // Function to display search suggestions in a dropdown
+        function displaySearchSuggestions(query, inputId) {
+            const suggestionsContainerId = inputId === 'searchInput' ? 'searchSuggestionsDesktop' : 'searchSuggestionsMobile';
+            const suggestionsContainer = document.getElementById(suggestionsContainerId);
+
+            if (!suggestionsContainer) return;
+
+            const searchTerm = query.toLowerCase().trim();
+
+            if (searchTerm.length < 2) {
+                suggestionsContainer.innerHTML = '';
+                suggestionsContainer.classList.add('hidden');
+                return;
+            }
+
+            const filteredGames = allGameTitlesForSuggestions.filter(game => 
+                game.title.toLowerCase().includes(searchTerm)
+            ).slice(0, 7); // Show up to 7 suggestions
+
+            if (filteredGames.length > 0) {
+                suggestionsContainer.innerHTML = filteredGames.map(game => {
+                    // Highlight matching part (simple version)
+                    const title = game.title.replace(
+                        new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'ig'), '<strong class="suggestion-match">$1</strong>'
+                    );
+                    return `
+                        <a href="gamepage.html?id=${game.id}" class="suggestion-item flex items-center space-x-3 p-2 hover:bg-gray-700 rounded-md">
+                            <img src="${game.cover_image_url || './images/weblogo.png'}" alt="${game.title}" class="w-10 h-14 object-cover rounded-sm">
+                            <div>
+                                <span class="block text-sm font-medium text-white">${title}</span>
+                                <span class="block text-xs text-gray-400">${game.genre || 'Game'} - ${new Date(game.release_date || game.created_at).getFullYear()}</span>
+                            </div>
+                        </a>
+                    `;
+                }).join('');
+                suggestionsContainer.classList.remove('hidden');
+            } else {
+                suggestionsContainer.innerHTML = '<div class="p-3 text-sm text-gray-400">No matching games found.</div>';
+                suggestionsContainer.classList.remove('hidden');
+            }
+        }
+
+        // Search functionality (modified for suggestions on index.html)
+        async function searchGames(query, page = 1) { 
+            // This function will now primarily be for a full search result display if explicitly called,
+            // e.g., if a user presses Enter and we decide NOT to redirect but show results on index.html.
+            // For now, typing in search bar on index.html will primarily use displaySearchSuggestions.
+            console.log('Full search on index.html triggered for:', query, 'Page:', page);
+            
+            // The existing logic for searchResults, searchLoading etc. on index.html will be used here.
+            // This part remains if we want to display full results on index.html upon a specific action (e.g. pressing enter without redirect)
+            // For now, let's assume suggestions are the primary interaction from typing.
+            if (!query || query.length < 2) {
+                document.getElementById('searchResults').style.display = 'none';
+                document.getElementById('latestReleases').style.display = 'grid';
+                return;
+            }
+            // ... (keep existing Supabase query and rendering logic for #searchResultsGrid on index.html)
+            // This part is complex and might need careful merging/testing if we want full results on index.html
+            // For now, focus on suggestions -> gamepage.html or suggestions -> games.html (on Enter)
+            console.warn("searchGames on index.html is currently set up for suggestions. Full grid update logic needs review if activated.");
+            // To prevent full grid update from just typing, ensure handleSearch calls displaySearchSuggestions
+        }
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
             initSlider();
-            loadLatestReleases()
-            // Mobile menu toggle
-            const mobileMenuButton = document.getElementById('mobileMenuButton')
-            const mobileMenu = document.getElementById('mobileMenu')
-            mobileMenuButton.addEventListener('click', () => {
-                mobileMenu.classList.toggle('hidden')
-            })
-            // Search input handlers
-            const desktopSearchInput = document.getElementById('searchInput')
-            const mobileSearchInput = document.getElementById('mobileSearchInput')
-            let searchTimeout
-            function handleSearch(query) {
-                clearTimeout(searchTimeout)
+            loadLatestReleases();
+            fetchAllGameTitles(); // Fetch titles for suggestions
+
+            const desktopSearchInput = document.getElementById('searchInput');
+            const mobileSearchInput = document.getElementById('mobileSearchInput');
+            const desktopSuggestions = document.getElementById('searchSuggestionsDesktop');
+            const mobileSuggestions = document.getElementById('searchSuggestionsMobile');
+
+            let searchTimeout;
+
+            function handleSearchInput(inputElement, suggestionsElement) {
+                const query = inputElement.value;
+                clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => {
-                    searchGames(query, 1)
-                }, 300)
+                    displaySearchSuggestions(query, inputElement.id);
+                    // Do NOT call searchGames(query,1) here for live full grid updates on index.html
+                    // unless that is the desired behavior for every keystroke.
+                }, 300);
             }
-            desktopSearchInput.addEventListener('input', () => {
-                handleSearch(desktopSearchInput.value.trim())
-            })
-            mobileSearchInput.addEventListener('input', () => {
-                handleSearch(mobileSearchInput.value.trim())
-            })
-            // Clear search
-            document.getElementById('clearSearch').addEventListener('click', () => {
-                desktopSearchInput.value = ''
-                mobileSearchInput.value = ''
-                document.getElementById('searchResults').style.display = 'none'
-                document.getElementById('latestReleases').style.display = 'grid'
-            })
-            // Back to top button
-            const backToTopButton = document.getElementById('backToTop')
-            window.addEventListener('scroll', () => {
-                if (window.pageYOffset > 300) {
-                    backToTopButton.classList.remove('opacity-0', 'invisible')
-                    backToTopButton.classList.add('opacity-100', 'visible')
-                } else {
-                    backToTopButton.classList.remove('opacity-100', 'visible')
-                    backToTopButton.classList.add('opacity-0', 'invisible')
+
+            if (desktopSearchInput && desktopSuggestions) {
+                desktopSearchInput.addEventListener('input', () => handleSearchInput(desktopSearchInput, desktopSuggestions));
+                desktopSearchInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const query = desktopSearchInput.value.trim();
+                        if (query.length >= 2) {
+                            window.location.href = `games.html?search=${encodeURIComponent(query)}`;
+                        }
+                    }
+                });
+            }
+
+            if (mobileSearchInput && mobileSuggestions) {
+                mobileSearchInput.addEventListener('input', () => handleSearchInput(mobileSearchInput, mobileSuggestions));
+                mobileSearchInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const query = mobileSearchInput.value.trim();
+                        if (query.length >= 2) {
+                            window.location.href = `games.html?search=${encodeURIComponent(query)}`;
+                        }
+                    }
+                });
+            }
+            
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', function(event) {
+                if (desktopSearchInput && desktopSuggestions && !desktopSearchInput.contains(event.target) && !desktopSuggestions.contains(event.target)) {
+                    desktopSuggestions.classList.add('hidden');
                 }
-            })
-            backToTopButton.addEventListener('click', () => {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                })
-            })
-        })
+                if (mobileSearchInput && mobileSuggestions && !mobileSearchInput.contains(event.target) && !mobileSuggestions.contains(event.target)) {
+                    mobileSuggestions.classList.add('hidden');
+                }
+            });
+
+            // Mobile menu toggle
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
+            const mobileMenu = document.getElementById('mobileMenu');
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+
+            // Clear search
+            const clearSearchButton = document.getElementById('clearSearch');
+            if (clearSearchButton) {
+                clearSearchButton.addEventListener('click', () => {
+                    if(desktopSearchInput) desktopSearchInput.value = '';
+                    if(mobileSearchInput) mobileSearchInput.value = '';
+                    if(desktopSuggestions) desktopSuggestions.classList.add('hidden');
+                    if(mobileSuggestions) mobileSuggestions.classList.add('hidden');
+                    document.getElementById('searchResults').style.display = 'none';
+                    document.getElementById('latestReleases').style.display = 'grid';
+                });
+            }
+
+            // Back to top button
+            const backToTopButton = document.getElementById('backToTop');
+            if (backToTopButton) {
+                window.addEventListener('scroll', () => {
+                    if (window.pageYOffset > 300) {
+                        backToTopButton.classList.remove('opacity-0', 'invisible');
+                        backToTopButton.classList.add('opacity-100', 'visible');
+                    } else {
+                        backToTopButton.classList.remove('opacity-100', 'visible');
+                        backToTopButton.classList.add('opacity-0', 'invisible');
+                    }
+                });
+                backToTopButton.addEventListener('click', () => {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                });
+            }
+        });
     </script>
 </body>
 </html>

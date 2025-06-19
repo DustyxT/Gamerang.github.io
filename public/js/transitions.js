@@ -4,17 +4,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!preloader) {
         console.warn('Page Transition Preloader element not found. Animations will not run.');
-        return;
+        // return; // Don't return if preloader is missing, decryption can still run
     }
 
     // Function to show the preloader
     function showPreloader() {
-        preloader.classList.add('visible');
+        if(preloader) preloader.classList.add('visible');
     }
 
     // Function to hide the preloader
     function hidePreloader() {
-        preloader.classList.remove('visible');
+        if(preloader) preloader.classList.remove('visible');
     }
 
     navLinks.forEach(link => {
@@ -60,4 +60,65 @@ document.addEventListener('DOMContentLoaded', () => {
             hidePreloader();
         }
     });
+
+    // --- Decrypted Text Animation --- 
+    const defaultChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{};:",./<>?';
+
+    function animateDecryptedText(element, options = {}) {
+        const originalText = element.dataset.originalText || element.textContent;
+        element.dataset.originalText = originalText; // Store it if not already
+        
+        const {
+            speed = 50, // Time in ms for each character update
+            revealDelay = 50, // Time in ms before revealing next char
+            scrambleChars = defaultChars,
+            maxIterationsPerChar = 5 // How many times each char scrambles before settling
+        } = options;
+
+        let currentText = originalText.split('');
+        let revealedChars = 0;
+
+        function scramble() {
+            if (revealedChars >= originalText.length) {
+                element.textContent = originalText; // Ensure final text is correct
+                return;
+            }
+
+            for (let i = revealedChars; i < originalText.length; i++) {
+                currentText[i] = scrambleChars[Math.floor(Math.random() * scrambleChars.length)];
+            }
+            element.textContent = currentText.join('');
+
+            let iterations = 0;
+            const intervalId = setInterval(() => {
+                iterations++;
+                for (let i = revealedChars; i < originalText.length; i++) {
+                    if (i === revealedChars && iterations >= maxIterationsPerChar) {
+                        // Time to reveal this character
+                        currentText[i] = originalText[i];
+                    } else if (i > revealedChars || (i === revealedChars && iterations < maxIterationsPerChar)) {
+                        currentText[i] = scrambleChars[Math.floor(Math.random() * scrambleChars.length)];
+                    }
+                }
+                element.textContent = currentText.join('');
+
+                if (iterations >= maxIterationsPerChar && currentText[revealedChars] === originalText[revealedChars]) {
+                    clearInterval(intervalId);
+                    revealedChars++;
+                    // Slight delay before starting the next character's reveal cycle
+                    setTimeout(scramble, revealDelay); 
+                }
+            }, speed);
+        }
+        scramble(); // Start the animation
+    }
+
+    const elementsToDecrypt = document.querySelectorAll('.decrypt-on-load');
+    elementsToDecrypt.forEach(el => {
+        // Optional: Add a slight delay before starting each to stagger them
+        // const delay = parseInt(el.dataset.decryptDelay) || 0;
+        // setTimeout(() => animateDecryptedText(el), delay);
+        animateDecryptedText(el, { speed: 30, revealDelay: 30, maxIterationsPerChar: 8});
+    });
+
 }); 

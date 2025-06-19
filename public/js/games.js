@@ -81,7 +81,25 @@ async function initializePage() {
         
         await fetchGames();
         setupEventListeners();
-        renderGames(allGames);
+        // renderGames(allGames); // Old rendering call
+
+        // Check for search query in URL after setting up listeners and fetching games
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchQueryFromUrl = urlParams.get('search');
+
+        if (searchQueryFromUrl) {
+            console.log(`📎 Found search query in URL: "${searchQueryFromUrl}"`);
+            if (searchInput) {
+                searchInput.value = searchQueryFromUrl;
+            }
+            if (mobileSearchInput) { // Also populate mobile search input if it exists
+                mobileSearchInput.value = searchQueryFromUrl;
+            }
+            // Initial filter will now include the search term
+        }
+        
+        filterGames(); // Call filterGames to apply URL search query and any default filters
+
         console.log('✅ Games page initialized successfully');
     } catch (error) {
         console.error('❌ Error initializing page:', error);
@@ -254,7 +272,23 @@ function filterGames() {
     console.log('🔍 Filtering games with filters:', currentFilters);
     console.log('📚 Total games to filter:', allGames.length);
     
+    // Get the search term from the main search input
+    const searchTerm = searchInput && searchInput.value ? searchInput.value.toLowerCase().trim() : '';
+    if (searchTerm) {
+        console.log(`📄 Applying text search: "${searchTerm}"`);
+    }
+
     filteredGames = allGames.filter(game => {
+        // Text search filter (title, description, genre)
+        if (searchTerm) {
+            const titleMatch = game.title && game.title.toLowerCase().includes(searchTerm);
+            const descriptionMatch = game.description && game.description.toLowerCase().includes(searchTerm);
+            const genreMatch = game.genre && game.genre.toLowerCase().includes(searchTerm);
+            if (!(titleMatch || descriptionMatch || genreMatch)) {
+                return false;
+            }
+        }
+
         // Category filter - improved logic with case-insensitive matching and multi-genre support
         if (currentFilters.category.length > 0) {
             const gameGenre = (game.genre || '').trim();
@@ -375,20 +409,21 @@ function debounce(func, wait) {
 
 // Search functionality with debouncing
 function setupSearch() {
-    const handleSearch = (input, dropdown, resultsList) => {
+    const handleSearchSuggestions = (input, dropdown, resultsList) => {
         if (!input || !dropdown || !resultsList) return;
         
-        const searchTerm = input.value.toLowerCase();
+        const searchTerm = input.value.toLowerCase().trim();
         
         if (searchTerm.length < 2) {
             dropdown.classList.add('hidden');
             return;
         }
 
+        // This part is for suggestions, keep it as is or refine if needed
         const results = allGames.filter(game => 
             game.title.toLowerCase().includes(searchTerm) ||
             (game.description && game.description.toLowerCase().includes(searchTerm))
-        ).slice(0, 5);
+        ).slice(0, 5); // Limit suggestions
 
         if (results.length > 0) {
             resultsList.innerHTML = results.map(game => `
@@ -404,26 +439,41 @@ function setupSearch() {
             `).join('');
             dropdown.classList.remove('hidden');
         } else {
-            resultsList.innerHTML = '<p class="p-2 text-gray-400">No results found</p>';
+            resultsList.innerHTML = '<p class="p-2 text-gray-400">No instant suggestions found</p>';
             dropdown.classList.remove('hidden');
         }
     };
 
-    // Desktop search with debouncing
-    if (searchInput) {
-        const debouncedDesktopSearch = debounce(() => {
-            handleSearch(searchInput, searchDropdown, searchResultsList);
+    const debouncedFilterGames = debounce(() => {
+        filterGames(); // This will filter the main game list
+    }, 350); // Adjust debounce time as needed for main filtering
+
+    const setupInputEvents = (inputElement, dropdownElement, resultsListElement) => {
+        if (!inputElement) return;
+
+        const debouncedShowSuggestions = debounce(() => {
+            handleSearchSuggestions(inputElement, dropdownElement, resultsListElement);
         }, 300);
-        searchInput.addEventListener('input', debouncedDesktopSearch);
-    }
+
+        inputElement.addEventListener('input', () => {
+            debouncedShowSuggestions();
+            debouncedFilterGames(); // Trigger main filtering on input
+        });
+
+        inputElement.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Prevent form submission if it's in a form
+                filterGames(); // Trigger main filtering immediately
+                if(dropdownElement) dropdownElement.classList.add('hidden'); // Hide suggestions
+            }
+        });
+    };
+
+    // Desktop search
+    setupInputEvents(searchInput, searchDropdown, searchResultsList);
     
-    // Mobile search with debouncing
-    if (mobileSearchInput) {
-        const debouncedMobileSearch = debounce(() => {
-            handleSearch(mobileSearchInput, mobileSearchDropdown, mobileSearchResultsList);
-        }, 300);
-        mobileSearchInput.addEventListener('input', debouncedMobileSearch);
-    }
+    // Mobile search
+    setupInputEvents(mobileSearchInput, mobileSearchDropdown, mobileSearchResultsList);
 
     // Close dropdowns when clicking outside
     document.addEventListener('click', (e) => {
