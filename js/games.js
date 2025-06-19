@@ -1,16 +1,17 @@
-// Use global Supabase client (simpler approach)
-let supabaseClient;
+// Import Supabase configuration
+import { supabase } from './supabase-config.js';
 
-// Initialize Supabase client
+// Use consistent naming with other modules
+const supabaseClient = supabase;
+
+// Initialize Supabase client (simplified since import handles initialization)
 function initializeSupabase() {
     try {
-        // Use the global Supabase client set in HTML
-        if (window.supabaseClient) {
-            supabaseClient = window.supabaseClient;
-            console.log('✅ Using global Supabase client');
+        if (supabaseClient) {
+            console.log('✅ Using imported Supabase client');
             return Promise.resolve();
         } else {
-            console.error('❌ Global Supabase client not found');
+            console.error('❌ Supabase client not available');
             return Promise.reject(new Error('Supabase client not available'));
         }
     } catch (error) {
@@ -64,8 +65,18 @@ async function initializePage() {
         
         if (!gamesList) {
             console.error('❌ Games list container not found');
-            showError('Page elements not found. Please refresh the page.');
+            showError('Page elements not found (gamesList missing). Please refresh the page.');
             return;
+        }
+        if (!searchInput || !searchDropdown || !searchResultsList) {
+             console.error('❌ Desktop search components not fully found (searchInput, searchDropdown, or searchResultsList).');
+             showError('Page structure error: Essential desktop search components are missing. Please refresh or contact support.');
+             return;
+        }
+        if (!mobileSearchInput || !mobileSearchDropdown || !mobileSearchResultsList) {
+             console.error('❌ Mobile search components not fully found (mobileSearchInput, mobileSearchDropdown, or mobileSearchResultsList).');
+             showError('Page structure error: Essential mobile search components are missing. Please refresh or contact support.');
+             return;
         }
         
         await fetchGames();
@@ -349,7 +360,20 @@ function filterGames() {
     renderGames(filteredGames);
 }
 
-// Search functionality
+// Debounce utility function for performance optimization
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Search functionality with debouncing
 function setupSearch() {
     const handleSearch = (input, dropdown, resultsList) => {
         if (!input || !dropdown || !resultsList) return;
@@ -385,14 +409,20 @@ function setupSearch() {
         }
     };
 
-    // Desktop search
+    // Desktop search with debouncing
     if (searchInput) {
-        searchInput.addEventListener('input', () => handleSearch(searchInput, searchDropdown, searchResultsList));
+        const debouncedDesktopSearch = debounce(() => {
+            handleSearch(searchInput, searchDropdown, searchResultsList);
+        }, 300);
+        searchInput.addEventListener('input', debouncedDesktopSearch);
     }
     
-    // Mobile search
+    // Mobile search with debouncing
     if (mobileSearchInput) {
-        mobileSearchInput.addEventListener('input', () => handleSearch(mobileSearchInput, mobileSearchDropdown, mobileSearchResultsList));
+        const debouncedMobileSearch = debounce(() => {
+            handleSearch(mobileSearchInput, mobileSearchDropdown, mobileSearchResultsList);
+        }, 300);
+        mobileSearchInput.addEventListener('input', debouncedMobileSearch);
     }
 
     // Close dropdowns when clicking outside

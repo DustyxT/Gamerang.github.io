@@ -89,13 +89,17 @@ export class Forum {
             });
         }
 
-        // Search input
+        // Search input with debouncing for better performance
         const searchInput = document.getElementById('searchInput');
         if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                this.searchTerm = e.target.value.trim();
+            const debouncedSearch = this.debounce((value) => {
+                this.searchTerm = value.trim();
                 this.currentPage = 1;
                 this.loadThreads();
+            }, 300); // 300ms delay
+
+            searchInput.addEventListener('input', (e) => {
+                debouncedSearch(e.target.value);
             });
         }
 
@@ -238,6 +242,7 @@ export class Forum {
 
             if (error) {
                 console.error('Error loading categories:', error);
+                this.showError('Failed to load forum categories. Some features may be unavailable.');
                 return;
             }
 
@@ -311,6 +316,19 @@ export class Forum {
                 console.error('Threads error:', error);
                 console.error('Error details:', error.message, error.details, error.hint);
                 
+                // Enhanced error handling: Specific error messages based on error type
+                if (error.message && error.message.includes('function get_thread_list')) {
+                    console.error('RPC function not found or has wrong signature');
+                    this.showError('Database function error. Please contact administrator.');
+                    this.threadsContainer.innerHTML = `
+                        <div class="text-center py-8">
+                            <p class="text-red-500 mb-4">Database configuration error. Please contact support.</p>
+                            <p class="text-sm text-gray-500">Error: RPC function signature mismatch</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
                 // Fallback: try to load threads directly from table if RPC fails
                 console.log('Attempting fallback direct query...');
                 const { data: fallbackData, error: fallbackError } = await this.supabase
@@ -332,6 +350,7 @@ export class Forum {
                 console.log('Using fallback data:', this.threads);
             } else {
                 if (!data || !Array.isArray(data)) {
+                    console.error('Invalid RPC response format:', data);
                     throw new Error('Invalid response from get_thread_list');
                 }
                 
@@ -595,12 +614,91 @@ export class Forum {
         const formErrorP = document.getElementById('formError');
         formErrorP.classList.add('hidden');
 
-        if (!title || !content || !category) {
-            this.showError('Title, content, and category are required.', 'formError');
+        // Enhanced form validation
+        if (!title || title.trim().length === 0) {
+            this.showError('Thread title is required.', 'formError');
+            this.isSubmittingNewThread = false;
+            submitButton.disabled = false;
+            submitButton.textContent = 'Create Thread';
             return;
         }
 
+        if (title.trim().length < 3) {
+            this.showError('Thread title must be at least 3 characters long.', 'formError');
+            this.isSubmittingNewThread = false;
+            submitButton.disabled = false;
+            submitButton.textContent = 'Create Thread';
+            return;
+        }
+
+        if (title.trim().length > 100) {
+            this.showError('Thread title must be less than 100 characters.', 'formError');
+            this.isSubmittingNewThread = false;
+            submitButton.disabled = false;
+            submitButton.textContent = 'Create Thread';
+            return;
+        }
+
+        if (!content || content.trim().length === 0) {
+            this.showError('Thread content is required.', 'formError');
+            this.isSubmittingNewThread = false;
+            submitButton.disabled = false;
+            submitButton.textContent = 'Create Thread';
+            return;
+        }
+
+        if (content.trim().length < 10) {
+            this.showError('Thread content must be at least 10 characters long.', 'formError');
+            this.isSubmittingNewThread = false;
+            submitButton.disabled = false;
+            submitButton.textContent = 'Create Thread';
+            return;
+        }
+
+        if (content.trim().length > 10000) {
+            this.showError('Thread content must be less than 10,000 characters.', 'formError');
+            this.isSubmittingNewThread = false;
+            submitButton.disabled = false;
+            submitButton.textContent = 'Create Thread';
+            return;
+        }
+
+        if (!category || category.trim().length === 0) {
+            this.showError('Please select a category.', 'formError');
+            this.isSubmittingNewThread = false;
+            submitButton.disabled = false;
+            submitButton.textContent = 'Create Thread';
+            return;
+        }
+
+        // Enhanced tag validation
         const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
+        
+        if (tags.length > 5) {
+            this.showError('Maximum 5 tags allowed.', 'formError');
+            this.isSubmittingNewThread = false;
+            submitButton.disabled = false;
+            submitButton.textContent = 'Create Thread';
+            return;
+        }
+
+        // Validate each tag
+        for (let tag of tags) {
+            if (tag.length > 20) {
+                this.showError('Each tag must be 20 characters or less.', 'formError');
+                this.isSubmittingNewThread = false;
+                submitButton.disabled = false;
+                submitButton.textContent = 'Create Thread';
+                return;
+            }
+            if (!/^[a-zA-Z0-9\s]+$/.test(tag)) {
+                this.showError('Tags can only contain letters, numbers, and spaces.', 'formError');
+                this.isSubmittingNewThread = false;
+                submitButton.disabled = false;
+                submitButton.textContent = 'Create Thread';
+                return;
+            }
+        }
         const uploadedImageUrls = [];
 
         // Disable submit button to prevent multiple submissions
@@ -609,7 +707,14 @@ export class Forum {
         submitButton.textContent = 'Creating...';
 
         try {
-            // 1. Look up category ID from category name
+            // 1. Enhanced category validation and lookup
+            if (!category || category.trim() === '') {
+                this.showError('Please select a valid category.', 'formError');
+                submitButton.disabled = false;
+                submitButton.textContent = 'Create Thread';
+                return;
+            }
+
             console.log(`[Forum.js] Looking up category ID for: ${category}`);
             const { data: categoryData, error: categoryError } = await this.supabase
                 .from('forum_categories')

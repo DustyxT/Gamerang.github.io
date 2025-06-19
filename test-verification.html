@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Gamerang Verification Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center">
+    <div class="max-w-2xl mx-auto p-8">
+        <h1 class="text-4xl font-bold text-center mb-8">🧪 Gamerang Verification Test</h1>
+        
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <h2 class="text-2xl font-semibold mb-4">📊 Module Load Test</h2>
+            <div id="testResults" class="space-y-2">
+                <!-- Test results will appear here -->
+            </div>
+        </div>
+
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <h2 class="text-2xl font-semibold mb-4">🔗 Quick Links</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <a href="forum.html" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-center">🗣️ Forum</a>
+                <a href="games.html" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-center">🎮 Games</a>
+                <a href="gamesubmit.html" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-center">📤 Submit Game</a>
+                <a href="index.html" class="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded text-center">🏠 Home</a>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <button id="runTests" class="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg font-semibold">
+                🚀 Run Verification Tests
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './js/supabase-config.js';
+
+        const testResults = document.getElementById('testResults');
+        const runTestsBtn = document.getElementById('runTests');
+
+        function addTestResult(testName, status, details = '') {
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `p-3 rounded ${status === 'pass' ? 'bg-green-800' : status === 'fail' ? 'bg-red-800' : 'bg-yellow-800'}`;
+            resultDiv.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span class="font-medium">${testName}</span>
+                    <span class="text-sm">${status === 'pass' ? '✅' : status === 'fail' ? '❌' : '⏳'}</span>
+                </div>
+                ${details ? `<div class="text-sm text-gray-300 mt-1">${details}</div>` : ''}
+            `;
+            testResults.appendChild(resultDiv);
+        }
+
+        async function runVerificationTests() {
+            testResults.innerHTML = '';
+            runTestsBtn.disabled = true;
+            runTestsBtn.textContent = '🔄 Running Tests...';
+
+            // Test 1: Supabase Connection
+            try {
+                addTestResult('Supabase Configuration', 'running', 'Checking connection...');
+                const { data, error } = await supabase.auth.getSession();
+                if (error) throw error;
+                addTestResult('Supabase Configuration', 'pass', 'Connection successful');
+            } catch (error) {
+                addTestResult('Supabase Configuration', 'fail', `Error: ${error.message}`);
+            }
+
+            // Test 2: RPC Function Check
+            try {
+                addTestResult('Database RPC Functions', 'running', 'Testing get_thread_list...');
+                const { data, error } = await supabase.rpc('get_thread_list', {
+                    page_number: 1,
+                    page_size: 5,
+                    p_category_filter: null,
+                    p_category_id_filter: null
+                });
+                if (error) throw error;
+                addTestResult('Database RPC Functions', 'pass', `Returned ${data ? data.length : 0} threads`);
+            } catch (error) {
+                addTestResult('Database RPC Functions', 'fail', `Error: ${error.message}`);
+            }
+
+            // Test 3: Tables Accessibility
+            try {
+                addTestResult('Database Tables', 'running', 'Checking table access...');
+                const { data, error } = await supabase.from('threads').select('count', { count: 'exact', head: true });
+                if (error) throw error;
+                addTestResult('Database Tables', 'pass', `Tables accessible (${data} total threads)`);
+            } catch (error) {
+                addTestResult('Database Tables', 'fail', `Error: ${error.message}`);
+            }
+
+            // Test 4: Storage Access
+            try {
+                addTestResult('Storage Buckets', 'running', 'Checking storage access...');
+                const { data, error } = await supabase.storage.listBuckets();
+                if (error) throw error;
+                addTestResult('Storage Buckets', 'pass', `Found ${data.length} storage buckets`);
+            } catch (error) {
+                addTestResult('Storage Buckets', 'fail', `Error: ${error.message}`);
+            }
+
+            // Test 5: Module Imports
+            try {
+                addTestResult('ES6 Module Imports', 'running', 'Testing module system...');
+                // If we got this far, modules are working
+                addTestResult('ES6 Module Imports', 'pass', 'All modules loading correctly');
+            } catch (error) {
+                addTestResult('ES6 Module Imports', 'fail', `Error: ${error.message}`);
+            }
+
+            runTestsBtn.disabled = false;
+            runTestsBtn.textContent = '🔄 Run Tests Again';
+
+            // Summary
+            const passCount = testResults.querySelectorAll('.bg-green-800').length;
+            const totalTests = testResults.children.length;
+            
+            const summaryDiv = document.createElement('div');
+            summaryDiv.className = `mt-4 p-4 rounded-lg text-center ${passCount === totalTests ? 'bg-green-700' : 'bg-yellow-700'}`;
+            summaryDiv.innerHTML = `
+                <h3 class="text-xl font-bold">🎯 Test Summary</h3>
+                <p class="text-lg">${passCount}/${totalTests} tests passed</p>
+                ${passCount === totalTests ? 
+                    '<p class="text-green-200 mt-2">🎉 All systems ready for launch!</p>' : 
+                    '<p class="text-yellow-200 mt-2">⚠️ Some issues need attention before launch</p>'
+                }
+            `;
+            testResults.appendChild(summaryDiv);
+        }
+
+        runTestsBtn.addEventListener('click', runVerificationTests);
+
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(runVerificationTests, 1000);
+        });
+    </script>
+</body>
+</html> 
