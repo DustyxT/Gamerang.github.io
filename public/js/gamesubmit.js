@@ -151,118 +151,120 @@ async function uploadFileWithRetry(file, filePath, maxRetries = 3) {
 
 // Handle file input changes and preview
 function setupFileInputs() {
-    console.log('🎯 Setting up file inputs...');
-    
-    // Cover image setup and preview
+    console.log('🎯 [v2] Setting up file inputs...');
+
+    // --- Cover Image Setup ---
     const coverInput = document.getElementById('coverImage');
     const coverPreview = document.getElementById('coverPreview');
-    const coverUploadArea = coverInput.closest('.file-upload');
-    
-    console.log('📁 Cover input found:', !!coverInput);
-    console.log('📁 Cover upload area found:', !!coverUploadArea);
-    
-    // Handle click on upload area for cover image
-    if (coverUploadArea) {
-        coverUploadArea.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('🖱️ Cover upload area clicked, triggering file input...');
-            coverInput.click();
-        });
-    }
-    
-    if (coverInput) {
-        coverInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            // Validate file size (50MB limit)
-            if (file.size > 52428800) {
-                alert('Cover image must be smaller than 50MB');
-                coverInput.value = '';
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = coverPreview.querySelector('img') || document.createElement('img');
-                img.src = e.target.result;
-                img.className = 'preview-image';
-                if (!coverPreview.querySelector('img')) {
-                    coverPreview.appendChild(img);
-                }
-                coverPreview.classList.remove('hidden');
-            };
-            reader.readAsDataURL(file);
+
+    if (coverInput && coverPreview) {
+        console.log('📁 Cover input (#coverImage) and preview area (#coverPreview) found.');
+        const coverUploadArea = coverInput.closest('.file-upload');
+
+        if (coverUploadArea) {
+            console.log('📁 Cover upload area (.file-upload for cover) found.');
+            coverUploadArea.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🖱️ Cover upload area clicked. Triggering #coverImage.click()');
+                coverInput.click();
+            });
+        } else {
+            console.error('❌ Cover upload area (.file-upload for cover) NOT found!');
         }
-    });
+
+        coverInput.addEventListener('change', (e) => {
+            console.log('🖼️ Cover input changed.');
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 52428800) { // 50MB
+                    alert('Cover image must be smaller than 50MB');
+                    coverInput.value = ''; return;
+                }
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = coverPreview.querySelector('img') || document.createElement('img');
+                    img.src = event.target.result;
+                    img.className = 'preview-image';
+                    if (!coverPreview.querySelector('img')) coverPreview.appendChild(img);
+                    coverPreview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    } else {
+        if (!coverInput) console.error('❌ Cover input element (#coverImage) NOT found!');
+        if (!coverPreview) console.error('❌ Cover preview element (#coverPreview) NOT found!');
     }
 
-    // Screenshots setup and preview
+    // --- Screenshots Setup ---
     const screenshotsInput = document.getElementById('screenshots');
     const screenshotsPreview = document.getElementById('screenshotsPreview');
-    const screenshotsUploadArea = screenshotsInput.closest('.file-upload');
-    
-    console.log('📷 Screenshots input found:', !!screenshotsInput);
-    console.log('📷 Screenshots upload area found:', !!screenshotsUploadArea);
-    
-    // Handle click on upload area for screenshots
-    if (screenshotsUploadArea) {
-        screenshotsUploadArea.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('🖱️ Screenshots upload area clicked, triggering file input...');
-            screenshotsInput.click();
-        });
-    }
-    
-    if (screenshotsInput) {
+
+    if (screenshotsInput && screenshotsPreview) {
+        console.log('📷 Screenshots input (#screenshots) and preview area (#screenshotsPreview) found.');
+        const screenshotsUploadArea = screenshotsInput.closest('.file-upload');
+
+        if (screenshotsUploadArea) {
+            console.log('📷 Screenshots upload area (.file-upload for screenshots) found.');
+            screenshotsUploadArea.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🖱️ Screenshots upload area clicked. Triggering #screenshots.click()');
+                screenshotsInput.click(); // Using the variable which is confirmed to exist.
+            });
+        } else {
+            console.error('❌ Screenshots upload area (.file-upload for screenshots) NOT found!');
+        }
+
         screenshotsInput.addEventListener('change', (e) => {
-        screenshotsPreview.innerHTML = '';
-        const files = Array.from(e.target.files);
-        
-        console.log(`📸 Selected ${files.length} screenshot files`);
-        
-        // Limit to 10 screenshots
-        if (files.length > 10) {
-            alert('Maximum 10 screenshots allowed');
-            screenshotsInput.value = '';
-            return;
-        }
-        
-        // Show file count message
-        if (files.length > 0) {
-            const countMessage = document.createElement('div');
-            countMessage.className = 'mb-2 text-sm text-blue-400';
-            countMessage.textContent = `${files.length} screenshot${files.length > 1 ? 's' : ''} selected`;
-            screenshotsPreview.appendChild(countMessage);
-        }
-        
-        // Validate each file and create previews
-        files.forEach((file, index) => {
-            if (file.size > 52428800) {
-                alert(`Screenshot "${file.name}" must be smaller than 50MB`);
+            console.log(`🖼️ Screenshots input changed. ${e.target.files.length} files selected.`);
+            screenshotsPreview.innerHTML = '';
+            const files = Array.from(e.target.files);
+
+            if (files.length > 10) {
+                alert('Maximum 10 screenshots allowed');
+                screenshotsInput.value = ''; return;
+            }
+
+            if (files.length > 0) {
+                const countMessage = document.createElement('div');
+                countMessage.className = 'mb-2 text-sm text-blue-400';
+                countMessage.textContent = `${files.length} screenshot${files.length > 1 ? 's' : ''} selected`;
+                screenshotsPreview.appendChild(countMessage);
+            }
+
+            let allFilesValid = true;
+            files.forEach((file) => {
+                if (file.size > 52428800) { // 50MB
+                    alert(`Screenshot "${file.name}" must be smaller than 50MB`);
+                    allFilesValid = false;
+                }
+            });
+
+            if (!allFilesValid) {
                 screenshotsInput.value = '';
+                screenshotsPreview.innerHTML = ''; // Clear preview if invalid files
                 return;
             }
+
+            files.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const div = document.createElement('div');
+                    div.className = 'relative';
+                    div.innerHTML = `
+                        <img src="${event.target.result}" alt="Screenshot Preview ${index + 1}" class="preview-image w-full rounded border-2 border-gray-600">
+                        <div class="absolute top-1 left-1 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">${index + 1}</div>
+                    `;
+                    screenshotsPreview.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
         });
-        
-        // Create preview for each valid file
-        files.forEach((file, index) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const div = document.createElement('div');
-                div.className = 'relative';
-                div.innerHTML = `
-                    <img src="${e.target.result}" alt="Screenshot Preview ${index + 1}" class="preview-image w-full rounded border-2 border-gray-600">
-                    <div class="absolute top-1 left-1 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
-                        ${index + 1}
-                    </div>
-                `;
-                screenshotsPreview.appendChild(div);
-            };
-            reader.readAsDataURL(file);
-        });
-    });
+    } else {
+        if (!screenshotsInput) console.error('❌ Screenshots input element (#screenshots) NOT found!');
+        if (!screenshotsPreview) console.error('❌ Screenshots preview element (#screenshotsPreview) NOT found!');
     }
 }
 
