@@ -151,18 +151,28 @@ async function uploadFileWithRetry(file, filePath, maxRetries = 3) {
 
 // Handle file input changes and preview
 function setupFileInputs() {
+    console.log('🎯 Setting up file inputs...');
+    
     // Cover image setup and preview
     const coverInput = document.getElementById('coverImage');
     const coverPreview = document.getElementById('coverPreview');
     const coverUploadArea = coverInput.closest('.file-upload');
     
-    // Handle click on upload area for cover image
-    coverUploadArea.addEventListener('click', (e) => {
-        e.preventDefault();
-        coverInput.click();
-    });
+    console.log('📁 Cover input found:', !!coverInput);
+    console.log('📁 Cover upload area found:', !!coverUploadArea);
     
-    coverInput.addEventListener('change', (e) => {
+    // Handle click on upload area for cover image
+    if (coverUploadArea) {
+        coverUploadArea.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🖱️ Cover upload area clicked, triggering file input...');
+            coverInput.click();
+        });
+    }
+    
+    if (coverInput) {
+        coverInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
             // Validate file size (50MB limit)
@@ -185,19 +195,28 @@ function setupFileInputs() {
             reader.readAsDataURL(file);
         }
     });
+    }
 
     // Screenshots setup and preview
     const screenshotsInput = document.getElementById('screenshots');
     const screenshotsPreview = document.getElementById('screenshotsPreview');
     const screenshotsUploadArea = screenshotsInput.closest('.file-upload');
     
-    // Handle click on upload area for screenshots
-    screenshotsUploadArea.addEventListener('click', (e) => {
-        e.preventDefault();
-        screenshotsInput.click();
-    });
+    console.log('📷 Screenshots input found:', !!screenshotsInput);
+    console.log('📷 Screenshots upload area found:', !!screenshotsUploadArea);
     
-    screenshotsInput.addEventListener('change', (e) => {
+    // Handle click on upload area for screenshots
+    if (screenshotsUploadArea) {
+        screenshotsUploadArea.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🖱️ Screenshots upload area clicked, triggering file input...');
+            screenshotsInput.click();
+        });
+    }
+    
+    if (screenshotsInput) {
+        screenshotsInput.addEventListener('change', (e) => {
         screenshotsPreview.innerHTML = '';
         const files = Array.from(e.target.files);
         
@@ -244,6 +263,7 @@ function setupFileInputs() {
             reader.readAsDataURL(file);
         });
     });
+    }
 }
 
 // Handle download links
