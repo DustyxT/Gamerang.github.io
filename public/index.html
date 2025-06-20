@@ -773,7 +773,8 @@
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
-            initSlider();
+            // initSlider(); // Temporarily commented out to isolate rogue slider
+            console.log('Our initSlider() is currently COMMENTED OUT for debugging.');
             loadLatestReleases();
             fetchAllGameTitles(); // Fetch titles for suggestions
 
@@ -872,6 +873,94 @@
                 });
             }
         });
+    </script>
+    <script>
+    // FINAL ATTEMPT V2: JavaScript-based arrow removal with MutationObserver
+    window.addEventListener('load', () => {
+        console.log('Running V2 arrow removal script with MutationObserver...');
+        const sliderContainer = document.querySelector('.slider-container');
+
+        function forceRemoveElement(el, reason) {
+            console.log(`Force removing potential arrow (${reason}):`, el);
+            el.style.display = 'none !important';
+            el.style.visibility = 'hidden !important';
+            el.style.opacity = '0 !important';
+            el.style.pointerEvents = 'none !important';
+            if (el.parentNode) {
+                // el.parentNode.removeChild(el); // Most aggressive option
+            }
+        }
+
+        function checkForArrows(targetNode) {
+            const potentialArrows = targetNode.querySelectorAll('button, i, div, span, a');
+            potentialArrows.forEach(el => {
+                if (!el.isConnected) return; // Skip elements already removed or not in DOM
+
+                const classList = String(el.className || '').toLowerCase();
+                const id = String(el.id || '').toLowerCase();
+                const htmlContent = String(el.innerHTML || '').toLowerCase();
+
+                const arrowKeywords = ['arrow', 'chevron', 'prev', 'next', 'slider-control', 'nav', 'control', 'handle'];
+                const isVisuallyAnArrowSymbol = htmlContent.includes('&') || htmlContent.includes('<') || htmlContent.includes('>') || classList.includes('fa-') || classList.includes('glyph');
+                
+                let isPositionedLikeArrow = false;
+                try {
+                    const style = window.getComputedStyle(el);
+                    if (style.position === 'absolute' && el.offsetWidth > 0 && el.offsetHeight > 0 && el.offsetWidth < 100 && el.offsetHeight < 100) {
+                        if ((style.left === '0px' || style.left.startsWith('0.') || (style.left.endsWith('%') && parseFloat(style.left) < 20)) ||
+                            (style.right === '0px' || style.right.startsWith('0.') || (style.right.endsWith('%') && parseFloat(style.right) < 20))) {
+                            if (!el.closest('.slide-card') && !el.classList.contains('btn-steam') && !el.querySelector('.fa-chevron-down') && !el.classList.contains('fa-chevron-down')) {
+                                isPositionedLikeArrow = true;
+                            }
+                        }
+                    }
+                } catch (e) { /* ignore */ }
+
+                let isKeywordMatch = arrowKeywords.some(keyword => classList.includes(keyword) || id.includes(keyword));
+
+                // Exclude known good elements
+                if (el.closest('.slide-card') || el.classList.contains('btn-steam') || (el.classList.contains('fas') && el.classList.contains('fa-chevron-down'))) {
+                    return;
+                }
+
+                if (isVisuallyAnArrowSymbol) forceRemoveElement(el, 'visual symbol');
+                else if (isPositionedLikeArrow) forceRemoveElement(el, 'positioning');
+                else if (isKeywordMatch && (el.offsetWidth < 100 && el.offsetHeight < 100) ) forceRemoveElement(el, 'keyword match & small size');
+            });
+        }
+
+        if (sliderContainer) {
+            // Initial scan
+            checkForArrows(sliderContainer);
+
+            // Observe mutations
+            const observer = new MutationObserver((mutationsList) => {
+                for (const mutation of mutationsList) {
+                    if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                        mutation.addedNodes.forEach(node => {
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                checkForArrows(node);
+                                if(node.matches('button, i, div, span, a')) { // Check the node itself too
+                                   checkForArrows(node.parentElement || sliderContainer); // Re-check its context
+                                }
+                            }
+                        });
+                    } else if (mutation.type === 'attributes') {
+                         // If an existing element's class/style changes to become an arrow
+                        if (mutation.target.nodeType === Node.ELEMENT_NODE) {
+                            checkForArrows(mutation.target.parentElement || sliderContainer);
+                        }
+                    }
+                }
+            });
+
+            observer.observe(sliderContainer, { childList: true, subtree: true, attributes: true });
+            console.log('MutationObserver is now watching the slider container.');
+        } else {
+            console.error('.slider-container not found for MutationObserver.');
+        }
+        console.log('Final arrow removal script V2 (Observer) completed setup.');
+    });
     </script>
 </body>
 </html>
