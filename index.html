@@ -218,6 +218,32 @@
                 font-size: 0.9rem;
             }
         }
+        /* Slider button improvements */
+        .slider-controls {
+            pointer-events: auto;
+            cursor: pointer;
+            user-select: none;
+            z-index: 30;
+        }
+        
+        #sliderNext, #sliderPrev {
+            pointer-events: auto !important;
+            cursor: pointer !important;
+            user-select: none;
+            z-index: 30 !important;
+            position: absolute !important;
+        }
+        
+        #sliderNext:hover, #sliderPrev:hover {
+            transform: scale(1.1);
+        }
+        
+        .slider-indicator {
+            pointer-events: auto !important;
+            cursor: pointer !important;
+            user-select: none;
+            z-index: 25 !important;
+        }
     </style>
 </head>
 <body class="relative overflow-x-hidden">
@@ -355,11 +381,11 @@
             </div>
         </div>
         <!-- Slider Controls -->
-        <button id="sliderPrev" class="absolute left-6 top-1/2 -translate-y-1/2 bg-black bg-opacity-60 hover:bg-opacity-80 hover:bg-cyan-600 text-white rounded-full w-16 h-16 flex items-center justify-center z-20 transition-all duration-300 backdrop-blur-sm border border-cyan-500/30 hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-400/30">
-            <i class="fas fa-chevron-left text-xl"></i>
+        <button id="sliderPrev" class="slider-controls absolute left-6 top-1/2 -translate-y-1/2 bg-black bg-opacity-60 hover:bg-opacity-80 hover:bg-cyan-600 text-white rounded-full w-16 h-16 flex items-center justify-center z-30 transition-all duration-300 backdrop-blur-sm border border-cyan-500/30 hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-400/30">
+            <i class="fas fa-chevron-left text-xl pointer-events-none"></i>
         </button>
-        <button id="sliderNext" class="absolute right-6 top-1/2 -translate-y-1/2 bg-black bg-opacity-60 hover:bg-opacity-80 hover:bg-cyan-600 text-white rounded-full w-16 h-16 flex items-center justify-center z-20 transition-all duration-300 backdrop-blur-sm border border-cyan-500/30 hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-400/30">
-            <i class="fas fa-chevron-right text-xl"></i>
+        <button id="sliderNext" class="slider-controls absolute right-6 top-1/2 -translate-y-1/2 bg-black bg-opacity-60 hover:bg-opacity-80 hover:bg-cyan-600 text-white rounded-full w-16 h-16 flex items-center justify-center z-30 transition-all duration-300 backdrop-blur-sm border border-cyan-500/30 hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-400/30">
+            <i class="fas fa-chevron-right text-xl pointer-events-none"></i>
         </button>
         <!-- Slider Indicators -->
         <div class="absolute bottom-8 left-0 right-0 flex justify-center space-x-3 z-20">
@@ -549,11 +575,28 @@
         function initSlider() {
             const slides = document.querySelectorAll('.slider-slide');
             const indicators = document.querySelectorAll('.slider-indicator');
+            const nextButton = document.getElementById('sliderNext');
+            const prevButton = document.getElementById('sliderPrev');
+            const sliderContainer = document.querySelector('.slider-container');
+            
+            // Check if all elements exist
+            if (!slides.length || !indicators.length || !nextButton || !prevButton || !sliderContainer) {
+                console.error('Slider elements not found. Retrying in 100ms...');
+                setTimeout(initSlider, 100);
+                return;
+            }
+            
+            console.log('Slider initialized with', slides.length, 'slides');
+            
             let currentSlide = 0;
             let slideInterval;
             const TRANSITION_INTERVAL = 6000; // 6 seconds between transitions (allowing 2s for transition + 4s display)
 
             function showSlide(index) {
+                if (index < 0 || index >= slides.length) return;
+                
+                console.log('Showing slide:', index);
+                
                 // Remove active class from all slides and indicators
                 slides.forEach(slide => {
                     slide.style.opacity = '0';
@@ -574,11 +617,13 @@
 
             function nextSlide() {
                 const nextIndex = (currentSlide + 1) % slides.length;
+                console.log('Next slide:', nextIndex);
                 showSlide(nextIndex);
             }
 
             function prevSlide() {
                 const prevIndex = (currentSlide - 1 + slides.length) % slides.length;
+                console.log('Previous slide:', prevIndex);
                 showSlide(prevIndex);
             }
 
@@ -589,43 +634,74 @@
                 }
                 // Start new interval
                 slideInterval = setInterval(nextSlide, TRANSITION_INTERVAL);
+                console.log('Auto-slide started');
             }
 
-            // Event Listeners
-            document.getElementById('sliderNext').addEventListener('click', () => {
-                clearInterval(slideInterval);
+            function stopAutoSlide() {
+                if (slideInterval) {
+                    clearInterval(slideInterval);
+                    slideInterval = null;
+                    console.log('Auto-slide stopped');
+                }
+            }
+
+            // Event Listeners with error handling
+            nextButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Next button clicked');
+                stopAutoSlide();
                 nextSlide();
                 startAutoSlide();
             });
 
-            document.getElementById('sliderPrev').addEventListener('click', () => {
-                clearInterval(slideInterval);
+            prevButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Previous button clicked');
+                stopAutoSlide();
                 prevSlide();
                 startAutoSlide();
             });
 
             // Indicator clicks
             indicators.forEach((indicator, index) => {
-                indicator.addEventListener('click', () => {
-                    clearInterval(slideInterval);
+                indicator.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Indicator clicked:', index);
+                    stopAutoSlide();
                     showSlide(index);
                     startAutoSlide();
                 });
             });
 
             // Pause on hover
-            const sliderContainer = document.querySelector('.slider-container');
             sliderContainer.addEventListener('mouseenter', () => {
-                clearInterval(slideInterval);
+                stopAutoSlide();
             });
 
             sliderContainer.addEventListener('mouseleave', () => {
                 startAutoSlide();
             });
 
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    stopAutoSlide();
+                    prevSlide();
+                    startAutoSlide();
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    stopAutoSlide();
+                    nextSlide();
+                    startAutoSlide();
+                }
+            });
+
             // Initialize
             showSlide(0);
             startAutoSlide();
+            
+            console.log('Slider fully initialized');
         }
 
         // Load latest releases from Supabase
@@ -868,7 +944,10 @@
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
-            initSlider();
+            // Small delay to ensure all elements are rendered
+            setTimeout(() => {
+                initSlider();
+            }, 100);
             loadLatestReleases();
             fetchAllGameTitles(); // Fetch titles for suggestions
 
