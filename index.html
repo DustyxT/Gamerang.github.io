@@ -381,17 +381,17 @@
             </div>
         </div>
         <!-- Slider Controls -->
-        <button id="sliderPrev" class="slider-controls absolute left-6 top-1/2 -translate-y-1/2 bg-black bg-opacity-60 hover:bg-opacity-80 hover:bg-cyan-600 text-white rounded-full w-16 h-16 flex items-center justify-center z-30 transition-all duration-300 backdrop-blur-sm border border-cyan-500/30 hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-400/30">
+        <button id="sliderPrev" onclick="handlePrevClick()" class="slider-controls absolute left-6 top-1/2 -translate-y-1/2 bg-black bg-opacity-60 hover:bg-opacity-80 hover:bg-cyan-600 text-white rounded-full w-16 h-16 flex items-center justify-center z-30 transition-all duration-300 backdrop-blur-sm border border-cyan-500/30 hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-400/30">
             <i class="fas fa-chevron-left text-xl pointer-events-none"></i>
         </button>
-        <button id="sliderNext" class="slider-controls absolute right-6 top-1/2 -translate-y-1/2 bg-black bg-opacity-60 hover:bg-opacity-80 hover:bg-cyan-600 text-white rounded-full w-16 h-16 flex items-center justify-center z-30 transition-all duration-300 backdrop-blur-sm border border-cyan-500/30 hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-400/30">
+        <button id="sliderNext" onclick="handleNextClick()" class="slider-controls absolute right-6 top-1/2 -translate-y-1/2 bg-black bg-opacity-60 hover:bg-opacity-80 hover:bg-cyan-600 text-white rounded-full w-16 h-16 flex items-center justify-center z-30 transition-all duration-300 backdrop-blur-sm border border-cyan-500/30 hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-400/30">
             <i class="fas fa-chevron-right text-xl pointer-events-none"></i>
         </button>
         <!-- Slider Indicators -->
         <div class="absolute bottom-8 left-0 right-0 flex justify-center space-x-3 z-20">
-            <button class="slider-indicator w-4 h-4 rounded-full bg-white bg-opacity-50 hover:bg-opacity-80 transition-all duration-300 border-2 border-transparent hover:border-cyan-400" data-slide="0"></button>
-            <button class="slider-indicator w-4 h-4 rounded-full bg-white bg-opacity-50 hover:bg-opacity-80 transition-all duration-300 border-2 border-transparent hover:border-cyan-400" data-slide="1"></button>
-            <button class="slider-indicator w-4 h-4 rounded-full bg-white bg-opacity-50 hover:bg-opacity-80 transition-all duration-300 border-2 border-transparent hover:border-cyan-400" data-slide="2"></button>
+            <button onclick="handleIndicatorClick(0)" class="slider-indicator w-4 h-4 rounded-full bg-white bg-opacity-50 hover:bg-opacity-80 transition-all duration-300 border-2 border-transparent hover:border-cyan-400" data-slide="0"></button>
+            <button onclick="handleIndicatorClick(1)" class="slider-indicator w-4 h-4 rounded-full bg-white bg-opacity-50 hover:bg-opacity-80 transition-all duration-300 border-2 border-transparent hover:border-cyan-400" data-slide="1"></button>
+            <button onclick="handleIndicatorClick(2)" class="slider-indicator w-4 h-4 rounded-full bg-white bg-opacity-50 hover:bg-opacity-80 transition-all duration-300 border-2 border-transparent hover:border-cyan-400" data-slide="2"></button>
         </div>
         <div class="absolute bottom-0 left-0 right-0 flex justify-center pb-8 z-10">
             <a href="#latest" class="text-white animate-bounce hover:text-cyan-400 transition">
@@ -571,137 +571,175 @@
 
         let allGameTitlesForSuggestions = []; // For search suggestions
 
-        // Improved slider functionality
-        function initSlider() {
+        // Simple and robust slider functionality
+        let currentSlide = 0;
+        let slideInterval;
+        const TRANSITION_INTERVAL = 6000;
+
+        function showSlide(index) {
             const slides = document.querySelectorAll('.slider-slide');
             const indicators = document.querySelectorAll('.slider-indicator');
-            const nextButton = document.getElementById('sliderNext');
-            const prevButton = document.getElementById('sliderPrev');
-            const sliderContainer = document.querySelector('.slider-container');
             
-            // Check if all elements exist
-            if (!slides.length || !indicators.length || !nextButton || !prevButton || !sliderContainer) {
-                console.error('Slider elements not found. Retrying in 100ms...');
-                setTimeout(initSlider, 100);
-                return;
-            }
+            if (!slides.length || index < 0 || index >= slides.length) return;
             
-            console.log('Slider initialized with', slides.length, 'slides');
+            console.log('Showing slide:', index);
             
-            let currentSlide = 0;
-            let slideInterval;
-            const TRANSITION_INTERVAL = 6000; // 6 seconds between transitions (allowing 2s for transition + 4s display)
-
-            function showSlide(index) {
-                if (index < 0 || index >= slides.length) return;
-                
-                console.log('Showing slide:', index);
-                
-                // Remove active class from all slides and indicators
-                slides.forEach(slide => {
+            // Remove active class from all slides and indicators
+            slides.forEach((slide, i) => {
+                if (i === index) {
+                    slide.style.opacity = '1';
+                    slide.classList.add('active');
+                } else {
                     slide.style.opacity = '0';
                     slide.classList.remove('active');
-                });
-                indicators.forEach(indicator => {
+                }
+            });
+            
+            indicators.forEach((indicator, i) => {
+                if (i === index) {
+                    indicator.classList.remove('bg-opacity-50');
+                    indicator.classList.add('bg-opacity-80', 'border-cyan-400');
+                } else {
                     indicator.classList.remove('bg-opacity-80', 'border-cyan-400');
                     indicator.classList.add('bg-opacity-50');
-                });
-
-                // Add active class to current slide and indicator
-                slides[index].style.opacity = '1';
-                slides[index].classList.add('active');
-                indicators[index].classList.remove('bg-opacity-50');
-                indicators[index].classList.add('bg-opacity-80', 'border-cyan-400');
-                currentSlide = index;
-            }
-
-            function nextSlide() {
-                const nextIndex = (currentSlide + 1) % slides.length;
-                console.log('Next slide:', nextIndex);
-                showSlide(nextIndex);
-            }
-
-            function prevSlide() {
-                const prevIndex = (currentSlide - 1 + slides.length) % slides.length;
-                console.log('Previous slide:', prevIndex);
-                showSlide(prevIndex);
-            }
-
-            function startAutoSlide() {
-                // Clear any existing interval
-                if (slideInterval) {
-                    clearInterval(slideInterval);
                 }
-                // Start new interval
-                slideInterval = setInterval(nextSlide, TRANSITION_INTERVAL);
-                console.log('Auto-slide started');
-            }
-
-            function stopAutoSlide() {
-                if (slideInterval) {
-                    clearInterval(slideInterval);
-                    slideInterval = null;
-                    console.log('Auto-slide stopped');
-                }
-            }
-
-            // Event Listeners with error handling
-            nextButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                console.log('Next button clicked');
-                stopAutoSlide();
-                nextSlide();
-                startAutoSlide();
             });
+            
+            currentSlide = index;
+        }
 
-            prevButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                console.log('Previous button clicked');
-                stopAutoSlide();
-                prevSlide();
-                startAutoSlide();
-            });
+        function nextSlide() {
+            const slides = document.querySelectorAll('.slider-slide');
+            const nextIndex = (currentSlide + 1) % slides.length;
+            console.log('Next slide triggered, going to:', nextIndex);
+            showSlide(nextIndex);
+        }
 
-            // Indicator clicks
-            indicators.forEach((indicator, index) => {
-                indicator.addEventListener('click', (e) => {
+        function prevSlide() {
+            const slides = document.querySelectorAll('.slider-slide');
+            const prevIndex = (currentSlide - 1 + slides.length) % slides.length;
+            console.log('Previous slide triggered, going to:', prevIndex);
+            showSlide(prevIndex);
+        }
+
+        function startAutoSlide() {
+            if (slideInterval) clearInterval(slideInterval);
+            slideInterval = setInterval(nextSlide, TRANSITION_INTERVAL);
+            console.log('Auto-slide started');
+        }
+
+        function stopAutoSlide() {
+            if (slideInterval) {
+                clearInterval(slideInterval);
+                slideInterval = null;
+                console.log('Auto-slide stopped');
+            }
+        }
+
+        // Global click handlers (fallback method)
+        function handleNextClick() {
+            console.log('handleNextClick called');
+            stopAutoSlide();
+            nextSlide();
+            startAutoSlide();
+            return false;
+        }
+        
+        function handlePrevClick() {
+            console.log('handlePrevClick called');
+            stopAutoSlide();
+            prevSlide();
+            startAutoSlide();
+            return false;
+        }
+        
+        function handleIndicatorClick(index) {
+            console.log('handleIndicatorClick called with index:', index);
+            stopAutoSlide();
+            showSlide(index);
+            startAutoSlide();
+            return false;
+        }
+        
+        // Make functions globally available
+        window.handleNextClick = handleNextClick;
+        window.handlePrevClick = handlePrevClick;
+        window.handleIndicatorClick = handleIndicatorClick;
+
+        // Direct event binding function
+        function bindSliderEvents() {
+            console.log('Binding slider events...');
+            
+            // Next button
+            const nextBtn = document.getElementById('sliderNext');
+            if (nextBtn) {
+                nextBtn.onclick = function(e) {
                     e.preventDefault();
+                    e.stopPropagation();
+                    console.log('NEXT BUTTON CLICKED!');
+                    stopAutoSlide();
+                    nextSlide();
+                    startAutoSlide();
+                    return false;
+                };
+                console.log('Next button event bound');
+            } else {
+                console.error('Next button not found!');
+            }
+            
+            // Previous button
+            const prevBtn = document.getElementById('sliderPrev');
+            if (prevBtn) {
+                prevBtn.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('PREV BUTTON CLICKED!');
+                    stopAutoSlide();
+                    prevSlide();
+                    startAutoSlide();
+                    return false;
+                };
+                console.log('Previous button event bound');
+            } else {
+                console.error('Previous button not found!');
+            }
+            
+            // Indicators
+            const indicators = document.querySelectorAll('.slider-indicator');
+            indicators.forEach((indicator, index) => {
+                indicator.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
                     console.log('Indicator clicked:', index);
                     stopAutoSlide();
                     showSlide(index);
                     startAutoSlide();
-                });
+                    return false;
+                };
             });
+            console.log('Indicators bound:', indicators.length);
+            
+            // Hover events
+            const sliderContainer = document.querySelector('.slider-container');
+            if (sliderContainer) {
+                sliderContainer.addEventListener('mouseenter', stopAutoSlide);
+                sliderContainer.addEventListener('mouseleave', startAutoSlide);
+            }
+        }
 
-            // Pause on hover
-            sliderContainer.addEventListener('mouseenter', () => {
-                stopAutoSlide();
-            });
-
-            sliderContainer.addEventListener('mouseleave', () => {
-                startAutoSlide();
-            });
-
-            // Keyboard navigation
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowLeft') {
-                    e.preventDefault();
-                    stopAutoSlide();
-                    prevSlide();
-                    startAutoSlide();
-                } else if (e.key === 'ArrowRight') {
-                    e.preventDefault();
-                    stopAutoSlide();
-                    nextSlide();
-                    startAutoSlide();
-                }
-            });
-
-            // Initialize
+        function initSlider() {
+            console.log('Initializing slider...');
+            
+            // Set initial slide
             showSlide(0);
+            
+            // Bind events
+            bindSliderEvents();
+            
+            // Start auto-slide
             startAutoSlide();
             
-            console.log('Slider fully initialized');
+            console.log('Slider initialization complete');
         }
 
         // Load latest releases from Supabase
@@ -944,10 +982,31 @@
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
-            // Small delay to ensure all elements are rendered
-            setTimeout(() => {
-                initSlider();
-            }, 100);
+            console.log('DOM Content Loaded');
+            
+            // Initialize slider with retry mechanism
+            let sliderRetries = 0;
+            function tryInitSlider() {
+                console.log('Trying to init slider, attempt:', sliderRetries + 1);
+                const nextBtn = document.getElementById('sliderNext');
+                const prevBtn = document.getElementById('sliderPrev');
+                const slides = document.querySelectorAll('.slider-slide');
+                
+                if (nextBtn && prevBtn && slides.length > 0) {
+                    console.log('Elements found, initializing slider...');
+                    initSlider();
+                } else if (sliderRetries < 10) {
+                    console.log('Elements not ready yet, retrying...');
+                    sliderRetries++;
+                    setTimeout(tryInitSlider, 200);
+                } else {
+                    console.error('Failed to initialize slider after multiple attempts');
+                }
+            }
+            
+            // Start trying to initialize slider
+            setTimeout(tryInitSlider, 100);
+            
             loadLatestReleases();
             fetchAllGameTitles(); // Fetch titles for suggestions
 
