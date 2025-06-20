@@ -265,19 +265,7 @@
                 </div>
             </div>
         </div>
-        <!-- Slider Controls -->
-        <button id="sliderPrev" class="absolute left-4 top-1/2 -translate-y-1/2 bg-gray-900 bg-opacity-50 hover:bg-cyan-600 text-white rounded-full w-12 h-12 flex items-center justify-center z-20 transition">
-            <i class="fas fa-chevron-left"></i>
-        </button>
-        <button id="sliderNext" class="absolute right-4 top-1/2 -translate-y-1/2 bg-gray-900 bg-opacity-50 hover:bg-cyan-600 text-white rounded-full w-12 h-12 flex items-center justify-center z-20 transition">
-            <i class="fas fa-chevron-right"></i>
-        </button>
-        <!-- Slider Indicators -->
-        <div class="absolute bottom-8 left-0 right-0 flex justify-center space-x-2 z-20">
-            <button class="slider-indicator w-3 h-3 rounded-full bg-white bg-opacity-30 hover:bg-opacity-70 transition" data-slide="0"></button>
-            <button class="slider-indicator w-3 h-3 rounded-full bg-white bg-opacity-30 hover:bg-opacity-70 transition" data-slide="1"></button>
-            <button class="slider-indicator w-3 h-3 rounded-full bg-white bg-opacity-30 hover:bg-opacity-70 transition" data-slide="2"></button>
-        </div>
+
         <div class="absolute bottom-0 left-0 right-0 flex justify-center pb-8 z-10">
             <a href="#latest" class="text-white animate-bounce hover:text-cyan-400 transition">
                 <i class="fas fa-chevron-down text-2xl"></i>
@@ -459,23 +447,20 @@
         // Improved slider functionality
         function initSlider() {
             const slides = document.querySelectorAll('.slider-slide');
-            const indicators = document.querySelectorAll('.slider-indicator');
             let currentSlide = 0;
             let slideInterval;
-            const TRANSITION_INTERVAL = 3000; // 3 seconds between transitions
+            const TRANSITION_INTERVAL = 6000; // 6 seconds between transitions
 
             function showSlide(index) {
-                // Remove active class from all slides and indicators
+                // Remove active class from all slides
                 slides.forEach(slide => {
                     slide.style.opacity = '0';
                     slide.classList.remove('active');
                 });
-                indicators.forEach(indicator => indicator.classList.remove('bg-opacity-70'));
 
-                // Add active class to current slide and indicator
+                // Add active class to current slide
                 slides[index].style.opacity = '1';
                 slides[index].classList.add('active');
-                indicators[index].classList.add('bg-opacity-70');
                 currentSlide = index;
             }
 
@@ -498,37 +483,7 @@
                 slideInterval = setInterval(nextSlide, TRANSITION_INTERVAL);
             }
 
-            // Event Listeners
-            document.getElementById('sliderNext').addEventListener('click', () => {
-                clearInterval(slideInterval);
-                nextSlide();
-                startAutoSlide();
-            });
-
-            document.getElementById('sliderPrev').addEventListener('click', () => {
-                clearInterval(slideInterval);
-                prevSlide();
-                startAutoSlide();
-            });
-
-            // Indicator clicks
-            indicators.forEach((indicator, index) => {
-                indicator.addEventListener('click', () => {
-                    clearInterval(slideInterval);
-                    showSlide(index);
-                    startAutoSlide();
-                });
-            });
-
-            // Pause on hover
-            const sliderContainer = document.querySelector('.slider-container');
-            sliderContainer.addEventListener('mouseenter', () => {
-                clearInterval(slideInterval);
-            });
-
-            sliderContainer.addEventListener('mouseleave', () => {
-                startAutoSlide();
-            });
+            // Auto-play only - no manual controls
 
             // Initialize
             showSlide(0);
