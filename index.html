@@ -380,17 +380,7 @@
                 </div>
             </div>
         </div>
-        <!-- Simple Keyboard-style Navigation -->
-        <div style="position: absolute; bottom: 50px; right: 20px; z-index: 99999;">
-            <button onclick="alert('PREV WORKS!'); handleSliderPrev();" style="background: #22c55e; color: white; border: none; padding: 15px 20px; margin: 5px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold;">◀ PREV</button>
-            <button onclick="alert('NEXT WORKS!'); handleSliderNext();" style="background: #22c55e; color: white; border: none; padding: 15px 20px; margin: 5px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold;">NEXT ▶</button>
-        </div>
-        <!-- Slider Indicators -->
-        <div class="absolute bottom-8 left-0 right-0 flex justify-center space-x-3 z-20">
-            <div onclick="alert('DOT 0 CLICKED!'); handleSliderDot(0)" class="slider-indicator" style="width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,0.5); border: 2px solid transparent; cursor: pointer; transition: all 0.3s; z-index: 9999;" data-slide="0"></div>
-            <div onclick="alert('DOT 1 CLICKED!'); handleSliderDot(1)" class="slider-indicator" style="width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,0.5); border: 2px solid transparent; cursor: pointer; transition: all 0.3s; z-index: 9999;" data-slide="1"></div>
-            <div onclick="alert('DOT 2 CLICKED!'); handleSliderDot(2)" class="slider-indicator" style="width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,0.5); border: 2px solid transparent; cursor: pointer; transition: all 0.3s; z-index: 9999;" data-slide="2"></div>
-        </div>
+
         <div class="absolute bottom-0 left-0 right-0 flex justify-center pb-8 z-10">
             <a href="#latest" class="text-white animate-bounce hover:text-cyan-400 transition">
                 <i class="fas fa-chevron-down text-2xl"></i>
@@ -399,67 +389,13 @@
     </section>
 
     <script>
-    // IMMEDIATE SLIDER FUNCTIONS - DEFINED RIGHT HERE!
+    // Clean Auto-Playing Slider
     let currentSlideIndex = 0;
     let slideTimer = null;
-    
-    function handleSliderNext() {
-        console.log('NEXT BUTTON CLICKED - IMMEDIATE FUNCTION!');
-        try {
-            const slides = document.querySelectorAll('.slider-slide');
-            if (slides.length === 0) {
-                console.error('No slides found!');
-                return;
-            }
-            
-            if (slideTimer) clearInterval(slideTimer);
-            
-            currentSlideIndex = (currentSlideIndex + 1) % slides.length;
-            updateSliderDisplay();
-            startSliderTimer();
-        } catch (error) {
-            console.error('Error in handleSliderNext:', error);
-        }
-    }
-    
-    function handleSliderPrev() {
-        console.log('PREV BUTTON CLICKED - IMMEDIATE FUNCTION!');
-        try {
-            const slides = document.querySelectorAll('.slider-slide');
-            if (slides.length === 0) {
-                console.error('No slides found!');
-                return;
-            }
-            
-            if (slideTimer) clearInterval(slideTimer);
-            
-            currentSlideIndex = (currentSlideIndex - 1 + slides.length) % slides.length;
-            updateSliderDisplay();
-            startSliderTimer();
-        } catch (error) {
-            console.error('Error in handleSliderPrev:', error);
-        }
-    }
-    
-    function handleSliderDot(index) {
-        console.log('DOT CLICKED - IMMEDIATE FUNCTION! Index:', index);
-        try {
-            if (slideTimer) clearInterval(slideTimer);
-            
-            currentSlideIndex = index;
-            updateSliderDisplay();
-            startSliderTimer();
-        } catch (error) {
-            console.error('Error in handleSliderDot:', error);
-        }
-    }
     
     function updateSliderDisplay() {
         try {
             const slides = document.querySelectorAll('.slider-slide');
-            const indicators = document.querySelectorAll('.slider-indicator');
-            
-            console.log('Updating slider - showing slide:', currentSlideIndex);
             
             slides.forEach((slide, index) => {
                 if (index === currentSlideIndex) {
@@ -468,16 +404,6 @@
                 } else {
                     slide.style.opacity = '0';
                     slide.classList.remove('active');
-                }
-            });
-            
-            indicators.forEach((indicator, index) => {
-                if (index === currentSlideIndex) {
-                    indicator.style.backgroundColor = 'rgba(255,255,255,0.9)';
-                    indicator.style.borderColor = 'rgb(34,197,94)';
-                } else {
-                    indicator.style.backgroundColor = 'rgba(255,255,255,0.5)';
-                    indicator.style.borderColor = 'transparent';
                 }
             });
         } catch (error) {
@@ -490,28 +416,25 @@
             if (slideTimer) clearInterval(slideTimer);
             slideTimer = setInterval(() => {
                 const slides = document.querySelectorAll('.slider-slide');
-                currentSlideIndex = (currentSlideIndex + 1) % slides.length;
-                updateSliderDisplay();
-            }, 6000);
+                if (slides.length > 0) {
+                    currentSlideIndex = (currentSlideIndex + 1) % slides.length;
+                    updateSliderDisplay();
+                }
+            }, 6000); // 6 seconds per slide
         } catch (error) {
             console.error('Error in startSliderTimer:', error);
         }
     }
     
-    // Initialize immediately
+    // Initialize the clean auto-playing slider
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM loaded - initializing slider immediately...');
+        console.log('Initializing clean auto-playing slider...');
         setTimeout(() => {
             updateSliderDisplay();
             startSliderTimer();
-            console.log('Slider initialized successfully!');
+            console.log('Auto-playing slider started successfully!');
         }, 100);
     });
-    
-    // Also make functions available globally as backup
-    window.handleSliderNext = handleSliderNext;
-    window.handleSliderPrev = handleSliderPrev;
-    window.handleSliderDot = handleSliderDot;
     </script>
     <!-- Latest Releases -->
     <section class="py-16" id="latest">
