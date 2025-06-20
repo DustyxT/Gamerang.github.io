@@ -169,7 +169,7 @@ body.fade-out {
     opacity: 0;
     visibility: hidden; /* Use visibility for better performance */
     pointer-events: none;
-    transition: opacity 0.4s ease-in-out, visibility 0.4s ease-in-out;
+    transition: opacity 2s ease-in-out, visibility 2s ease-in-out;
 }
 
 .page-preloader.visible {

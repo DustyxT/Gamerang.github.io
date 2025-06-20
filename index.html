@@ -71,9 +71,10 @@
             width: 100%;
             height: 100%;
             opacity: 0;
-            transition: opacity 1s ease-in-out;
+            transition: opacity 2s ease-in-out, transform 2s ease-in-out;
             background-size: cover;
-            background-position: top center;
+            background-position: center center;
+            background-repeat: no-repeat;
         }
         .slider-slide.active {
             opacity: 1;
@@ -83,6 +84,28 @@
             border: 1px solid rgba(255,255,255,0.08);
             transform-style: preserve-3d;
             perspective: 1000px;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            transition: all 0.5s ease;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .slide-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 247, 255, 0.2);
+        }
+        .slide-cover-image {
+            width: 200px;
+            height: 280px;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.5s ease;
+            border: 2px solid rgba(0, 247, 255, 0.3);
+        }
+        .slide-cover-image:hover {
+            transform: scale(1.05) rotateY(5deg);
         }
         .btn-steam {
             background: linear-gradient(135deg, var(--neon-blue) 0%, var(--neon-purple) 100%);
@@ -159,6 +182,42 @@
                 font-size: 1rem;
             }
         }
+        @media (max-width: 768px) {
+            .slide-card {
+                padding: 1.5rem;
+                max-width: 95vw;
+                flex-direction: column;
+                text-align: center;
+            }
+            .slide-cover-image {
+                width: 160px;
+                height: 220px;
+                margin-bottom: 1rem;
+            }
+            .slide-card h2 {
+                font-size: 1.75rem;
+                margin-bottom: 1rem;
+            }
+            .slide-card p {
+                font-size: 1rem;
+                margin-bottom: 1.5rem;
+            }
+            .slider-slide {
+                padding: 1rem;
+            }
+        }
+        @media (max-width: 480px) {
+            .slide-cover-image {
+                width: 120px;
+                height: 160px;
+            }
+            .slide-card h2 {
+                font-size: 1.5rem;
+            }
+            .slide-card p {
+                font-size: 0.9rem;
+            }
+        }
     </style>
 </head>
 <body class="relative overflow-x-hidden">
@@ -224,59 +283,89 @@
     <!-- Hero Slider -->
     <section class="slider-container relative">
         <!-- Slide 1 -->
-        <div class="slider-slide active" style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('./images/spiderman.jpg');">
-            <div class="absolute inset-0 flex items-center justify-center z-10 px-4">
-                <div class="slide-card w-full max-w-md bg-gray-900 bg-opacity-80 rounded-xl shadow-lg p-8 flex flex-col items-center text-center">
-                    <img src="./images/spiderman.jpg" alt="Spider-Man" class="w-32 h-32 object-contain rounded-lg mb-4 hidden md:block">
-                    <h2 class="text-2xl md:text-3xl font-bold mb-2 text-white">Marvel's Spider-Man Remastered</h2>
-                    <p class="text-gray-300 mb-4 text-base md:text-lg">Experience the complete Spider-Man adventure with all DLCs included.</p>
-                    <a href="games.html" class="btn-steam px-6 py-3 rounded-full flex items-center justify-center space-x-2">
-                        <i class="fas fa-gamepad"></i>
-                        <span>Browse Games</span>
-                    </a>
+        <div class="slider-slide active" style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('./images/spiderman.jpg');">
+            <div class="absolute inset-0 flex items-center justify-center z-10 px-6 md:px-12">
+                <div class="slide-card flex flex-col md:flex-row items-center text-center md:text-left space-y-6 md:space-y-0 md:space-x-8">
+                    <div class="flex-shrink-0">
+                        <img src="./images/spiderman.jpg" alt="Spider-Man" class="slide-cover-image">
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="text-3xl md:text-4xl font-bold mb-4 text-white">Marvel's Spider-Man Remastered</h2>
+                        <p class="text-gray-200 mb-6 text-lg md:text-xl leading-relaxed">Experience the complete Spider-Man adventure with enhanced ray-tracing, improved textures, and all DLCs included in this ultimate repack edition.</p>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                            <a href="games.html" class="btn-steam px-8 py-3 rounded-full flex items-center justify-center space-x-2 text-lg">
+                                <i class="fas fa-gamepad"></i>
+                                <span>View Game</span>
+                            </a>
+                            <a href="games.html" class="bg-transparent border-2 border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-black px-8 py-3 rounded-full flex items-center justify-center space-x-2 text-lg transition-all duration-300">
+                                <i class="fas fa-download"></i>
+                                <span>Download</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         <!-- Slide 2 -->
-        <div class="slider-slide" style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('./images/tombrider.jpg');">
-            <div class="absolute inset-0 flex items-center justify-center z-10 px-4">
-                <div class="slide-card w-full max-w-md bg-gray-900 bg-opacity-80 rounded-xl shadow-lg p-8 flex flex-col items-center text-center">
-                    <img src="./images/tombrider.jpg" alt="Tomb Raider" class="w-32 h-32 object-contain rounded-lg mb-4 hidden md:block">
-                    <h2 class="text-2xl md:text-3xl font-bold mb-2 text-white">Shadow of the Tomb Raider</h2>
-                    <p class="text-gray-300 mb-4 text-base md:text-lg">The definitive edition with all DLCs and bonus content.</p>
-                    <a href="games.html" class="btn-steam px-6 py-3 rounded-full flex items-center justify-center space-x-2">
-                        <i class="fas fa-trophy"></i>
-                        <span>View Collection</span>
-                    </a>
+        <div class="slider-slide" style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('./images/tombrider.jpg');">
+            <div class="absolute inset-0 flex items-center justify-center z-10 px-6 md:px-12">
+                <div class="slide-card flex flex-col md:flex-row items-center text-center md:text-left space-y-6 md:space-y-0 md:space-x-8">
+                    <div class="flex-shrink-0">
+                        <img src="./images/tombrider.jpg" alt="Tomb Raider" class="slide-cover-image">
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="text-3xl md:text-4xl font-bold mb-4 text-white">Shadow of the Tomb Raider</h2>
+                        <p class="text-gray-200 mb-6 text-lg md:text-xl leading-relaxed">The definitive edition featuring Lara Croft's most challenging adventure yet, complete with all DLCs, bonus content, and enhanced graphics.</p>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                            <a href="games.html" class="btn-steam px-8 py-3 rounded-full flex items-center justify-center space-x-2 text-lg">
+                                <i class="fas fa-trophy"></i>
+                                <span>View Game</span>
+                            </a>
+                            <a href="games.html" class="bg-transparent border-2 border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-black px-8 py-3 rounded-full flex items-center justify-center space-x-2 text-lg transition-all duration-300">
+                                <i class="fas fa-download"></i>
+                                <span>Download</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         <!-- Slide 3 -->
-        <div class="slider-slide" style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('./images/acorigins.jpg');">
-            <div class="absolute inset-0 flex items-center justify-center z-10 px-4">
-                <div class="slide-card w-full max-w-md bg-gray-900 bg-opacity-80 rounded-xl shadow-lg p-8 flex flex-col items-center text-center">
-                    <img src="./images/acorigins.jpg" alt="Assassin's Creed Origins" class="w-32 h-32 object-contain rounded-lg mb-4 hidden md:block">
-                    <h2 class="text-2xl md:text-3xl font-bold mb-2 text-white">Assassin's Creed Origins</h2>
-                    <p class="text-gray-300 mb-4 text-base md:text-lg">Explore ancient Egypt in this complete edition with all DLCs.</p>
-                    <a href="games.html" class="btn-steam px-6 py-3 rounded-full flex items-center justify-center space-x-2">
-                        <i class="fas fa-download"></i>
-                        <span>Download Now</span>
-                    </a>
+        <div class="slider-slide" style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('./images/acorigins.jpg');">
+            <div class="absolute inset-0 flex items-center justify-center z-10 px-6 md:px-12">
+                <div class="slide-card flex flex-col md:flex-row items-center text-center md:text-left space-y-6 md:space-y-0 md:space-x-8">
+                    <div class="flex-shrink-0">
+                        <img src="./images/acorigins.jpg" alt="Assassin's Creed Origins" class="slide-cover-image">
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="text-3xl md:text-4xl font-bold mb-4 text-white">Assassin's Creed Origins</h2>
+                        <p class="text-gray-200 mb-6 text-lg md:text-xl leading-relaxed">Journey to ancient Egypt and discover the origins of the Brotherhood in this epic adventure, featuring enhanced gameplay and all expansion content.</p>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                            <a href="games.html" class="btn-steam px-8 py-3 rounded-full flex items-center justify-center space-x-2 text-lg">
+                                <i class="fas fa-play"></i>
+                                <span>View Game</span>
+                            </a>
+                            <a href="games.html" class="bg-transparent border-2 border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-black px-8 py-3 rounded-full flex items-center justify-center space-x-2 text-lg transition-all duration-300">
+                                <i class="fas fa-download"></i>
+                                <span>Download</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         <!-- Slider Controls -->
-        <button id="sliderPrev" class="absolute left-4 top-1/2 -translate-y-1/2 bg-gray-900 bg-opacity-50 hover:bg-cyan-600 text-white rounded-full w-12 h-12 flex items-center justify-center z-20 transition">
-            <i class="fas fa-chevron-left"></i>
+        <button id="sliderPrev" class="absolute left-6 top-1/2 -translate-y-1/2 bg-black bg-opacity-60 hover:bg-opacity-80 hover:bg-cyan-600 text-white rounded-full w-16 h-16 flex items-center justify-center z-20 transition-all duration-300 backdrop-blur-sm border border-cyan-500/30 hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-400/30">
+            <i class="fas fa-chevron-left text-xl"></i>
         </button>
-        <button id="sliderNext" class="absolute right-4 top-1/2 -translate-y-1/2 bg-gray-900 bg-opacity-50 hover:bg-cyan-600 text-white rounded-full w-12 h-12 flex items-center justify-center z-20 transition">
-            <i class="fas fa-chevron-right"></i>
+        <button id="sliderNext" class="absolute right-6 top-1/2 -translate-y-1/2 bg-black bg-opacity-60 hover:bg-opacity-80 hover:bg-cyan-600 text-white rounded-full w-16 h-16 flex items-center justify-center z-20 transition-all duration-300 backdrop-blur-sm border border-cyan-500/30 hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-400/30">
+            <i class="fas fa-chevron-right text-xl"></i>
         </button>
         <!-- Slider Indicators -->
-        <div class="absolute bottom-8 left-0 right-0 flex justify-center space-x-2 z-20">
-            <button class="slider-indicator w-3 h-3 rounded-full bg-white bg-opacity-30 hover:bg-opacity-70 transition" data-slide="0"></button>
-            <button class="slider-indicator w-3 h-3 rounded-full bg-white bg-opacity-30 hover:bg-opacity-70 transition" data-slide="1"></button>
-            <button class="slider-indicator w-3 h-3 rounded-full bg-white bg-opacity-30 hover:bg-opacity-70 transition" data-slide="2"></button>
+        <div class="absolute bottom-8 left-0 right-0 flex justify-center space-x-3 z-20">
+            <button class="slider-indicator w-4 h-4 rounded-full bg-white bg-opacity-50 hover:bg-opacity-80 transition-all duration-300 border-2 border-transparent hover:border-cyan-400" data-slide="0"></button>
+            <button class="slider-indicator w-4 h-4 rounded-full bg-white bg-opacity-50 hover:bg-opacity-80 transition-all duration-300 border-2 border-transparent hover:border-cyan-400" data-slide="1"></button>
+            <button class="slider-indicator w-4 h-4 rounded-full bg-white bg-opacity-50 hover:bg-opacity-80 transition-all duration-300 border-2 border-transparent hover:border-cyan-400" data-slide="2"></button>
         </div>
         <div class="absolute bottom-0 left-0 right-0 flex justify-center pb-8 z-10">
             <a href="#latest" class="text-white animate-bounce hover:text-cyan-400 transition">
@@ -462,7 +551,7 @@
             const indicators = document.querySelectorAll('.slider-indicator');
             let currentSlide = 0;
             let slideInterval;
-            const TRANSITION_INTERVAL = 3000; // 3 seconds between transitions
+            const TRANSITION_INTERVAL = 6000; // 6 seconds between transitions (allowing 2s for transition + 4s display)
 
             function showSlide(index) {
                 // Remove active class from all slides and indicators
@@ -470,12 +559,16 @@
                     slide.style.opacity = '0';
                     slide.classList.remove('active');
                 });
-                indicators.forEach(indicator => indicator.classList.remove('bg-opacity-70'));
+                indicators.forEach(indicator => {
+                    indicator.classList.remove('bg-opacity-80', 'border-cyan-400');
+                    indicator.classList.add('bg-opacity-50');
+                });
 
                 // Add active class to current slide and indicator
                 slides[index].style.opacity = '1';
                 slides[index].classList.add('active');
-                indicators[index].classList.add('bg-opacity-70');
+                indicators[index].classList.remove('bg-opacity-50');
+                indicators[index].classList.add('bg-opacity-80', 'border-cyan-400');
                 currentSlide = index;
             }
 
