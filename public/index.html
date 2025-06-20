@@ -175,9 +175,13 @@
             -webkit-backdrop-filter: blur(15px);
             transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
             padding: 2rem;
-            max-width: 600px;
+            max-width: 800px;
             margin: 0 auto;
             will-change: transform;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 2rem;
         }
 
         .slide-card:hover {
@@ -186,14 +190,15 @@
         }
 
         .slide-cover-image {
-            width: 100px;
-            height: 140px;
+            width: 120px;
+            height: 160px;
             object-fit: cover;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
             border: 2px solid rgba(0, 247, 255, 0.3);
             will-change: transform;
+            flex-shrink: 0;
         }
 
         .slide-cover-image:hover {
@@ -336,21 +341,21 @@
             .slide-card {
                 padding: 1.5rem;
                 max-width: 95vw;
-                flex-direction: column;
-                text-align: center;
+                flex-direction: row;
+                text-align: left;
+                gap: 1.5rem;
             }
             .slide-cover-image {
-                width: 80px;
-                height: 110px;
-                margin-bottom: 1rem;
+                width: 100px;
+                height: 130px;
             }
             .slide-card h2 {
-                font-size: 1.75rem;
-                margin-bottom: 1rem;
+                font-size: 1.5rem;
+                margin-bottom: 0.75rem;
             }
             .slide-card p {
-                font-size: 1rem;
-                margin-bottom: 1.5rem;
+                font-size: 0.9rem;
+                margin-bottom: 1rem;
             }
             .slider-slide {
                 padding: 1rem;
@@ -358,15 +363,24 @@
         }
 
         @media (max-width: 480px) {
+            .slide-card {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+                padding: 1rem;
+            }
             .slide-cover-image {
-                width: 70px;
-                height: 100px;
+                width: 80px;
+                height: 110px;
+                align-self: center;
             }
             .slide-card h2 {
-                font-size: 1.5rem;
+                font-size: 1.25rem;
+                margin-bottom: 0.5rem;
             }
             .slide-card p {
-                font-size: 0.9rem;
+                font-size: 0.85rem;
+                margin-bottom: 1rem;
             }
         }
     </style>
@@ -758,25 +772,25 @@
                     const slideHtml = `
                         <div class="slider-slide ${isActive}" style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('${bgImage}');">
                             <div class="absolute inset-0 flex items-center justify-center z-10 px-6 md:px-12">
-                                <div class="slide-card flex flex-col md:flex-row items-center text-center md:text-left space-y-6 md:space-y-0 md:space-x-8">
-                                    <div class="flex-shrink-0">
+                                <div class="slide-card">
+                                    <div class="relative">
                                         <img src="${game.cover_image_url || bgImage}" alt="${game.title}" class="slide-cover-image">
-                                        ${game.isPlaceholder ? '<div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-12"><span class="text-white font-bold text-sm">COMING SOON</span></div>' : ''}
+                                        ${game.isPlaceholder ? '<div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-xl"><span class="text-white font-bold text-sm">COMING SOON</span></div>' : ''}
                                     </div>
                                     <div class="flex-1">
-                                        <h2 class="text-3xl md:text-4xl font-bold mb-4 text-white">${displayTitle}</h2>
-                                        <p class="text-gray-200 mb-6 text-lg md:text-xl leading-relaxed">${shortDescription}</p>
-                                        <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                                        <h2 class="text-2xl md:text-3xl font-bold mb-3 text-white">${displayTitle}</h2>
+                                        <p class="text-gray-200 mb-4 text-base md:text-lg leading-relaxed">${shortDescription}</p>
+                                        <div class="flex flex-col sm:flex-row gap-3">
                                             ${game.isPlaceholder ? 
-                                                `<button class="btn-steam px-8 py-3 rounded-full flex items-center justify-center space-x-2 text-lg opacity-50 cursor-not-allowed" disabled>
+                                                `<button class="btn-steam px-6 py-2.5 rounded-full flex items-center justify-center space-x-2 opacity-50 cursor-not-allowed" disabled>
                                                     <i class="fas fa-clock"></i>
                                                     <span>Coming Soon</span>
                                                 </button>` :
-                                                `<a href="gamepage.html?id=${game.id}" class="btn-steam px-8 py-3 rounded-full flex items-center justify-center space-x-2 text-lg">
+                                                `<a href="gamepage.html?id=${game.id}" class="btn-steam px-6 py-2.5 rounded-full flex items-center justify-center space-x-2">
                                                     <i class="fas fa-gamepad"></i>
                                                     <span>View Game</span>
                                                 </a>
-                                                <a href="gamepage.html?id=${game.id}" class="bg-transparent border-2 border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-black px-8 py-3 rounded-full flex items-center justify-center space-x-2 text-lg transition-all duration-500">
+                                                <a href="gamepage.html?id=${game.id}" class="bg-transparent border-2 border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-black px-6 py-2.5 rounded-full flex items-center justify-center space-x-2 transition-all duration-500">
                                                     <i class="fas fa-download"></i>
                                                     <span>Download</span>
                                                 </a>`

@@ -175,9 +175,13 @@
             -webkit-backdrop-filter: blur(15px);
             transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
             padding: 2rem;
-            max-width: 600px;
+            max-width: 800px;
             margin: 0 auto;
             will-change: transform;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 2rem;
         }
 
         .slide-card:hover {
@@ -186,14 +190,15 @@
         }
 
         .slide-cover-image {
-            width: 100px;
-            height: 140px;
+            width: 120px;
+            height: 160px;
             object-fit: cover;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
             border: 2px solid rgba(0, 247, 255, 0.3);
             will-change: transform;
+            flex-shrink: 0;
         }
 
         .slide-cover-image:hover {
@@ -336,21 +341,21 @@
             .slide-card {
                 padding: 1.5rem;
                 max-width: 95vw;
-                flex-direction: column;
-                text-align: center;
+                flex-direction: row;
+                text-align: left;
+                gap: 1.5rem;
             }
             .slide-cover-image {
-                width: 80px;
-                height: 110px;
-                margin-bottom: 1rem;
+                width: 100px;
+                height: 130px;
             }
             .slide-card h2 {
-                font-size: 1.75rem;
-                margin-bottom: 1rem;
+                font-size: 1.5rem;
+                margin-bottom: 0.75rem;
             }
             .slide-card p {
-                font-size: 1rem;
-                margin-bottom: 1.5rem;
+                font-size: 0.9rem;
+                margin-bottom: 1rem;
             }
             .slider-slide {
                 padding: 1rem;
@@ -358,15 +363,24 @@
         }
 
         @media (max-width: 480px) {
+            .slide-card {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+                padding: 1rem;
+            }
             .slide-cover-image {
-                width: 70px;
-                height: 100px;
+                width: 80px;
+                height: 110px;
+                align-self: center;
             }
             .slide-card h2 {
-                font-size: 1.5rem;
+                font-size: 1.25rem;
+                margin-bottom: 0.5rem;
             }
             .slide-card p {
-                font-size: 0.9rem;
+                font-size: 0.85rem;
+                margin-bottom: 1rem;
             }
         }
     </style>
