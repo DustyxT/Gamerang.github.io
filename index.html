@@ -265,48 +265,25 @@
     </header>
     <!-- Hero Slider -->
     <section class="slider-container relative">
-        <!-- Slide 1 -->
-        <div class="slider-slide active" style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('./images/spiderman.jpg');">
-            <div class="absolute inset-0 flex items-center justify-center z-10 px-4">
-                <div class="slide-card w-full max-w-md bg-gray-900 bg-opacity-80 rounded-xl shadow-lg p-8 flex flex-col items-center text-center">
-                    <img src="./images/spiderman.jpg" alt="Spider-Man" class="w-32 h-32 object-contain rounded-lg mb-4 hidden md:block">
-                    <h2 class="text-2xl md:text-3xl font-bold mb-2 text-white">Marvel's Spider-Man Remastered</h2>
-                    <p class="text-gray-300 mb-4 text-base md:text-lg">Experience the complete Spider-Man adventure with all DLCs included.</p>
-                    <a href="games.html" class="btn-steam px-6 py-3 rounded-full flex items-center justify-center space-x-2">
-                        <i class="fas fa-gamepad"></i>
-                        <span>Browse Games</span>
-                    </a>
+        <!-- Dynamic slides will be loaded here -->
+        <div id="dynamicSlides">
+            <!-- Loading slide -->
+            <div class="slider-slide active" style="background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)), url('./images/spiderman.jpg');">
+                <div class="absolute inset-0 flex items-center justify-center z-10 px-4">
+                    <div class="slide-card w-full max-w-md bg-gray-900 bg-opacity-80 rounded-xl shadow-lg p-8 flex flex-col items-center text-center">
+                        <div class="animate-pulse mb-4">
+                            <div class="w-32 h-32 bg-gray-700 rounded-lg mb-4 hidden md:block mx-auto"></div>
+                            <div class="h-8 bg-gray-700 rounded w-3/4 mb-4 mx-auto"></div>
+                            <div class="h-4 bg-gray-700 rounded w-full mb-2"></div>
+                            <div class="h-4 bg-gray-700 rounded w-5/6 mb-4 mx-auto"></div>
+                            <div class="h-12 bg-gray-700 rounded w-1/2 mx-auto"></div>
+                        </div>
+                        <p class="text-gray-400 text-sm">Loading popular games...</p>
+                    </div>
                 </div>
             </div>
         </div>
-        <!-- Slide 2 -->
-        <div class="slider-slide" style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('./images/tombrider.jpg');">
-            <div class="absolute inset-0 flex items-center justify-center z-10 px-4">
-                <div class="slide-card w-full max-w-md bg-gray-900 bg-opacity-80 rounded-xl shadow-lg p-8 flex flex-col items-center text-center">
-                    <img src="./images/tombrider.jpg" alt="Tomb Raider" class="w-32 h-32 object-contain rounded-lg mb-4 hidden md:block">
-                    <h2 class="text-2xl md:text-3xl font-bold mb-2 text-white">Shadow of the Tomb Raider</h2>
-                    <p class="text-gray-300 mb-4 text-base md:text-lg">The definitive edition with all DLCs and bonus content.</p>
-                    <a href="games.html" class="btn-steam px-6 py-3 rounded-full flex items-center justify-center space-x-2">
-                        <i class="fas fa-trophy"></i>
-                        <span>View Collection</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-        <!-- Slide 3 -->
-        <div class="slider-slide" style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('./images/acorigins.jpg');">
-            <div class="absolute inset-0 flex items-center justify-center z-10 px-4">
-                <div class="slide-card w-full max-w-md bg-gray-900 bg-opacity-80 rounded-xl shadow-lg p-8 flex flex-col items-center text-center">
-                    <img src="./images/acorigins.jpg" alt="Assassin's Creed Origins" class="w-32 h-32 object-contain rounded-lg mb-4 hidden md:block">
-                    <h2 class="text-2xl md:text-3xl font-bold mb-2 text-white">Assassin's Creed Origins</h2>
-                    <p class="text-gray-300 mb-4 text-base md:text-lg">Explore ancient Egypt in this complete edition with all DLCs.</p>
-                    <a href="games.html" class="btn-steam px-6 py-3 rounded-full flex items-center justify-center space-x-2">
-                        <i class="fas fa-download"></i>
-                        <span>Download Now</span>
-                    </a>
-                </div>
-            </div>
-        </div>
+        
         <!-- Slider Controls -->
         <button id="sliderPrev" class="absolute left-4 top-1/2 -translate-y-1/2 bg-gray-900 bg-opacity-50 hover:bg-cyan-600 text-white rounded-full w-12 h-12 flex items-center justify-center z-20 transition">
             <i class="fas fa-chevron-left"></i>
@@ -314,12 +291,12 @@
         <button id="sliderNext" class="absolute right-4 top-1/2 -translate-y-1/2 bg-gray-900 bg-opacity-50 hover:bg-cyan-600 text-white rounded-full w-12 h-12 flex items-center justify-center z-20 transition">
             <i class="fas fa-chevron-right"></i>
         </button>
-        <!-- Slider Indicators -->
-        <div class="absolute bottom-8 left-0 right-0 flex justify-center space-x-2 z-20">
-            <button class="slider-indicator w-3 h-3 rounded-full bg-white bg-opacity-30 hover:bg-opacity-70 transition" data-slide="0"></button>
-            <button class="slider-indicator w-3 h-3 rounded-full bg-white bg-opacity-30 hover:bg-opacity-70 transition" data-slide="1"></button>
-            <button class="slider-indicator w-3 h-3 rounded-full bg-white bg-opacity-30 hover:bg-opacity-70 transition" data-slide="2"></button>
+        
+        <!-- Slider Indicators (will be updated dynamically) -->
+        <div id="sliderIndicators" class="absolute bottom-8 left-0 right-0 flex justify-center space-x-2 z-20">
+            <button class="slider-indicator w-3 h-3 rounded-full bg-white bg-opacity-70 transition"></button>
         </div>
+        
         <div class="absolute bottom-0 left-0 right-0 flex justify-center pb-8 z-10">
             <a href="#latest" class="text-white animate-bounce hover:text-cyan-400 transition">
                 <i class="fas fa-chevron-down text-2xl"></i>
@@ -512,40 +489,228 @@
 
         let allGameTitlesForSuggestions = []; // For search suggestions
 
+        // Load popular games for slider
+        async function loadPopularGamesForSlider() {
+            try {
+                console.log('Loading popular games for slider...');
+                
+                // Try to get games with download_count first, then fall back to newest games
+                let { data: games, error } = await window.supabaseClient
+                    .from('games')
+                    .select('id, title, description, cover_image_url, download_count')
+                    .order('download_count', { ascending: false, nullsLast: true })
+                    .limit(5);
+                    
+                // If no games with download_count or error, get newest games
+                if (error || !games || games.length === 0) {
+                    console.log('Falling back to newest games...');
+                    ({ data: games, error } = await window.supabaseClient
+                        .from('games')
+                        .select('id, title, description, cover_image_url, download_count')
+                        .order('created_at', { ascending: false })
+                        .limit(5));
+                }
+                
+                if (error) {
+                    console.error('Error fetching games for slider:', error);
+                    return false; // Use fallback slides
+                }
+                
+                if (!games || games.length === 0) {
+                    console.log('No games found, using fallback slides');
+                    return false;
+                }
+                
+                console.log(`Found ${games.length} games for slider:`, games);
+                
+                // Create slider slides dynamically
+                const sliderContainer = document.querySelector('.slider-container');
+                const dynamicSlidesContainer = document.getElementById('dynamicSlides');
+                const indicatorsContainer = document.getElementById('sliderIndicators');
+                
+                if (!dynamicSlidesContainer || !indicatorsContainer) {
+                    console.error('Slider containers not found');
+                    return false;
+                }
+                
+                // Clear existing content
+                dynamicSlidesContainer.innerHTML = '';
+                indicatorsContainer.innerHTML = '';
+                
+                // Create slides for each game
+                games.forEach((game, index) => {
+                    const isActive = index === 0 ? 'active' : '';
+                    const slideBackground = game.cover_image_url || './images/spiderman.jpg';
+                    
+                    // Create slide
+                    const slide = document.createElement('div');
+                    slide.className = `slider-slide ${isActive}`;
+                    slide.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('${slideBackground}')`;
+                    
+                    slide.innerHTML = `
+                        <div class="absolute inset-0 flex items-center justify-center z-10 px-4">
+                            <div class="slide-card w-full max-w-md bg-gray-900 bg-opacity-80 rounded-xl shadow-lg p-8 flex flex-col items-center text-center">
+                                <img src="${game.cover_image_url || './images/spiderman.jpg'}" alt="${game.title}" class="w-32 h-32 object-contain rounded-lg mb-4 hidden md:block">
+                                <h2 class="text-2xl md:text-3xl font-bold mb-2 text-white">${game.title}</h2>
+                                <p class="text-gray-300 mb-4 text-base md:text-lg">${game.description ? game.description.substring(0, 100) + '...' : 'Experience this amazing game with enhanced graphics and improved gameplay.'}</p>
+                                <a href="gamepage.html?id=${game.id}" class="btn-steam px-6 py-3 rounded-full flex items-center justify-center space-x-2">
+                                    <i class="fas fa-gamepad"></i>
+                                    <span>View Game</span>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                    
+                    dynamicSlidesContainer.appendChild(slide);
+                    
+                    // Create indicator
+                    const indicator = document.createElement('button');
+                    indicator.className = `slider-indicator w-3 h-3 rounded-full bg-white transition ${index === 0 ? 'bg-opacity-70' : 'bg-opacity-30 hover:bg-opacity-70'}`;
+                    indicator.setAttribute('data-slide', index);
+                    indicatorsContainer.appendChild(indicator);
+                });
+                
+                return true; // Successfully loaded dynamic content
+                
+            } catch (error) {
+                console.error('Error loading popular games for slider:', error);
+                return false; // Use fallback slides
+            }
+        }
+
+        // Create fallback slides if dynamic loading fails
+        function createFallbackSlides() {
+            const dynamicSlidesContainer = document.getElementById('dynamicSlides');
+            const indicatorsContainer = document.getElementById('sliderIndicators');
+            
+            if (!dynamicSlidesContainer || !indicatorsContainer) return;
+            
+            const fallbackGames = [
+                {
+                    title: "Marvel's Spider-Man Remastered",
+                    description: "Experience the complete Spider-Man adventure with all DLCs included.",
+                    background: "./images/spiderman.jpg",
+                    cover: "./images/spiderman.jpg",
+                    link: "games.html"
+                },
+                {
+                    title: "Shadow of the Tomb Raider",
+                    description: "The definitive edition with all DLCs and bonus content.",
+                    background: "./images/tombrider.jpg", 
+                    cover: "./images/tombrider.jpg",
+                    link: "games.html"
+                },
+                {
+                    title: "Assassin's Creed Origins",
+                    description: "Explore ancient Egypt in this complete edition with all DLCs.",
+                    background: "./images/acorigins.jpg",
+                    cover: "./images/acorigins.jpg", 
+                    link: "games.html"
+                }
+            ];
+            
+            // Clear existing content
+            dynamicSlidesContainer.innerHTML = '';
+            indicatorsContainer.innerHTML = '';
+            
+            fallbackGames.forEach((game, index) => {
+                const isActive = index === 0 ? 'active' : '';
+                
+                // Create slide
+                const slide = document.createElement('div');
+                slide.className = `slider-slide ${isActive}`;
+                slide.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('${game.background}')`;
+                
+                slide.innerHTML = `
+                    <div class="absolute inset-0 flex items-center justify-center z-10 px-4">
+                        <div class="slide-card w-full max-w-md bg-gray-900 bg-opacity-80 rounded-xl shadow-lg p-8 flex flex-col items-center text-center">
+                            <img src="${game.cover}" alt="${game.title}" class="w-32 h-32 object-contain rounded-lg mb-4 hidden md:block">
+                            <h2 class="text-2xl md:text-3xl font-bold mb-2 text-white">${game.title}</h2>
+                            <p class="text-gray-300 mb-4 text-base md:text-lg">${game.description}</p>
+                            <a href="${game.link}" class="btn-steam px-6 py-3 rounded-full flex items-center justify-center space-x-2">
+                                <i class="fas fa-gamepad"></i>
+                                <span>Browse Games</span>
+                            </a>
+                        </div>
+                    </div>
+                `;
+                
+                dynamicSlidesContainer.appendChild(slide);
+                
+                // Create indicator
+                const indicator = document.createElement('button');
+                indicator.className = `slider-indicator w-3 h-3 rounded-full bg-white transition ${index === 0 ? 'bg-opacity-70' : 'bg-opacity-30 hover:bg-opacity-70'}`;
+                indicator.setAttribute('data-slide', index);
+                indicatorsContainer.appendChild(indicator);
+            });
+        }
+
         // Improved slider functionality
         function initSlider() {
-            const slides = document.querySelectorAll('.slider-slide');
-            const indicators = document.querySelectorAll('.slider-indicator');
+            const slidesContainer = document.getElementById('dynamicSlides');
+            const indicatorsContainer = document.getElementById('sliderIndicators');
             let currentSlide = 0;
             let slideInterval;
-            const TRANSITION_INTERVAL = 3000; // 3 seconds between transitions
+            const TRANSITION_INTERVAL = 4000; // 4 seconds between transitions
+
+            function updateSliderElements() {
+                return {
+                    slides: slidesContainer ? slidesContainer.querySelectorAll('.slider-slide') : [],
+                    indicators: indicatorsContainer ? indicatorsContainer.querySelectorAll('.slider-indicator') : []
+                };
+            }
 
             function showSlide(index) {
+                const { slides, indicators } = updateSliderElements();
+                
+                if (slides.length === 0) return;
+                
                 // Remove active class from all slides and indicators
                 slides.forEach(slide => {
                     slide.style.opacity = '0';
                     slide.classList.remove('active');
                 });
-                indicators.forEach(indicator => indicator.classList.remove('bg-opacity-70'));
+                indicators.forEach(indicator => indicator.classList.remove('bg-opacity-70', 'bg-opacity-30'));
 
                 // Add active class to current slide and indicator
-                slides[index].style.opacity = '1';
-                slides[index].classList.add('active');
-                indicators[index].classList.add('bg-opacity-70');
+                if (slides[index]) {
+                    slides[index].style.opacity = '1';
+                    slides[index].classList.add('active');
+                }
+                if (indicators[index]) {
+                    indicators[index].classList.add('bg-opacity-70');
+                }
+                
+                // Update non-active indicators
+                indicators.forEach((indicator, i) => {
+                    if (i !== index) {
+                        indicator.classList.add('bg-opacity-30');
+                    }
+                });
+                
                 currentSlide = index;
             }
 
             function nextSlide() {
+                const { slides } = updateSliderElements();
+                if (slides.length === 0) return;
+                
                 const nextIndex = (currentSlide + 1) % slides.length;
                 showSlide(nextIndex);
             }
 
             function prevSlide() {
+                const { slides } = updateSliderElements();
+                if (slides.length === 0) return;
+                
                 const prevIndex = (currentSlide - 1 + slides.length) % slides.length;
                 showSlide(prevIndex);
             }
 
             function startAutoSlide() {
+                const { slides } = updateSliderElements();
+                if (slides.length <= 1) return; // Don't auto-slide if only one slide
+                
                 // Clear any existing interval
                 if (slideInterval) {
                     clearInterval(slideInterval);
@@ -554,41 +719,68 @@
                 slideInterval = setInterval(nextSlide, TRANSITION_INTERVAL);
             }
 
-            // Event Listeners
-            document.getElementById('sliderNext').addEventListener('click', () => {
-                clearInterval(slideInterval);
-                nextSlide();
+            function setupEventListeners() {
+                // Navigation buttons
+                const nextButton = document.getElementById('sliderNext');
+                const prevButton = document.getElementById('sliderPrev');
+                
+                if (nextButton) {
+                    nextButton.addEventListener('click', () => {
+                        clearInterval(slideInterval);
+                        nextSlide();
+                        startAutoSlide();
+                    });
+                }
+                
+                if (prevButton) {
+                    prevButton.addEventListener('click', () => {
+                        clearInterval(slideInterval);
+                        prevSlide();
+                        startAutoSlide();
+                    });
+                }
+
+                // Indicator clicks (delegated event handling)
+                if (indicatorsContainer) {
+                    indicatorsContainer.addEventListener('click', (e) => {
+                        if (e.target.classList.contains('slider-indicator')) {
+                            const index = parseInt(e.target.getAttribute('data-slide'));
+                            if (!isNaN(index)) {
+                                clearInterval(slideInterval);
+                                showSlide(index);
+                                startAutoSlide();
+                            }
+                        }
+                    });
+                }
+
+                // Pause on hover
+                const sliderContainer = document.querySelector('.slider-container');
+                if (sliderContainer) {
+                    sliderContainer.addEventListener('mouseenter', () => {
+                        clearInterval(slideInterval);
+                    });
+
+                    sliderContainer.addEventListener('mouseleave', () => {
+                        startAutoSlide();
+                    });
+                }
+            }
+
+            // Public method to reinitialize slider after dynamic content loads
+            function reinitialize() {
+                setupEventListeners();
+                showSlide(0);
                 startAutoSlide();
-            });
+            }
 
-            document.getElementById('sliderPrev').addEventListener('click', () => {
-                clearInterval(slideInterval);
-                prevSlide();
-                startAutoSlide();
-            });
-
-            // Indicator clicks
-            indicators.forEach((indicator, index) => {
-                indicator.addEventListener('click', () => {
-                    clearInterval(slideInterval);
-                    showSlide(index);
-                    startAutoSlide();
-                });
-            });
-
-            // Pause on hover
-            const sliderContainer = document.querySelector('.slider-container');
-            sliderContainer.addEventListener('mouseenter', () => {
-                clearInterval(slideInterval);
-            });
-
-            sliderContainer.addEventListener('mouseleave', () => {
-                startAutoSlide();
-            });
-
-            // Initialize
+            // Initial setup
+            setupEventListeners();
             showSlide(0);
             startAutoSlide();
+            
+            // Return reinitialize function for external use
+            return { reinitialize };
         }
 
         // Load latest releases from Supabase
@@ -830,8 +1022,36 @@
         }
 
         // Initialize page
-        document.addEventListener('DOMContentLoaded', () => {
-            initSlider();
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize slider first with loading content
+            const slider = initSlider();
+            
+            // Load dynamic slider content
+            try {
+                const dynamicContentLoaded = await loadPopularGamesForSlider();
+                if (dynamicContentLoaded) {
+                    console.log('Dynamic slider content loaded, reinitializing slider...');
+                    // Small delay to ensure DOM is updated
+                    setTimeout(() => {
+                        slider.reinitialize();
+                    }, 100);
+                } else {
+                    console.log('Using fallback slider content');
+                    // If dynamic loading fails, create fallback slides
+                    createFallbackSlides();
+                    setTimeout(() => {
+                        slider.reinitialize();
+                    }, 100);
+                }
+            } catch (error) {
+                console.error('Error loading dynamic slider content:', error);
+                createFallbackSlides();
+                setTimeout(() => {
+                    slider.reinitialize();
+                }, 100);
+            }
+            
+            // Load other content
             loadLatestReleases();
             fetchAllGameTitles(); // Fetch titles for suggestions
 
