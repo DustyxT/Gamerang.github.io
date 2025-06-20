@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Gamerang - Premium Game Repacks</title>
+    <title>Gamerang - Premium Game Repacks v2.1</title>
     <!-- Remove Tailwind CDN -->
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -224,7 +224,47 @@
             </div>
         </div>
     </header>
-    <!-- Hero Slider (Navigation Free - Cache Buster: 2025-01-28) -->
+    <!-- Hero Slider (Navigation Free - NUCLEAR CACHE BUSTER: 2025-01-28-17:45:30) -->
+    <style>
+    /* Nuclear option: Hide any slider navigation elements */
+    .slider-container button:not(.btn-steam),
+    .slider-container .slider-controls,
+    .slider-container [class*="nav"]:not(.nav-link),
+    .slider-container [class*="arrow"],
+    .slider-container [class*="chevron"],
+    .slider-container [id*="slider"],
+    .slider-container [class*="slider-nav"],
+    .slider-container .fa-chevron-left,
+    .slider-container .fa-chevron-right,
+    .slider-container .fa-arrow-left,
+    .slider-container .fa-arrow-right,
+    .slider-container::before,
+    .slider-container::after,
+    .slider-container *::before,
+    .slider-container *::after {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        content: none !important;
+    }
+    
+    /* Ensure our buttons stay visible */
+    .slider-container .btn-steam,
+    .slider-container .slide-card a {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+    
+    /* Ensure chevron-down stays visible */
+    .slider-container .fa-chevron-down {
+        display: inline !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    </style>
     <section class="slider-container relative">
         <!-- Slide 1 -->
         <div class="slider-slide active" style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('./images/spiderman.jpg');">
