@@ -163,24 +163,21 @@
         /* Background Video Styles for Lower Sections */
         .video-background-lower {
             position: fixed;
-            top: 0;
+            top: 500px;
             left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -10;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
             overflow: hidden;
         }
         
         .background-video-lower {
-            min-width: 100%;
-            min-height: 100%;
-            width: auto;
-            height: auto;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
             object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
         
         .video-overlay {
@@ -189,7 +186,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(15, 15, 26, 0.85);
+            background: rgba(15, 15, 26, 0.7);
             z-index: 1;
         }
         
@@ -197,6 +194,12 @@
         section:not(.slider-container) {
             position: relative;
             z-index: 5;
+        }
+        
+        /* Ensure content within sections appears above the video */
+        .container {
+            position: relative;
+            z-index: 10;
         }
     </style>
 </head>
@@ -323,16 +326,17 @@
             </a>
         </div>
     </section>
+    
+    <!-- Background Video Container for All Lower Sections -->
+    <div class="video-background-lower">
+        <video autoplay muted loop class="background-video-lower">
+            <source src="https://pjlzzuoplxrftrqbhbfl.supabase.co/storage/v1/object/public/background-video-forum-page/peaceful-wild-west-red-dead-redemption-2-moewalls-com.mp4" type="video/mp4">
+        </video>
+        <div class="video-overlay"></div>
+    </div>
+    
     <!-- Latest Releases -->
     <section class="py-16 relative" id="latest">
-        <!-- Background Video for Latest Releases and Below -->
-        <div class="video-background-lower">
-            <video autoplay muted loop class="background-video-lower">
-                <source src="https://pjlzzuoplxrftrqbhbfl.supabase.co/storage/v1/object/public/background-video-forum-page/peaceful-wild-west-red-dead-redemption-2-moewalls-com.mp4" type="video/mp4">
-            </video>
-            <div class="video-overlay"></div>
-        </div>
-        
         <div class="container mx-auto px-4 relative z-10">
             <div class="flex flex-col md:flex-row justify-between items-center mb-10">
                 <div>
