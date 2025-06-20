@@ -758,7 +758,7 @@
                 
                 sliderContainer.innerHTML = '';
                 
-                // Create slides for each game
+                // Create slides for each game with consistent landscape layout
                 allSlideGames.forEach((game, index) => {
                     const isActive = index === 0 ? 'active' : '';
                     const bgImage = game.cover_image_url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyMCIgaGVpZ2h0PSIxMDgwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6IzFhMWEyZTtzdG9wLW9wYWNpdHk6MSIgLz48c3RvcCBvZmZzZXQ9IjUwJSIgc3R5bGU9InN0b3AtY29sb3I6IzE2MjEzZTtzdG9wLW9wYWNpdHk6MSIgLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMwZjM0NjA7c3RvcC1vcGFjaXR5OjEiIC8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjE5MjAiIGhlaWdodD0iMTA4MCIgZmlsbD0idXJsKCNncmFkKSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iNDgiIGZpbGw9IiM2NGZmZGEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5Db21pbmcgU29vbjwvdGV4dD48L3N2Zz4=';
@@ -769,15 +769,18 @@
                         (game.description.length > 120 ? game.description.substring(0, 117) + '...' : game.description) : 
                         'Experience this amazing game with enhanced graphics and all content included.';
                     
+                    // Ensure all slides have identical landscape structure
                     const slideHtml = `
                         <div class="slider-slide ${isActive}" style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('${bgImage}');">
                             <div class="absolute inset-0 flex items-center justify-center z-10 px-6 md:px-12">
-                                <div class="slide-card">
-                                    <div class="relative">
-                                        <img src="${game.cover_image_url || bgImage}" alt="${game.title}" class="slide-cover-image">
-                                        ${game.isPlaceholder ? '<div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-xl"><span class="text-white font-bold text-sm">COMING SOON</span></div>' : ''}
+                                <div class="slide-card flex flex-row items-center gap-8 md:gap-8">
+                                    <div class="flex-shrink-0">
+                                        <div class="relative">
+                                            <img src="${game.cover_image_url || bgImage}" alt="${game.title}" class="slide-cover-image">
+                                            ${game.isPlaceholder ? '<div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-xl"><span class="text-white font-bold text-sm">COMING SOON</span></div>' : ''}
+                                        </div>
                                     </div>
-                                    <div class="flex-1">
+                                    <div class="flex-1 text-left">
                                         <h2 class="text-2xl md:text-3xl font-bold mb-3 text-white">${displayTitle}</h2>
                                         <p class="text-gray-200 mb-4 text-base md:text-lg leading-relaxed">${shortDescription}</p>
                                         <div class="flex flex-col sm:flex-row gap-3">
@@ -805,7 +808,7 @@
                     sliderContainer.innerHTML += slideHtml;
                 });
                 
-                console.log(`Loaded ${allSlideGames.length} games for Most Viewed slider`);
+                console.log(`Loaded ${allSlideGames.length} games for Most Viewed slider with landscape layout`);
                 
                 // Initialize slider after loading
                 initSlider();

@@ -670,97 +670,103 @@
                 // Create placeholder games for remaining slots
                 const placeholderGames = [
                     {
-                        id: 'placeholder1',
-                        title: 'Coming Soon',
-                        cover_image_url: './images/placeholder-game.jpg',
-                        description: 'New exciting game releases are coming soon! Stay tuned for more amazing gaming content.',
-                        genre: 'Various',
+                        id: 'placeholder-1',
+                        title: 'Grand Theft Auto V',
+                        description: 'The ultimate open-world action-adventure experience. Coming soon to Gamerang with enhanced features.',
+                        cover_image_url: './images/placeholder-gta5.jpg',
+                        genre: 'Action, Adventure',
+                        developer: 'Rockstar Games',
                         isPlaceholder: true
                     },
                     {
-                        id: 'placeholder2', 
-                        title: 'More Games Soon',
-                        cover_image_url: './images/placeholder-game2.jpg',
-                        description: 'We are constantly adding new games to our collection. Check back regularly for updates!',
-                        genre: 'Various',
+                        id: 'placeholder-2', 
+                        title: 'Cyberpunk 2077',
+                        description: 'The next-generation RPG set in the futuristic Night City. Coming soon with all DLCs included.',
+                        cover_image_url: './images/placeholder-cyberpunk.jpg',
+                        genre: 'RPG, Action',
+                        developer: 'CD Projekt Red',
                         isPlaceholder: true
                     },
                     {
-                        id: 'placeholder3',
-                        title: 'Expanding Library',
-                        cover_image_url: './images/placeholder-game3.jpg', 
-                        description: 'Our game library is growing! More premium repacks and exclusive content coming your way.',
-                        genre: 'Various',
+                        id: 'placeholder-3',
+                        title: 'The Witcher 3: Wild Hunt',
+                        description: 'The award-winning fantasy RPG adventure. Complete Edition coming soon to Gamerang.',
+                        cover_image_url: './images/placeholder-witcher3.jpg',
+                        genre: 'RPG, Adventure',
+                        developer: 'CD Projekt Red',
                         isPlaceholder: true
                     }
                 ];
                 
-                // Combine real games with placeholders (up to 5 total)
-                const allSliderGames = [...(realGames || []), ...placeholderGames].slice(0, 5);
+                // Combine real games with placeholders to make 5 total
+                const allSlideGames = [...(realGames || []), ...placeholderGames].slice(0, 5);
                 
-                console.log(`Creating slider with ${allSliderGames.length} slides (${realGames?.length || 0} real games, ${Math.min(placeholderGames.length, 5 - (realGames?.length || 0))} placeholders)`);
-                
-                // Generate slider HTML
                 const sliderContainer = document.getElementById('heroSliderContainer');
                 if (!sliderContainer) {
-                    console.error('Slider container not found');
+                    console.error('Hero slider container not found');
                     return;
                 }
                 
-                const slidesHTML = allSliderGames.map((game, index) => {
-                    const isPlaceholder = game.isPlaceholder;
-                    const backgroundStyle = isPlaceholder 
-                        ? `background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);`
-                        : `background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('${game.cover_image_url || './images/default-game.jpg'}');`;
+                sliderContainer.innerHTML = '';
+                
+                // Create slides for each game with consistent landscape layout
+                allSlideGames.forEach((game, index) => {
+                    const isActive = index === 0 ? 'active' : '';
+                    const bgImage = game.cover_image_url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyMCIgaGVpZ2h0PSIxMDgwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6IzFhMWEyZTtzdG9wLW9wYWNpdHk6MSIgLz48c3RvcCBvZmZzZXQ9IjUwJSIgc3R5bGU9InN0b3AtY29sb3I6IzE2MjEzZTtzdG9wLW9wYWNpdHk6MSIgLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMwZjM0NjA7c3RvcC1vcGFjaXR5OjEiIC8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjE5MjAiIGhlaWdodD0iMTA4MCIgZmlsbD0idXJsKCNncmFkKSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iNDgiIGZpbGw9IiM2NGZmZGEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5Db21pbmcgU29vbjwvdGV4dD48L3N2Zz4=';
                     
-                    const gameUrl = isPlaceholder ? '#' : `gamepage.html?id=${game.id}`;
-                    const downloadUrl = isPlaceholder ? '#' : 'games.html';
+                    // Truncate long titles for display
+                    const displayTitle = game.title.length > 50 ? game.title.substring(0, 47) + '...' : game.title;
+                    const shortDescription = game.description ? 
+                        (game.description.length > 120 ? game.description.substring(0, 117) + '...' : game.description) : 
+                        'Experience this amazing game with enhanced graphics and all content included.';
                     
-                    return `
-                        <div class="slider-slide ${index === 0 ? 'active' : ''}" style="${backgroundStyle}">
+                    // Ensure all slides have identical landscape structure
+                    const slideHtml = `
+                        <div class="slider-slide ${isActive}" style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('${bgImage}');">
                             <div class="absolute inset-0 flex items-center justify-center z-10 px-6 md:px-12">
-                                <div class="slide-card flex flex-col md:flex-row items-center text-center md:text-left space-y-6 md:space-y-0 md:space-x-8">
+                                <div class="slide-card flex flex-row items-center gap-8 md:gap-8">
                                     <div class="flex-shrink-0">
-                                        <img src="${game.cover_image_url || './images/default-game.jpg'}" 
-                                             alt="${game.title}" 
-                                             class="slide-cover-image ${isPlaceholder ? 'opacity-50' : ''}"
-                                             onerror="this.src='./images/default-game.jpg'">
-                                        ${isPlaceholder ? '<div class="absolute inset-0 flex items-center justify-center"><i class="fas fa-clock text-white text-4xl opacity-70"></i></div>' : ''}
+                                        <div class="relative">
+                                            <img src="${game.cover_image_url || bgImage}" alt="${game.title}" class="slide-cover-image">
+                                            ${game.isPlaceholder ? '<div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-xl"><span class="text-white font-bold text-sm">COMING SOON</span></div>' : ''}
+                                        </div>
                                     </div>
-                                    <div class="flex-1">
-                                        <h2 class="text-3xl md:text-4xl font-bold mb-4 text-white">${game.title}</h2>
-                                        <p class="text-gray-200 mb-6 text-lg md:text-xl leading-relaxed">${game.description}</p>
-                                        <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                                            <a href="${gameUrl}" class="btn-steam px-8 py-3 rounded-full flex items-center justify-center space-x-2 text-lg ${isPlaceholder ? 'opacity-50 cursor-not-allowed' : ''}">
-                                                <i class="fas fa-${isPlaceholder ? 'clock' : 'gamepad'}"></i>
-                                                <span>${isPlaceholder ? 'Coming Soon' : 'View Game'}</span>
-                                            </a>
-                                            <a href="${downloadUrl}" class="bg-transparent border-2 border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-black px-8 py-3 rounded-full flex items-center justify-center space-x-2 text-lg transition-all duration-500 ${isPlaceholder ? 'opacity-50 cursor-not-allowed' : ''}">
-                                                <i class="fas fa-${isPlaceholder ? 'plus' : 'download'}"></i>
-                                                <span>${isPlaceholder ? 'Stay Tuned' : 'Download'}</span>
-                                            </a>
+                                    <div class="flex-1 text-left">
+                                        <h2 class="text-2xl md:text-3xl font-bold mb-3 text-white">${displayTitle}</h2>
+                                        <p class="text-gray-200 mb-4 text-base md:text-lg leading-relaxed">${shortDescription}</p>
+                                        <div class="flex flex-col sm:flex-row gap-3">
+                                            ${game.isPlaceholder ? 
+                                                `<button class="btn-steam px-6 py-2.5 rounded-full flex items-center justify-center space-x-2 opacity-50 cursor-not-allowed" disabled>
+                                                    <i class="fas fa-clock"></i>
+                                                    <span>Coming Soon</span>
+                                                </button>` :
+                                                `<a href="gamepage.html?id=${game.id}" class="btn-steam px-6 py-2.5 rounded-full flex items-center justify-center space-x-2">
+                                                    <i class="fas fa-gamepad"></i>
+                                                    <span>View Game</span>
+                                                </a>
+                                                <a href="gamepage.html?id=${game.id}" class="bg-transparent border-2 border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-black px-6 py-2.5 rounded-full flex items-center justify-center space-x-2 transition-all duration-500">
+                                                    <i class="fas fa-download"></i>
+                                                    <span>Download</span>
+                                                </a>`
+                                            }
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     `;
-                }).join('');
+                    
+                    sliderContainer.innerHTML += slideHtml;
+                });
                 
-                // Update slider container
-                sliderContainer.innerHTML = slidesHTML;
+                console.log(`Loaded ${allSlideGames.length} games for Most Viewed slider with landscape layout`);
                 
-                // Initialize slider functionality
-                setTimeout(() => {
-                    initSlider();
-                }, 100);
-                
-                console.log('Most Viewed Games slider loaded successfully');
+                // Initialize slider after loading
+                initSlider();
                 
             } catch (error) {
                 console.error('Error loading most viewed games:', error);
-                
-                // Fallback to show error message
+                // Fallback to a simple error slide
                 const sliderContainer = document.getElementById('heroSliderContainer');
                 if (sliderContainer) {
                     sliderContainer.innerHTML = `
@@ -768,8 +774,7 @@
                             <div class="absolute inset-0 flex items-center justify-center z-10">
                                 <div class="text-center text-white">
                                     <i class="fas fa-exclamation-triangle text-4xl mb-4 text-red-400"></i>
-                                    <p class="text-xl">Unable to load games</p>
-                                    <p class="text-sm text-gray-300 mt-2">Please check your connection and try again</p>
+                                    <p class="text-xl">Error loading games. Please refresh the page.</p>
                                 </div>
                             </div>
                         </div>
