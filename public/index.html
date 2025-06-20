@@ -133,9 +133,76 @@
         .floating-element:nth-child(2) { width: 200px; height: 200px; top: 60%; left: 80%; animation-delay: 5s; }
         .floating-element:nth-child(3) { width: 150px; height: 150px; top: 30%; left: 50%; animation-delay: 10s; }
 
+        .slider-container {
+            position: relative;
+            overflow: hidden;
+            height: 500px;
+            width: 100vw;
+            left: 50%;
+            right: 50%;
+            margin-left: -50vw;
+            margin-right: -50vw;
+        }
 
+        .slider-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            transform: scale(0.98);
+            will-change: transform, opacity;
+        }
 
+        .slider-slide.active {
+            opacity: 1;
+            transform: scale(1);
+        }
 
+        .slide-card {
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255,255,255,0.08);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            will-change: transform;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .slide-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 247, 255, 0.2);
+        }
+
+        .slide-cover-image {
+            width: 180px;
+            height: 100px;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1.5px solid rgba(0, 247, 255, 0.4);
+            will-change: transform;
+            flex-shrink: 0;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .slide-cover-image:hover {
+            transform: scale(1.05) rotateY(5deg);
+        }
 
         .btn-steam {
             background: linear-gradient(135deg, var(--neon-blue) 0%, var(--neon-purple) 100%);
@@ -251,7 +318,76 @@
             background: linear-gradient(var(--neon-blue), var(--neon-pink));
         }
 
+        /* Responsive Styles */
+        @media (max-width: 640px) {
+            .slide-card {
+                padding: 1.5rem;
+                max-width: 95vw;
+            }
+            .slide-card img {
+                width: 64px;
+                height: 64px;
+            }
+            .slide-card h2 {
+                font-size: 1.25rem;
+            }
+            .slide-card p {
+                font-size: 1rem;
+            }
+        }
 
+        @media (max-width: 768px) {
+            .slide-card {
+                padding: 1.5rem;
+                max-width: 95vw;
+                flex-direction: row;
+                text-align: left;
+                gap: 1.5rem;
+            }
+            .slide-cover-image {
+                width: 150px;
+                height: 85px;
+                border-radius: 6px;
+                border: 1px solid rgba(0, 247, 255, 0.4);
+                box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+            }
+            .slide-card h2 {
+                font-size: 1.5rem;
+                margin-bottom: 0.75rem;
+            }
+            .slide-card p {
+                font-size: 0.9rem;
+                margin-bottom: 1rem;
+            }
+            .slider-slide {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .slide-card {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            .slide-cover-image {
+                width: 120px;
+                height: 70px;
+                align-self: center;
+                border-radius: 5px;
+                border: 1px solid rgba(0, 247, 255, 0.4);
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            }
+            .slide-card h2 {
+                font-size: 1.25rem;
+                margin-bottom: 0.5rem;
+            }
+            .slide-card p {
+                font-size: 0.85rem;
+                margin-bottom: 1rem;
+            }
+        }
     </style>
 </head>
 <body class="relative overflow-x-hidden">
@@ -326,24 +462,29 @@
             </div>
         </div>
     </header>
-    <!-- Hero Section -->
-    <section class="relative h-screen flex items-center justify-center">
-        <div class="text-center text-white z-10 max-w-4xl mx-auto px-6">
-            <h1 class="text-4xl md:text-6xl font-bold mb-6 neon-text header-font">Gamerang</h1>
-            <p class="text-xl md:text-2xl mb-8 text-gray-200">Premium Game Repacks - High Quality, Fast Downloads</p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="games.html" class="btn-steam px-8 py-4 rounded-full inline-flex items-center space-x-2 text-lg">
-                    <i class="fas fa-gamepad"></i>
-                    <span>Browse Games</span>
-                </a>
-                <a href="forum.html" class="bg-transparent border-2 border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-black px-8 py-4 rounded-full inline-flex items-center space-x-2 text-lg transition-all duration-500">
-                    <i class="fas fa-users"></i>
-                    <span>Join Community</span>
-                </a>
+    <!-- Hero Slider -->
+    <section class="slider-container relative">
+        <!-- Section Title Badge -->
+        <div class="absolute top-8 left-1/2 transform -translate-x-1/2 z-20">
+            <div class="bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-bold px-6 py-2 rounded-full shadow-lg animate-pulse">
+                <i class="fas fa-fire mr-2"></i>Most Viewed Games
             </div>
         </div>
-        
-        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+
+        <!-- Dynamic Slides Container -->
+        <div id="heroSliderContainer">
+            <!-- Loading placeholder -->
+            <div class="slider-slide active" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);">
+                <div class="absolute inset-0 flex items-center justify-center z-10">
+                    <div class="text-center text-white">
+                        <i class="fas fa-spinner fa-spin text-4xl mb-4 text-cyan-400"></i>
+                        <p class="text-xl">Loading Most Viewed Games...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="absolute bottom-0 left-0 right-0 flex justify-center pb-8 z-10">
             <a href="#latest" class="text-white animate-bounce hover:text-cyan-400 transition">
                 <i class="fas fa-chevron-down text-2xl"></i>
             </a>
@@ -522,7 +663,190 @@
 
         let allGameTitlesForSuggestions = []; // For search suggestions
 
+        // Improved slider functionality
+        function initSlider() {
+            const slides = document.querySelectorAll('#heroSliderContainer .slider-slide');
+            
+            if (slides.length === 0) {
+                console.log('No slides found, skipping slider initialization');
+                return;
+            }
+            
+            let currentSlide = 0;
+            let slideInterval;
+            const TRANSITION_INTERVAL = 5000; // 5 seconds between transitions
 
+            function showSlide(index) {
+                // Remove active class from all slides
+                slides.forEach((slide, i) => {
+                    if (i === index) {
+                        slide.style.opacity = '1';
+                        slide.classList.add('active');
+                    } else {
+                        slide.style.opacity = '0';
+                        slide.classList.remove('active');
+                    }
+                });
+                currentSlide = index;
+            }
+
+            function nextSlide() {
+                const nextIndex = (currentSlide + 1) % slides.length;
+                showSlide(nextIndex);
+            }
+
+            function startAutoSlide() {
+                // Clear any existing interval
+                if (slideInterval) {
+                    clearInterval(slideInterval);
+                }
+                // Only start auto-slide if there are multiple slides
+                if (slides.length > 1) {
+                    slideInterval = setInterval(nextSlide, TRANSITION_INTERVAL);
+                }
+            }
+
+            console.log(`Initializing slider with ${slides.length} slides`);
+            
+            // Initialize first slide
+            showSlide(0);
+            
+            // Start auto-advance
+            startAutoSlide();
+        }
+
+        // Load most viewed games for hero slider
+        async function loadMostViewedGames() {
+            try {
+                console.log('Loading Most Viewed Games for slider...');
+                
+                // Get your actual games from database
+                const { data: realGames, error } = await window.supabaseClient
+                    .from('games')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(2);
+                    
+                if (error) {
+                    console.error('Error fetching most viewed games:', error);
+                    throw error;
+                }
+                
+                // Create placeholder games for remaining slots
+                const placeholderGames = [
+                    {
+                        id: 'placeholder-1',
+                        title: 'Grand Theft Auto V',
+                        description: 'The ultimate open-world action-adventure experience. Coming soon to Gamerang with enhanced features.',
+                        cover_image_url: './images/placeholder-gta5.jpg',
+                        genre: 'Action, Adventure',
+                        developer: 'Rockstar Games',
+                        isPlaceholder: true
+                    },
+                    {
+                        id: 'placeholder-2', 
+                        title: 'Cyberpunk 2077',
+                        description: 'The next-generation RPG set in the futuristic Night City. Coming soon with all DLCs included.',
+                        cover_image_url: './images/placeholder-cyberpunk.jpg',
+                        genre: 'RPG, Action',
+                        developer: 'CD Projekt Red',
+                        isPlaceholder: true
+                    },
+                    {
+                        id: 'placeholder-3',
+                        title: 'The Witcher 3: Wild Hunt',
+                        description: 'The award-winning fantasy RPG adventure. Complete Edition coming soon to Gamerang.',
+                        cover_image_url: './images/placeholder-witcher3.jpg',
+                        genre: 'RPG, Adventure',
+                        developer: 'CD Projekt Red',
+                        isPlaceholder: true
+                    }
+                ];
+                
+                // Combine real games with placeholders to make 5 total
+                const allSlideGames = [...(realGames || []), ...placeholderGames].slice(0, 5);
+                
+                const sliderContainer = document.getElementById('heroSliderContainer');
+                if (!sliderContainer) {
+                    console.error('Hero slider container not found');
+                    return;
+                }
+                
+                sliderContainer.innerHTML = '';
+                
+                // Create slides for each game with consistent landscape layout
+                allSlideGames.forEach((game, index) => {
+                    const isActive = index === 0 ? 'active' : '';
+                    const bgImage = game.cover_image_url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyMCIgaGVpZ2h0PSIxMDgwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6IzFhMWEyZTtzdG9wLW9wYWNpdHk6MSIgLz48c3RvcCBvZmZzZXQ9IjUwJSIgc3R5bGU9InN0b3AtY29sb3I6IzE2MjEzZTtzdG9wLW9wYWNpdHk6MSIgLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMwZjM0NjA7c3RvcC1vcGFjaXR5OjEiIC8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjE5MjAiIGhlaWdodD0iMTA4MCIgZmlsbD0idXJsKCNncmFkKSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iNDgiIGZpbGw9IiM2NGZmZGEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5Db21pbmcgU29vbjwvdGV4dD48L3N2Zz4=';
+                    
+                    // Truncate long titles for display
+                    const displayTitle = game.title.length > 50 ? game.title.substring(0, 47) + '...' : game.title;
+                    const shortDescription = game.description ? 
+                        (game.description.length > 120 ? game.description.substring(0, 117) + '...' : game.description) : 
+                        'Experience this amazing game with enhanced graphics and all content included.';
+                    
+                    // Ensure all slides have identical landscape structure
+                    const slideHtml = `
+                        <div class="slider-slide ${isActive}" style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('${bgImage}');">
+                            <div class="absolute inset-0 flex items-center justify-center z-10 px-6 md:px-12">
+                                <div class="slide-card flex flex-row items-center gap-8 md:gap-8">
+                                    <div class="flex-shrink-0">
+                                        <div class="relative">
+                                            <img src="${game.cover_image_url || bgImage}" alt="${game.title}" class="slide-cover-image">
+                                            ${game.isPlaceholder ? '<div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-xl"><span class="text-white font-bold text-sm">COMING SOON</span></div>' : ''}
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 text-left">
+                                        <h2 class="text-2xl md:text-3xl font-bold mb-3 text-white">${displayTitle}</h2>
+                                        <p class="text-gray-200 mb-4 text-base md:text-lg leading-relaxed">${shortDescription}</p>
+                                        <div class="flex flex-col sm:flex-row gap-3">
+                                            ${game.isPlaceholder ? 
+                                                `<button class="btn-steam px-6 py-2.5 rounded-full flex items-center justify-center space-x-2 opacity-50 cursor-not-allowed" disabled>
+                                                    <i class="fas fa-clock"></i>
+                                                    <span>Coming Soon</span>
+                                                </button>` :
+                                                `<a href="gamepage.html?id=${game.id}" class="btn-steam px-6 py-2.5 rounded-full flex items-center justify-center space-x-2">
+                                                    <i class="fas fa-gamepad"></i>
+                                                    <span>View Game</span>
+                                                </a>
+                                                <a href="gamepage.html?id=${game.id}" class="bg-transparent border-2 border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-black px-6 py-2.5 rounded-full flex items-center justify-center space-x-2 transition-all duration-500">
+                                                    <i class="fas fa-download"></i>
+                                                    <span>Download</span>
+                                                </a>`
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    sliderContainer.innerHTML += slideHtml;
+                });
+                
+                console.log(`Loaded ${allSlideGames.length} games for Most Viewed slider with landscape layout`);
+                
+                // Initialize slider after loading
+                initSlider();
+                
+            } catch (error) {
+                console.error('Error loading most viewed games:', error);
+                // Fallback to a simple error slide
+                const sliderContainer = document.getElementById('heroSliderContainer');
+                if (sliderContainer) {
+                    sliderContainer.innerHTML = `
+                        <div class="slider-slide active" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);">
+                            <div class="absolute inset-0 flex items-center justify-center z-10">
+                                <div class="text-center text-white">
+                                    <i class="fas fa-exclamation-triangle text-4xl mb-4 text-red-400"></i>
+                                    <p class="text-xl">Error loading games. Please refresh the page.</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        }
 
         // Load latest releases from Supabase
         async function loadLatestReleases() {
@@ -774,6 +1098,7 @@
             }, 500);
 
             // Load content
+            loadMostViewedGames(); // Load hero slider games first
             loadLatestReleases();
             fetchAllGameTitles();
 
