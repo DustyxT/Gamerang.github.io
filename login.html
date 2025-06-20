@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Gamerang</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <!-- Tailwind and styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/transitions.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Initialize Supabase client with production instance
+        const supabaseUrl = 'https://pjlzzuoplxrftrqbhbfl.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqbHp6dW9wbHhyZnRycWJoYmZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzMTcwNjgsImV4cCI6MjA2Mzg5MzA2OH0.1U-dUVRY3qDPYsHEa0EttgKWpCRnlX3BS5SPE2qBExA';
+        window.supabase = supabase.createClient(supabaseUrl, supabaseKey, {
+            auth: {
+                autoRefreshToken: true,
+                persistSession: true,
+                detectSessionInUrl: true
+            }
+        });
+    </script>
+    <style>
+        body {
+            background-color: #18120c;
+            color: #f5e6c8;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #233554 0%, #0a192f 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans">
+    <!-- Header -->
+    <header class="gradient-bg sticky top-0 z-50 shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-gamepad text-2xl text-purple-400"></i>
+                <a href="index.html" class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">Gamerang</a>
+            </div>
+            
+            <div class="hidden md:flex space-x-6">
+                <a href="index.html" class="hover:text-purple-400 transition">Home</a>
+                <a href="games.html" class="hover:text-purple-400 transition">Games</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="max-w-md mx-auto">
+            <!-- Session Status (Hidden by default) -->
+            <div id="sessionStatus" class="bg-green-800 rounded-lg p-4 mb-4 hidden">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-green-100">Already Signed In</h3>
+                        <p class="text-green-200 text-sm" id="sessionEmail">Loading...</p>
+                    </div>
+                    <div class="space-x-2">
+                        <button onclick="goToGameSubmit()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">
+                            Go to Game Submit
+                        </button>
+                        <button onclick="signOut()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
+                            Sign Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="loginContainer">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold mb-2">Welcome Back</h1>
+                    <p class="text-gray-400">Sign in to your account</p>
+                </div>
+
+                <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+                    <form id="loginForm" class="space-y-4">
+                        <div>
+                            <label for="email" class="block text-gray-300 mb-2">Email</label>
+                            <input type="email" id="email" name="email" required
+                                   class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+
+                        <div>
+                            <label for="password" class="block text-gray-300 mb-2">Password</label>
+                            <input type="password" id="password" name="password" required
+                                   class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <a href="#" onclick="showResetPassword()" class="text-sm text-purple-400 hover:text-purple-300 mt-1 inline-block">Forgot Password?</a>
+                        </div>
+
+                        <button type="submit" id="submitButton" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition">
+                            Sign In
+                        </button>
+                    </form>
+
+                    <div class="mt-4 text-center">
+                        <p class="text-gray-400">Don't have an account? <a href="signup.html" class="text-purple-400 hover:text-purple-300">Sign Up</a></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Password Reset Form (Hidden by default) -->
+            <div id="resetForm" class="bg-gray-800 rounded-lg p-6 shadow-lg mt-4 hidden">
+                <h2 class="text-xl font-bold mb-4">Reset Password</h2>
+                <form id="passwordResetForm" class="space-y-4">
+                    <div>
+                        <label for="resetEmail" class="block text-gray-300 mb-2">Email</label>
+                        <input type="email" id="resetEmail" name="resetEmail" required
+                               class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
+                        Send Reset Link
+                    </button>
+                    <button type="button" onclick="hideResetPassword()" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition mt-2">
+                        Cancel
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function showResetPassword() {
+            document.getElementById('resetForm').classList.remove('hidden');
+        }
+
+        function hideResetPassword() {
+            document.getElementById('resetForm').classList.add('hidden');
+        }
+
+        function goToGameSubmit() {
+            window.location.href = 'gamesubmit.html';
+        }
+
+        async function signOut() {
+            try {
+                const { error } = await window.supabase.auth.signOut();
+                if (error) throw error;
+                
+                // Hide session status and show login form
+                document.getElementById('sessionStatus').classList.add('hidden');
+                document.getElementById('loginContainer').classList.remove('hidden');
+                
+                // Clear form
+                document.getElementById('loginForm').reset();
+                
+                console.log('Signed out successfully');
+            } catch (error) {
+                console.error('Sign out error:', error);
+                alert('Error signing out: ' + error.message);
+            }
+        }
+
+        function showSessionStatus(session) {
+            document.getElementById('sessionEmail').textContent = session.user.email;
+            document.getElementById('sessionStatus').classList.remove('hidden');
+            document.getElementById('loginContainer').classList.add('hidden');
+        }
+
+        function hideSessionStatus() {
+            document.getElementById('sessionStatus').classList.add('hidden');
+            document.getElementById('loginContainer').classList.remove('hidden');
+        }
+
+        // Password reset form handler
+        document.getElementById('passwordResetForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('resetEmail').value;
+
+            try {
+                const { error } = await window.supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: window.location.origin + '/reset-password.html'
+                });
+
+                if (error) throw error;
+
+                alert('Password reset link has been sent to your email.');
+                hideResetPassword();
+            } catch (error) {
+                console.error('Reset password error:', error);
+                alert(error.message);
+            }
+        });
+
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const submitButton = document.getElementById('submitButton');
+
+            try {
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
+
+                const { data, error } = await window.supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) {
+                    console.error('Login error:', error);
+                    
+                    // Provide specific error messages
+                    if (error.message.includes('Email not confirmed')) {
+                        alert('Please check your email and verify your account before signing in.');
+                    } else if (error.message.includes('Invalid login credentials')) {
+                        alert('Invalid email or password. Please check your credentials and try again.');
+                    } else if (error.message.includes('Email rate limit exceeded')) {
+                        alert('Too many login attempts. Please wait a moment before trying again.');
+                    } else if (error.message.includes('User not found')) {
+                        alert('No account found with this email address. Please sign up first or check your email.');
+                    } else {
+                        alert(`Login failed: ${error.message}`);
+                    }
+                    
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = 'Sign In';
+                } else if (data.session) {
+                    // Successful login - redirect immediately
+                    console.log('Login successful, redirecting to gamesubmit.html');
+                    window.location.href = 'gamesubmit.html';
+                } else {
+                    alert('Login completed but no session was created. Please try again.');
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = 'Sign In';
+                }
+            } catch (error) {
+                console.error('Unexpected login error:', error);
+                alert('An unexpected error occurred. Please try again.');
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Sign In';
+            }
+        });
+
+        // Check initial session and handle auth state changes
+        window.supabase.auth.onAuthStateChange((event, session) => {
+            console.log('Auth state changed on login.html - Event:', event, 'Session:', session);
+            
+            if (session) {
+                // Always show session status, never auto-redirect
+                console.log('Session detected, showing session status');
+                showSessionStatus(session);
+            } else {
+                // No session, hide status and show login form
+                hideSessionStatus();
+            }
+        });
+
+        // Check for existing session on page load
+        window.supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                console.log('Initial session found on page load');
+                showSessionStatus(session);
+            }
+        });
+    </script>
+</body>
+</html> 

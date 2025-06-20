@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Details | Gamerang</title>
+    <!-- Remove Tailwind CDN -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/transitions.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --neon-blue: #00f7ff;
+            --neon-pink: #ff00f7;
+            --neon-purple: #9d00ff;
+            --neon-yellow: #ffe066;
+            --neon-yellow-dark: #ffd600;
+            --dark-bg: #0f0f1a;
+            --card-bg: #1a1a2e;
+            --text-primary: #ffffff;
+            --text-secondary: #b8b8d4;
+        }
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            background-image: url('./images/backgroundimg.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        .header-font { font-family: 'Orbitron', sans-serif; }
+        .neon-text { text-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue); }
+        .neon-border { box-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-purple); border: 1px solid rgba(157, 0, 255, 0.3); }
+        .neon-card { transition: all 0.3s ease; transform-style: preserve-3d; perspective: 1000px; }
+        .neon-card:hover { transform: translateY(-10px) rotateX(5deg); box-shadow: 0 20px 30px rgba(157, 0, 255, 0.3), 0 0 20px var(--neon-purple), 0 0 40px var(--neon-blue); }
+        .game-image { transition: transform 0.5s ease; transform-style: preserve-3d; }
+        .game-card:hover .game-image { transform: scale(1.05) rotateY(5deg); }
+        .glow-effect { position: relative; }
+        .glow-effect::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at center, rgba(0, 247, 255, 0.1) 0%, transparent 70%); pointer-events: none; z-index: -1; }
+        .floating-element { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(0, 247, 255, 0.1) 0%, transparent 70%); filter: blur(30px); z-index: -1; animation: float 15s infinite ease-in-out; }
+        .floating-element:nth-child(1) { width: 300px; height: 300px; top: 10%; left: 10%; animation-delay: 0s; }
+        .floating-element:nth-child(2) { width: 200px; height: 200px; top: 60%; left: 80%; animation-delay: 5s; }
+        .floating-element:nth-child(3) { width: 150px; height: 150px; top: 30%; left: 50%; animation-delay: 10s; }
+        @keyframes float { 0%, 100% { transform: translateY(0) translateX(0); } 50% { transform: translateY(-50px) translateX(20px); } }
+        .btn-steam { background: linear-gradient(135deg, var(--neon-blue) 0%, var(--neon-purple) 100%); color: white; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; border: none; transition: all 0.3s ease; }
+        .btn-steam:hover { background: linear-gradient(135deg, #00a3cc 0%, #7d00cc 100%); transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0, 200, 255, 0.3); }
+        .nav-link { position: relative; padding-bottom: 5px; }
+        .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: 0; left: 0; background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple)); transition: width 0.3s ease; }
+        .nav-link:hover::after { width: 100%; }
+        .steam-gradient { background: linear-gradient(135deg, rgba(0, 100, 200, 0.1) 0%, rgba(0, 0, 0, 0.5) 100%); }
+        .screenshot { transition: all 0.3s ease; border: 1px solid rgba(0, 200, 255, 0.2); }
+        .screenshot:hover { transform: scale(1.03); box-shadow: 0 0 15px rgba(0, 247, 255, 0.5); }
+        .system-req { transition: all 0.3s ease; background: rgba(26, 26, 46, 0.7); backdrop-filter: blur(10px); }
+        .system-req:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3); }
+        .download-card { transition: all 0.3s ease; background: rgba(26, 26, 46, 0.7); backdrop-filter: blur(10px); }
+        .download-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3); }
+        .ribbon { position: absolute; top: 10px; right: -30px; width: 120px; height: 30px; background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple)); transform: rotate(45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; }
+        .discount-badge { background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple)); clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%); }
+        
+        /* Background effects */
+        .background-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: linear-gradient(rgba(15, 15, 26, 0.2), rgba(15, 15, 26, 0.4));
+            filter: blur(1px);
+            -webkit-filter: blur(1px);
+            transform: scale(1.1);
+            transition: all 0.8s ease-in-out;
+            will-change: background, filter;
+        }
+        
+        .blurry-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            background: rgba(15, 15, 26, 0.05);
+            transition: all 0.8s ease-in-out;
+        }
+        
+        .transparent-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -3;
+            opacity: 0.05;
+            background-image: 
+                linear-gradient(rgba(0, 247, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 247, 255, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mix-blend-mode: overlay;
+            transition: opacity 0.8s ease-in-out;
+        }
+        
+        .floating-game-icons {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -3;
+            overflow: hidden;
+        }
+        
+        .floating-icon {
+            position: absolute;
+            opacity: 0.08;
+            filter: blur(1px);
+            animation: float 30s infinite linear;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(50vw, 30vh) rotate(90deg);
+            }
+            50% {
+                transform: translate(80vw, 10vh) rotate(180deg);
+            }
+            75% {
+                transform: translate(30vw, 70vh) rotate(270deg);
+            }
+            100% {
+                transform: translate(0, 0) rotate(360deg);
+            }
+        }
+        
+        /* Content container with glass effect */
+        .content-container {
+            background: rgba(26, 26, 46, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 200, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Floating particles */
+        .particle {
+            position: fixed;
+            border-radius: 50%;
+            background: rgba(0, 247, 255, 0.1);
+            z-index: -2;
+            animation: float-particle 15s infinite linear;
+        }
+        
+        @keyframes float-particle {
+            0% {
+                transform: translate(0, 0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.1;
+            }
+            90% {
+                opacity: 0.1;
+            }
+            100% {
+                transform: translate(100vw, 100vh);
+                opacity: 0;
+            }
+        }
+
+        /* Add a subtle vignette effect */
+        .vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
+            pointer-events: none;
+        }
+
+        .neon-yellow-text {
+            color: var(--neon-yellow-dark);
+            text-shadow: 0 0 8px var(--neon-yellow), 0 0 16px var(--neon-yellow-dark);
+        }
+        .neon-yellow-bg {
+            background: linear-gradient(90deg, #ffe066 0%, #ffd600 100%);
+            color: #222;
+            font-weight: 700;
+            box-shadow: 0 0 10px #ffe066, 0 0 20px #ffd600;
+        }
+        /* Update .neon-title-text for a bright white with blue glow effect */
+        .neon-title-text {
+            color: #fff;
+            text-shadow: 0 0 8px var(--neon-blue), 0 0 16px #fff, 0 0 32px var(--neon-blue);
+        }
+
+        /* Screenshot Gallery Styles */
+        .screenshot-item img {
+            opacity: 1 !important;
+            visibility: visible !important;
+            display: block !important;
+            background-color: #374151 !important;
+            min-height: 200px !important;
+        }
+        
+        .screenshot-item {
+            background-color: #1f2937 !important;
+            min-height: 200px !important;
+        }
+        
+        /* Ensure images are not hidden by any parent styles */
+        #screenshotsGallery img {
+            opacity: 1 !important;
+            visibility: visible !important;
+            display: block !important;
+        }
+        
+        .screenshot-grid {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+        
+        @media (min-width: 768px) {
+            .screenshot-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .screenshot-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        .screenshot-loading {
+            background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+            background-size: 200% 100%;
+            animation: loading-shimmer 2s infinite;
+        }
+        
+        @keyframes loading-shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Enhanced Image Quality and Rendering */
+        .hero-image-enhanced {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            will-change: transform;
+        }
+        
+        /* High-quality image rendering for all game images */
+        img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            transform: translateZ(0);
+        }
+        
+        /* Specific improvements for background images */
+        [style*="background-image"] {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+        
+        /* Force screenshot visibility - debug styles */
+        .screenshot-item img {
+            opacity: 1 !important;
+            visibility: visible !important;
+            display: block !important;
+            background-color: #374151 !important;
+            min-height: 200px !important;
+        }
+        
+        .screenshot-item {
+            background-color: #1f2937 !important;
+            min-height: 200px !important;
+        }
+        
+        /* Ensure images are not hidden by any parent styles */
+        #screenshotsGallery img {
+            opacity: 1 !important;
+            visibility: visible !important;
+            display: block !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans">
+    <div id="pageTransitionPreloader" class="page-preloader">
+        <img src="./images/weblogo.png" alt="Gamerang Loading..." class="preloader-logo">
+    </div>
+    <!-- Background elements -->
+    <div class="background-overlay"></div>
+    <div class="blurry-bg"></div>
+    <div class="transparent-pattern"></div>
+    <div class="vignette"></div>
+    
+    <!-- Floating game icons -->
+    <div class="floating-game-icons">
+        <img src="https://cdn-icons-png.flaticon.com/512/2965/2965300.png" class="floating-icon" style="width: 120px; top: 20%; left: 10%; animation-delay: 0s;">
+        <img src="https://cdn-icons-png.flaticon.com/512/2965/2965278.png" class="floating-icon" style="width: 150px; top: 60%; left: 70%; animation-delay: 5s;">
+        <img src="https://cdn-icons-png.flaticon.com/512/2965/2965279.png" class="floating-icon" style="width: 100px; top: 30%; left: 40%; animation-delay: 10s;">
+        <img src="https://cdn-icons-png.flaticon.com/512/2965/2965306.png" class="floating-icon" style="width: 130px; top: 70%; left: 30%; animation-delay: 15s;">
+    </div>
+    
+    <!-- Floating particles -->
+    <div id="particles"></div>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-black bg-opacity-90 backdrop-blur-lg border-b border-gray-800 shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="relative group">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
+                    <div class="relative flex items-center space-x-2 bg-black px-3 py-1.5 rounded-lg">
+                        <img src="./images/weblogo.png" alt="Gamerang Logo" class="h-6 w-auto" id="siteLogo">
+                        <a href="index.html" class="text-2xl font-black text-white hover:text-blue-300 transition-all duration-300 header-font neon-text">GAMERANG</a>
+                    </div>
+                </div>
+            </div>
+            <div class="hidden md:flex space-x-6 items-center">
+                <a href="index.html" class="nav-link hover:text-neon-blue transition text-white hover:neon-text">Home</a>
+                <a href="games.html" class="nav-link hover:text-neon-blue transition text-white hover:neon-text">Games</a>
+                <a href="forum.html" class="nav-link hover:text-neon-blue transition text-white hover:neon-text">Community</a>
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Search games..." class="bg-gray-900 rounded-full py-2 px-4 pr-10 focus:outline-none focus:ring-2 focus:ring-neon-blue w-64 border border-gray-700 text-white">
+                    <button class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-neon-blue">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="md:hidden text-xl text-white focus:outline-none" id="mobileMenuButton">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="md:hidden bg-gray-900 px-4 py-2 hidden absolute w-full z-50 border-b border-gray-800" id="mobileMenu">
+            <div class="flex flex-col space-y-3">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-neon-blue">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <input type="text" id="mobileSearchInput" placeholder="Search games..."
+                           class="bg-gray-800 rounded-full py-2 px-10 focus:outline-none focus:ring-2 focus:ring-neon-blue w-full mb-2 border border-gray-700 text-white">
+                </div>
+                <a href="index.html" class="block py-2 hover:text-neon-blue border-b border-gray-800 text-white">Home</a>
+                <a href="games.html" class="block py-2 hover:text-neon-blue border-b border-gray-800 text-white">Games</a>
+                <a href="forum.html" class="block py-2 hover:text-neon-blue border-b border-gray-800 text-white">Community</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <div id="viewMode">
+            <!-- Hero Section -->
+            <section id="heroSection" class="game-hero">
+                <div class="game-hero-content">
+                    <h1 class="game-title header-font neon-title-text" id="gameTitle">Loading Game...</h1>
+
+                    <div class="game-meta" id="gameMetaTags"></div>
+                    <div class="flex flex-wrap gap-4">
+                        <button class="download-btn">
+                            <i class="fas fa-download mr-2"></i> Download Now
+                        </button>
+                        <button class="bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold">
+                            <i class="fas fa-heart mr-2"></i> Add to Wishlist
+                        </button>
+                    </div>
+                </div>
+            </section>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-12">
+                <!-- Left/Main Column -->
+                <div class="lg:col-span-2 space-y-12">
+                    <!-- Description Section -->
+                    <section class="content-container p-8">
+                        <h2 class="section-title text-3xl font-extrabold header-font">About the Game</h2>
+                        <div class="game-description text-gray-300 bg-gray-900 bg-opacity-80 rounded-lg p-6 mt-4 shadow-lg border border-neon-blue" id="gameDescriptionView">
+                            Loading game description...
+                        </div>
+                    </section>
+                    <!-- Screenshots Section -->
+                    <section class="content-container p-8">
+                        <h2 class="section-title text-3xl font-extrabold header-font">Screenshots</h2>
+                        <div class="screenshot-grid mt-6" id="screenshotsGallery">
+                            <!-- Screenshots will be loaded here -->
+                        </div>
+                    </section>
+                    <!-- Installation Notes -->
+                    <section class="content-container p-8">
+                        <h2 class="section-title text-3xl font-extrabold header-font">Installation Guide</h2>
+                        <div class="bg-gray-900 p-6 rounded-lg text-gray-300" id="installationNotesView">
+                            Loading installation notes...
+                        </div>
+                    </section>
+                    <!-- Repack Features -->
+                    <section class="content-container p-8">
+                        <h2 class="section-title text-3xl font-extrabold header-font" id="repackFeaturesHeading">Repack Features</h2>
+                        <div class="repack-features-box bg-gray-900 bg-opacity-80 rounded-lg p-6 mt-4 text-gray-200 shadow-lg border border-neon-blue" id="repackFeaturesSection">
+                            Loading repack features...
+                        </div>
+                    </section>
+                </div>
+                <!-- Right/Sidebar Column -->
+                <div class="space-y-8">
+                    <!-- Download Links -->
+                    <section class="content-container p-6">
+                        <h2 class="section-title text-3xl font-extrabold header-font">Download</h2>
+                        <div class="space-y-4" id="downloadLinksView">
+                            <!-- Download links will be loaded here -->
+                        </div>
+                    </section>
+                    <!-- System Requirements -->
+                    <section class="content-container p-6">
+                        <h2 class="section-title text-3xl font-extrabold header-font">System Requirements</h2>
+                        <div class="requirements-grid">
+                            <div class="system-req p-4 rounded-lg shadow-lg bg-gradient-to-br from-neon-blue/10 to-dark-bg/80">
+                                <h3 class="requirements-title flex items-center gap-2 text-neon-blue text-xl mb-3"><i class="fas fa-arrow-down"></i> Minimum</h3>
+                                <ul class="requirements-list space-y-2">
+                                    <!-- Minimum requirements will be loaded here -->
+                                </ul>
+                            </div>
+                            <div class="system-req p-4 rounded-lg shadow-lg bg-gradient-to-br from-neon-purple/10 to-dark-bg/80">
+                                <h3 class="requirements-title flex items-center gap-2 text-neon-purple text-xl mb-3"><i class="fas fa-arrow-up"></i> Recommended</h3>
+                                <ul class="requirements-list space-y-2">
+                                    <!-- Recommended requirements will be loaded here -->
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Additional Information -->
+                    <section class="content-container p-6">
+                        <h2 class="section-title text-3xl font-extrabold header-font">Details</h2>
+                        <div class="info-grid grid grid-cols-1 gap-y-2 gap-x-8 sm:grid-cols-2" id="detailsGrid">
+                            <div class="info-item hidden" id="row-gamePublisherView"><span class="info-label font-semibold text-neon-blue">Publisher</span><span class="info-value block mt-1" id="gamePublisherView"></span></div>
+                            <div class="info-item hidden" id="row-gameDeveloperView"><span class="info-label font-semibold text-neon-blue">Developer</span><span class="info-value block mt-1" id="gameDeveloperView"></span></div>
+                            <div class="info-item hidden" id="row-gameReleaseDateView"><span class="info-label font-semibold text-neon-blue">Release Date</span><span class="info-value block mt-1" id="gameReleaseDateView"></span></div>
+                            <div class="info-item hidden" id="row-gameGenreView"><span class="info-label font-semibold text-neon-blue">Genre</span><span class="info-value block mt-1" id="gameGenreView"></span></div>
+                            <div class="info-item hidden" id="row-originalSizeView"><span class="info-label font-semibold text-neon-blue">Original Size</span><span class="info-value block mt-1" id="originalSizeView"></span></div>
+                            <div class="info-item hidden" id="row-repackSizeView"><span class="info-label font-semibold text-neon-blue">Repack Size</span><span class="info-value block mt-1" id="repackSizeView"></span></div>
+                            <div class="info-item hidden" id="row-compressionRatioView"><span class="info-label font-semibold text-neon-blue">Compression Ratio</span><span class="info-value block mt-1" id="compressionRatioView"></span></div>
+                            <div class="info-item hidden" id="row-gameVersionView"><span class="info-label font-semibold text-neon-blue">Version</span><span class="info-value block mt-1" id="gameVersionView"></span></div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-black bg-opacity-90 py-12 mt-12 border-t border-gray-800 relative z-10">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 header-font neon-text">GAMERANG</h3>
+                    <p class="text-gray-400 mb-4">High quality compressed game repacks with all DLCs and updates included. Fast downloads with multiple mirrors.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="bg-gray-800 hover:bg-neon-blue w-10 h-10 rounded-full flex items-center justify-center transition">
+                            <i class="fab fa-discord"></i>
+                        </a>
+                        <a href="#" class="bg-gray-800 hover:bg-neon-purple w-10 h-10 rounded-full flex items-center justify-center transition">
+                            <i class="fab fa-telegram"></i>
+                        </a>
+                        <a href="#" class="bg-gray-800 hover:bg-neon-pink w-10 h-10 rounded-full flex items-center justify-center transition">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-lg">Quick Links</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="index.html" class="hover:text-neon-blue transition flex items-center"><i class="fas fa-chevron-right text-xs mr-2"></i> Home</a></li>
+                        <li><a href="games.html" class="hover:text-neon-blue transition flex items-center"><i class="fas fa-chevron-right text-xs mr-2"></i> Games</a></li>
+                        <li><a href="forum.html" class="hover:text-neon-blue transition flex items-center"><i class="fas fa-chevron-right text-xs mr-2"></i> Community</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-lg">Information</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-neon-blue transition flex items-center"><i class="fas fa-chevron-right text-xs mr-2"></i> Installation Guide</a></li>
+                        <li><a href="#" class="hover:text-neon-blue transition flex items-center"><i class="fas fa-chevron-right text-xs mr-2"></i> DMCA</a></li>
+                        <li><a href="#" class="hover:text-neon-blue transition flex items-center"><i class="fas fa-chevron-right text-xs mr-2"></i> Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-lg">Newsletter</h4>
+                    <p class="text-gray-400 mb-4">Subscribe to get notified about new releases and updates.</p>
+                    <div class="flex">
+                        <input type="email" placeholder="Your Email" class="bg-gray-900 text-white px-4 py-3 rounded-l-lg focus:outline-none w-full border border-gray-800">
+                        <button class="bg-gradient-to-r from-neon-blue to-neon-purple text-black px-4 py-3 rounded-r-lg hover:opacity-90 transition font-bold">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
+                <p>© 2025 Gamerang. All games are property of their respective owners. This site does not host any files.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script src="js/auth.js"></script>
+    <script src="js/transitions.js"></script>
+    <script>
+    // Initialize Supabase client
+    const supabaseUrl = 'https://pjlzzuoplxrftrqbhbfl.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqbHp6dW9wbHhyZnRycWJoYmZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzMTcwNjgsImV4cCI6MjA2Mzg5MzA2OH0.1U-dUVRY3qDPYsHEa0EttgKWpCRnlX3BS5SPE2qBExA';
+    
+    // Create Supabase client
+    const { createClient } = supabase;
+    window.supabaseClient = createClient(supabaseUrl, supabaseKey, {
+        auth: {
+            autoRefreshToken: true,
+            persistSession: true,
+            detectSessionInUrl: true
+        }
+    });
+    
+    // Make supabase available globally for this page
+    window.supabase = window.supabaseClient;
+    
+    console.log('🔧 Supabase client initialized for gamepage');
+    
+    // Add createParticles function
+    function createParticles() {
+        const particlesContainer = document.getElementById('particles');
+        if (!particlesContainer) return;
+        
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.width = Math.random() * 5 + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.top = Math.random() * 100 + 'vh';
+            particle.style.animationDuration = Math.random() * 20 + 10 + 's';
+            particle.style.animationDelay = Math.random() * 5 + 's';
+            particlesContainer.appendChild(particle);
+        }
+    }
+
+    async function loadGameDetails() {
+        try {
+            console.log('🎮 Starting to load game details...');
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameId = urlParams.get('id');
+            console.log('🔍 Game ID from URL:', gameId);
+            
+            if (!gameId) {
+                console.error('❌ No game ID provided in URL');
+                showErrorMessage('No game ID provided');
+                return;
+            }
+            
+            console.log('📡 Fetching game data from Supabase...');
+            const { data: games, error } = await window.supabase
+                .from('games')
+                .select('*')
+                .eq('id', gameId)
+                .limit(1);
+                
+            if (error) {
+                console.error('❌ Supabase error:', error);
+                showErrorMessage('Failed to fetch game data');
+                return;
+            }
+            
+            if (!games || games.length === 0) {
+                console.error('❌ No game found with ID:', gameId);
+                showErrorMessage('Game not found');
+                return;
+            }
+            
+            const game = games[0];
+            console.log('✅ Fetched game successfully:', game);
+            
+            // Set document title
+            document.title = `${game.title} | Gamerang`;
+            
+            // Update Hero Section
+            updateHeroSection(game);
+            
+            // Update Description
+            updateDescription(game);
+            
+            // Update Screenshots
+            updateScreenshots(game);
+            
+            // Update Installation Notes
+            updateInstallationNotes(game);
+            
+            // Update Repack Features
+            updateRepackFeatures(game);
+            
+            // Update System Requirements
+            updateSystemRequirements(game);
+            
+            // Update Download Links
+            updateDownloadLinks(game);
+            
+            // Update Details Grid
+            updateDetailsGrid(game);
+            
+            console.log('🎉 Game details loaded successfully!');
+        } catch (error) { 
+            console.error('❌ Error loading game details:', error);
+            showErrorMessage('An unexpected error occurred');
+        }
+    }
+
+    function showErrorMessage(message) {
+        const heroSection = document.getElementById('heroSection');
+        if (heroSection) {
+            heroSection.innerHTML = `
+                <div class="text-center py-16">
+                    <div class="bg-red-500/20 border border-red-500 rounded-lg p-8 max-w-md mx-auto">
+                        <i class="fas fa-exclamation-triangle text-red-400 text-4xl mb-4"></i>
+                        <h2 class="text-2xl font-bold text-red-400 mb-2">Error Loading Game</h2>
+                        <p class="text-gray-300">${message}. Please try again later.</p>
+                        <a href="games.html" class="inline-block mt-4 bg-neon-blue hover:bg-neon-purple text-white px-6 py-2 rounded transition-colors duration-300">
+                            <i class="fas fa-arrow-left mr-2"></i>Back to Games
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    function updateHeroSection(game) {
+        console.log('🖼️ Setting up hero section with cover image:', game.cover_image_url);
+        const heroSection = document.getElementById('heroSection');
+        if (heroSection) {
+            // Use the cover image directly without complex processing
+            const coverImageUrl = game.cover_image_url || 'https://via.placeholder.com/1920x1080/333/64ffda?text=No+Cover+Image';
+            console.log('🎭 Hero cover image URL:', coverImageUrl);
+            
+            heroSection.innerHTML = `
+                <div class="relative h-[32rem] md:h-[40rem] flex items-end bg-cover bg-center rounded-b-2xl shadow-xl mb-12" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url('${coverImageUrl}');">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+                    <div class="relative z-10 p-8 md:p-12 w-full">
+                        <div class="max-w-4xl">
+                            <h1 class="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg">
+                                ${game.title}
+                            </h1>
+                            <div class="flex flex-wrap items-center gap-4 mb-6">
+                                <span class="bg-blue-600 bg-opacity-90 text-white px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm">
+                                    <i class="fas fa-tag mr-1"></i>${game.genre || 'Action'}
+                                </span>
+                                <span class="bg-green-600 bg-opacity-90 text-white px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm">
+                                    <i class="fas fa-calendar mr-1"></i>${new Date(game.release_date || game.created_at).getFullYear()}
+                                </span>
+                                <span class="bg-purple-600 bg-opacity-90 text-white px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm">
+                                    <i class="fas fa-code mr-1"></i>v${game.version || '1.0'}
+                                </span>
+                                <span class="bg-orange-600 bg-opacity-90 text-white px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm">
+                                    <i class="fas fa-hdd mr-1"></i>${game.repack_size || '10'} ${game.repack_size_unit || 'GB'}
+                                </span>
+                            </div>
+                            <div class="flex gap-4">
+                                <button onclick="document.getElementById('downloadLinksView').scrollIntoView({behavior: 'smooth'})" 
+                                        class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2">
+                                    <i class="fas fa-download"></i>
+                                    Download Now
+                                </button>
+                                <button onclick="document.getElementById('screenshotsGallery').scrollIntoView({behavior: 'smooth'})" 
+                                        class="bg-gray-700 bg-opacity-90 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-xl border border-gray-600 hover:border-gray-400 transition-all duration-300 flex items-center justify-center gap-2 backdrop-blur-sm">
+                                    <i class="fas fa-images"></i>
+                                    View Screenshots
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            console.log('✅ Hero section updated successfully');
+        } else {
+            console.error('❌ Hero section element not found');
+        }
+    }
+
+    function updateDescription(game) {
+        const gameDescriptionView = document.getElementById('gameDescriptionView');
+        if (gameDescriptionView) {
+            if (game.description && game.description.trim() !== '') {
+                console.log('📝 Setting up game description');
+                const desc = game.description.trim();
+                
+                // Format description with proper paragraphs and lists
+                if (desc.includes('\n') || desc.match(/^[\-•*]/m)) {
+                    const lines = desc.split(/\r?\n/).filter(l => l.trim() !== '');
+                    if (lines.length > 1) {
+                        // Check if it's mostly bullet points
+                        const bulletLines = lines.filter(l => l.match(/^[\-•*]/)).length;
+                        if (bulletLines > lines.length / 2) {
+                            gameDescriptionView.innerHTML = '<ul class="list-disc pl-6 space-y-2">' +
+                                lines.map(line => `<li class="text-gray-300">${line.replace(/^[-•*]\s*/, '')}</li>`).join('') +
+                                '</ul>';
+                        } else {
+                            // Format as paragraphs
+                            gameDescriptionView.innerHTML = lines.map(line => 
+                                line.trim() === '' ? '' : `<p class="mb-4 text-gray-300 leading-relaxed">${line}</p>`
+                            ).join('');
+                        }
+                    } else {
+                        gameDescriptionView.innerHTML = `<p class="text-gray-300 leading-relaxed">${desc}</p>`;
+                    }
+                } else {
+                    gameDescriptionView.innerHTML = `<p class="text-gray-300 leading-relaxed">${desc}</p>`;
+                }
+                console.log('✅ Game description updated');
+            } else {
+                gameDescriptionView.innerHTML = '<p class="text-gray-400 italic">No description available</p>';
+                console.log('⚠️ No game description available');
+            }
+        }
+    }
+
+    function updateScreenshots(game) {
+        console.log('🖼️ Setting up screenshots...', game.screenshot_urls);
+        const screenshotsGallery = document.getElementById('screenshotsGallery');
+        if (screenshotsGallery) {
+            screenshotsGallery.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6';
+            screenshotsGallery.innerHTML = '';
+            
+            if (game.screenshot_urls && Array.isArray(game.screenshot_urls) && game.screenshot_urls.length > 0) {
+                console.log(`📸 Found ${game.screenshot_urls.length} screenshots`);
+                
+                // Process each screenshot directly
+                game.screenshot_urls.forEach((url, idx) => {
+                    console.log(`📷 Screenshot ${idx + 1} URL:`, url);
+                    
+                    const div = document.createElement('div');
+                    div.className = 'screenshot-item relative overflow-hidden rounded-lg shadow-lg group cursor-pointer bg-gray-800';
+                    
+                    // Use the URL directly without conversion
+                    const imageUrl = url;
+                    console.log(`📷 Screenshot ${idx + 1} final URL:`, imageUrl);
+                    
+                    div.innerHTML = `
+                        <img src="${imageUrl}" 
+                             alt="Game Screenshot ${idx+1}" 
+                             class="w-full h-48 transition-transform duration-300 group-hover:scale-110" 
+                             loading="lazy"
+                             style="display: block !important; opacity: 1 !important; visibility: visible !important; background-color: #374151; min-height: 200px; object-fit: contain; max-width: 100%;"
+                             onload="console.log('✅ Screenshot ${idx + 1} loaded successfully:', this.src); console.log('Image dimensions:', this.naturalWidth, 'x', this.naturalHeight); this.style.border='2px solid lime'; this.nextElementSibling.style.display='none';"
+                             onerror="console.error('❌ Screenshot ${idx + 1} failed to load:', this.src); this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="w-full h-48 bg-gray-700 flex-col items-center justify-center text-gray-400 hidden">
+                            <i class="fas fa-image text-3xl mb-2"></i>
+                            <span class="text-xs">Image unavailable</span>
+                            <button onclick="window.open('${imageUrl}', '_blank')" class="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs">
+                                Open Direct Link
+                            </button>
+                        </div>`;
+                    
+                    // Add click handler for lightbox
+                    div.addEventListener('click', () => {
+                        showImageLightbox(imageUrl, `${game.title} - Screenshot ${idx + 1}`);
+                    });
+                    
+                    screenshotsGallery.appendChild(div);
+                });
+                
+                console.log('✅ Screenshots gallery setup complete');
+            } else {
+                console.log('⚠️ No screenshots available');
+                screenshotsGallery.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <i class="fas fa-images text-gray-600 text-6xl mb-4"></i>
+                        <p class="text-gray-400 text-lg">No screenshots available</p>
+                        <p class="text-gray-500 text-sm">Screenshots will be displayed here when available</p>
+                    </div>
+                `;
+            }
+        } else {
+            console.error('❌ Screenshots gallery element not found');
+        }
+    }
+
+    // Lightbox functionality for viewing screenshots in full size
+    function showImageLightbox(imageUrl, title) {
+        console.log('🔍 Showing lightbox for:', title);
+        
+        // Create lightbox overlay
+        const lightbox = document.createElement('div');
+        lightbox.className = 'fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4';
+        lightbox.style.backdropFilter = 'blur(10px)';
+        
+        lightbox.innerHTML = `
+            <div class="relative max-w-7xl max-h-full">
+                <!-- Close button -->
+                <button class="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors text-2xl z-10" onclick="this.closest('.fixed').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+                
+                <!-- Image title -->
+                <div class="absolute -top-12 left-0 text-white text-lg font-semibold">
+                    ${title}
+                </div>
+                
+                <!-- Main image -->
+                <img src="${imageUrl}" 
+                     alt="${title}" 
+                     class="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+                     style="max-height: calc(100vh - 100px);">
+                
+                <!-- Instructions -->
+                <div class="absolute -bottom-12 left-1/2 transform -translate-x-1/2 text-gray-300 text-sm text-center">
+                    Click anywhere outside the image to close
+                </div>
+            </div>
+        `;
+        
+        // Close lightbox when clicking outside the image
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                lightbox.remove();
+            }
+        });
+        
+        // Close with Escape key
+        const escapeHandler = (e) => {
+            if (e.key === 'Escape') {
+                lightbox.remove();
+                document.removeEventListener('keydown', escapeHandler);
+            }
+        };
+        document.addEventListener('keydown', escapeHandler);
+        
+        // Add to page
+        document.body.appendChild(lightbox);
+        
+        // Prevent body scroll
+        document.body.style.overflow = 'hidden';
+        
+        // Restore body scroll when lightbox is removed
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList' && mutation.removedNodes.length > 0) {
+                    for (let node of mutation.removedNodes) {
+                        if (node === lightbox) {
+                            document.body.style.overflow = '';
+                            observer.disconnect();
+                            break;
+                        }
+                    }
+                }
+            });
+        });
+        observer.observe(document.body, { childList: true });
+    }
+
+    function updateInstallationNotes(game) {
+        console.log('📋 Setting up installation notes...', game.installation_notes);
+        const installationNotesView = document.getElementById('installationNotesView');
+        if (installationNotesView) {
+            if (game.installation_notes && game.installation_notes.trim() !== '') {
+                const notes = game.installation_notes.trim();
+                // Format notes with proper line breaks
+                const formattedNotes = notes.replace(/\n/g, '<br>');
+                installationNotesView.innerHTML = `
+                    <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-6">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-info-circle text-blue-400 text-xl mt-1 flex-shrink-0"></i>
+                            <div class="text-gray-300 leading-relaxed">${formattedNotes}</div>
+                        </div>
+                    </div>
+                `;
+                console.log('✅ Installation notes updated');
+            } else {
+                installationNotesView.innerHTML = '<p class="text-gray-400 italic">No installation notes available</p>';
+                console.log('⚠️ No installation notes available');
+            }
+        }
+    }
+
+    function updateRepackFeatures(game) {
+        console.log('🎁 Setting up repack features...', game.repack_features);
+        const repackFeaturesSection = document.getElementById('repackFeaturesSection');
+        if (repackFeaturesSection) {
+            if (game.repack_features && game.repack_features.trim() !== '') {
+                const features = game.repack_features.trim();
+                // Format features with proper line breaks and styling
+                const formattedFeatures = features
+                    .replace(/\n/g, '<br>')
+                    .replace(/^–\s*/gm, '<span class="text-neon-blue">•</span> ')
+                    .replace(/^-\s*/gm, '<span class="text-neon-blue">•</span> ');
+                
+                repackFeaturesSection.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="bg-gradient-to-r from-neon-blue/10 to-neon-purple/10 border border-neon-blue/30 rounded-lg p-6">
+                            <div class="flex items-start gap-3">
+                                <i class="fas fa-box-open text-neon-blue text-xl mt-1 flex-shrink-0"></i>
+                                <div class="text-gray-200 leading-relaxed whitespace-pre-line">${formattedFeatures}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                console.log('✅ Repack features updated');
+            } else {
+                repackFeaturesSection.innerHTML = '<p class="text-gray-400 italic">No repack features information available</p>';
+                console.log('⚠️ No repack features available');
+            }
+        }
+    }
+
+    function updateSystemRequirements(game) {
+        console.log('💻 Setting up system requirements...', game.system_requirements);
+        const requirementsGrid = document.querySelector('.requirements-grid');
+        if (requirementsGrid && game.system_requirements) {
+            const minReq = game.system_requirements?.minimum || {};
+            const recReq = game.system_requirements?.recommended || {};
+            const sysReqIcons = {
+                os: 'fa-desktop',
+                processor: 'fa-microchip',
+                memory: 'fa-memory',
+                graphics: 'fa-video',
+                storage: 'fa-hdd',
+            };
+            const sysReqRows = [
+                { key: 'os', label: 'OS' },
+                { key: 'processor', label: 'Processor' },
+                { key: 'memory', label: 'Memory' },
+                { key: 'graphics', label: 'Graphics' },
+                { key: 'storage', label: 'Storage' },
+            ];
+            
+            requirementsGrid.innerHTML = `
+                <div class="system-req p-6 rounded-lg shadow-lg bg-gradient-to-br from-neon-blue/10 to-dark-bg/80 border border-neon-blue/20">
+                    <h3 class="requirements-title flex items-center gap-2 text-neon-blue text-xl mb-4 font-bold">
+                        <i class="fas fa-download text-neon-blue"></i> Minimum Requirements
+                    </h3>
+                    <ul class="requirements-list space-y-3">
+                        ${sysReqRows.filter(row => minReq[row.key] && minReq[row.key].trim() !== '').map(row => `
+                            <li class="flex items-start gap-3">
+                                <i class="fas ${sysReqIcons[row.key]} text-neon-blue mt-1 flex-shrink-0"></i> 
+                                <div>
+                                    <span class="font-semibold text-white">${row.label}:</span> 
+                                    <span class="text-gray-300">${minReq[row.key]}</span>
+                                </div>
+                            </li>
+                        `).join('')}
+                        ${sysReqRows.filter(row => minReq[row.key] && minReq[row.key].trim() !== '').length === 0 ? '<li class="text-gray-400 italic">No minimum requirements specified</li>' : ''}
+                    </ul>
+                </div>
+                <div class="system-req p-6 rounded-lg shadow-lg bg-gradient-to-br from-neon-purple/10 to-dark-bg/80 border border-neon-purple/20">
+                    <h3 class="requirements-title flex items-center gap-2 text-neon-purple text-xl mb-4 font-bold">
+                        <i class="fas fa-star text-neon-purple"></i> Recommended Requirements
+                    </h3>
+                    <ul class="requirements-list space-y-3">
+                        ${sysReqRows.filter(row => recReq[row.key] && recReq[row.key].trim() !== '').map(row => `
+                            <li class="flex items-start gap-3">
+                                <i class="fas ${sysReqIcons[row.key]} text-neon-purple mt-1 flex-shrink-0"></i> 
+                                <div>
+                                    <span class="font-semibold text-white">${row.label}:</span> 
+                                    <span class="text-gray-300">${recReq[row.key]}</span>
+                                </div>
+                            </li>
+                        `).join('')}
+                        ${sysReqRows.filter(row => recReq[row.key] && recReq[row.key].trim() !== '').length === 0 ? '<li class="text-gray-400 italic">No recommended requirements specified</li>' : ''}
+                    </ul>
+                </div>
+            `;
+            console.log('✅ System requirements updated');
+        } else {
+            console.log('⚠️ No system requirements section found or no requirements data');
+        }
+    }
+
+    function updateDownloadLinks(game) {
+        console.log('🔗 Setting up download links...', game.download_links);
+        const downloadLinksView = document.getElementById('downloadLinksView');
+        if (downloadLinksView) {
+            downloadLinksView.innerHTML = '';
+            if (game.download_links && Array.isArray(game.download_links) && game.download_links.length > 0) {
+                console.log(`📥 Found ${game.download_links.length} download links`);
+                
+                game.download_links.filter(link => link.url && link.url.trim() !== '').forEach((link, idx) => {
+                    const partLabel = link.name && link.name.trim() !== '' ? link.name : (game.download_links.length > 1 ? `Part ${idx + 1}` : 'Download');
+                    const card = document.createElement('div');
+                    card.className = 'download-card p-4 rounded-lg mb-4 shadow-lg bg-gradient-to-r from-neon-blue/10 to-neon-purple/10 border border-neon-blue/30 hover:border-neon-blue transition-all duration-300';
+                    card.innerHTML = `
+                        <div class="flex items-center justify-between gap-4 mb-2">
+                            <div class="flex items-center gap-3">
+                                <span class="inline-block bg-neon-blue text-black text-xs font-bold px-3 py-1 rounded-full">${partLabel}</span>
+                                <a href="${link.url}" target="_blank" class="text-lg font-semibold text-neon-blue hover:text-neon-purple flex items-center gap-2 transition-colors duration-300">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            </div>
+                            <button class="copy-link-btn bg-gray-800 hover:bg-neon-blue text-white px-3 py-1 rounded transition-all duration-300" data-link="${link.url}">
+                                <i class="fas fa-copy"></i> Copy Link
+                            </button>
+                        </div>
+                        ${link.notes && link.notes.trim() !== '' ? `
+                            <div class="mt-3 text-sm text-gray-300 bg-gray-800/50 p-3 rounded border-l-2 border-neon-blue/50">
+                                <div class="whitespace-pre-line">${link.notes}</div>
+                            </div>
+                        ` : ''}
+                    `;
+                    downloadLinksView.appendChild(card);
+                });
+                
+                // Copy to clipboard functionality
+                downloadLinksView.querySelectorAll('.copy-link-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        navigator.clipboard.writeText(this.getAttribute('data-link'));
+                        this.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                        setTimeout(() => { this.innerHTML = '<i class="fas fa-copy"></i> Copy Link'; }, 1500);
+                    });
+                });
+                console.log('✅ Download links updated');
+            } else {
+                console.log('⚠️ No download links available');
+                downloadLinksView.innerHTML = '<p class="text-gray-400 text-center py-8">No download links available</p>';
+            }
+        } else {
+            console.error('❌ Download links view element not found');
+        }
+    }
+
+    function updateDetailsGrid(game) {
+        console.log('📊 Setting up details grid...');
+        
+        // Helper function to show/hide detail rows
+        function updateDetailRow(rowId, valueId, value) {
+            const row = document.getElementById(rowId);
+            const valueElement = document.getElementById(valueId);
+            if (row && valueElement) {
+                if (value && value.toString().trim() !== '') {
+                    valueElement.textContent = value;
+                    row.classList.remove('hidden');
+                } else {
+                    row.classList.add('hidden');
+                }
+            }
+        }
+
+        // Update all detail rows
+        updateDetailRow('row-gamePublisherView', 'gamePublisherView', game.publisher);
+        updateDetailRow('row-gameDeveloperView', 'gameDeveloperView', game.developer);
+        updateDetailRow('row-gameReleaseDateView', 'gameReleaseDateView', 
+            game.release_date ? new Date(game.release_date).toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            }) : null
+        );
+        updateDetailRow('row-gameGenreView', 'gameGenreView', game.genre);
+        updateDetailRow('row-originalSizeView', 'originalSizeView', 
+            game.original_size ? `${game.original_size} ${game.original_size_unit || 'GB'}` : null
+        );
+        updateDetailRow('row-repackSizeView', 'repackSizeView', 
+            game.repack_size ? `${game.repack_size} ${game.repack_size_unit || 'GB'}` : null
+        );
+        updateDetailRow('row-compressionRatioView', 'compressionRatioView', game.compression_ratio);
+        updateDetailRow('row-gameVersionView', 'gameVersionView', game.version);
+        
+        console.log('✅ Details grid updated');
+    }
+
+    // Add a check for black/empty images after a delay
+    setTimeout(() => {
+        const screenshotImages = document.querySelectorAll('.screenshot-item img');
+        console.log(`🔍 Checking ${screenshotImages.length} screenshots for empty content...`);
+        
+        screenshotImages.forEach((img, idx) => {
+            if (img.complete && img.style.display !== 'none') {
+                // Simple check: if image loaded but has very small dimensions or appears to be a placeholder
+                if (img.naturalWidth <= 1 || img.naturalHeight <= 1) {
+                    console.warn(`⚠️ Screenshot ${idx + 1} has invalid dimensions (${img.naturalWidth}x${img.naturalHeight}), showing fallback`);
+                    img.style.display = 'none';
+                    const fallback = img.nextElementSibling;
+                    if (fallback) fallback.style.display = 'flex';
+                } else {
+                    console.log(`✅ Screenshot ${idx + 1} appears valid (${img.naturalWidth}x${img.naturalHeight})`);
+                }
+            }
+        });
+    }, 2000);
+
+    document.addEventListener('DOMContentLoaded', () => {
+        createParticles();
+        loadGameDetails();
+    });
+    </script>
+</body>
+</html>
