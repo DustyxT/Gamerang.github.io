@@ -162,8 +162,8 @@
         
         /* Background Video Styles for Lower Sections */
         .video-background-lower {
-            position: fixed;
-            top: 500px;
+            position: absolute;
+            top: 0;
             left: 0;
             right: 0;
             bottom: 0;
@@ -327,95 +327,98 @@
         </div>
     </section>
     
-    <!-- Background Video Container for All Lower Sections -->
-    <div class="video-background-lower">
-        <video autoplay muted loop class="background-video-lower">
-            <source src="https://pjlzzuoplxrftrqbhbfl.supabase.co/storage/v1/object/public/background-video-forum-page/peaceful-wild-west-red-dead-redemption-2-moewalls-com.mp4" type="video/mp4">
-        </video>
-        <div class="video-overlay"></div>
-    </div>
-    
-    <!-- Latest Releases -->
-    <section class="py-16 relative" id="latest">
-        <div class="container mx-auto px-4 relative z-10">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-10">
-                <div>
-                    <h2 class="text-3xl font-bold mb-2">Latest Releases</h2>
-                    <p class="text-gray-400">Freshly repacked games with all updates included</p>
-                </div>
-                <a href="games.html" class="mt-4 md:mt-0 flex items-center text-cyan-400 hover:text-cyan-300 transition">
-                    View All Games <i class="fas fa-arrow-right ml-2"></i>
-                </a>
-            </div>
-            
-            <!-- Search Results Section (hidden by default) -->
-            <div id="searchResults" style="display: none;">
-                <div class="mb-6">
-                    <h3 class="text-2xl font-bold">Search Results</h3>
-                    <p class="text-gray-400">Found <span id="searchCount">0</span> games</p>
-                    <button id="clearSearch" class="text-cyan-400 hover:text-cyan-300 mt-2">
-                        <i class="fas fa-times mr-1"></i> Clear Search
-                    </button>
-                </div>
-                <div id="searchLoading" class="text-center py-8" style="display: none;">
-                    <i class="fas fa-spinner fa-spin text-4xl text-cyan-400"></i>
-                    <p class="mt-4 text-gray-400">Searching...</p>
-                </div>
-                <div id="searchResultsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
-                <div id="noResults" class="text-center py-8" style="display: none;">
-                    <p class="text-gray-400">No games found matching your search.</p>
-                </div>
-                <div id="searchError" class="text-center py-8 text-red-400" style="display: none;">
-                    <p>An error occurred while searching. Please try again.</p>
-                </div>
-                <div id="pagination" class="mt-8 flex justify-center" style="display: none;">
-                    <button id="prevPage" class="px-4 py-2 bg-gray-800 rounded-lg mr-2 hover:bg-gray-700 disabled:opacity-50">Previous</button>
-                    <div id="pageNumbers" class="flex space-x-2"></div>
-                    <button id="nextPage" class="px-4 py-2 bg-gray-800 rounded-lg ml-2 hover:bg-gray-700 disabled:opacity-50">Next</button>
-                </div>
-            </div>
-            
-            <div id="latestReleases" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Latest games will be loaded here -->
-                <div class="game-card steam-gradient rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition animate-pulse h-96">
-                    <div class="bg-gray-700 h-48 w-full"></div>
-                    <div class="p-6">
-                        <div class="h-6 bg-gray-700 rounded w-3/4 mb-4"></div>
-                        <div class="h-4 bg-gray-700 rounded w-full mb-2"></div>
-                        <div class="h-4 bg-gray-700 rounded w-5/6 mb-6"></div>
-                        <div class="flex justify-between">
-                            <div class="h-4 bg-gray-700 rounded w-1/4"></div>
-                            <div class="h-10 bg-gray-700 rounded w-1/3"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="game-card steam-gradient rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition animate-pulse h-96">
-                    <div class="bg-gray-700 h-48 w-full"></div>
-                    <div class="p-6">
-                        <div class="h-6 bg-gray-700 rounded w-3/4 mb-4"></div>
-                        <div class="h-4 bg-gray-700 rounded w-full mb-2"></div>
-                        <div class="h-4 bg-gray-700 rounded w-5/6 mb-6"></div>
-                        <div class="flex justify-between">
-                            <div class="h-4 bg-gray-700 rounded w-1/4"></div>
-                            <div class="h-10 bg-gray-700 rounded w-1/3"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="game-card steam-gradient rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition animate-pulse h-96">
-                    <div class="bg-gray-700 h-48 w-full"></div>
-                    <div class="p-6">
-                        <div class="h-6 bg-gray-700 rounded w-3/4 mb-4"></div>
-                        <div class="h-4 bg-gray-700 rounded w-full mb-2"></div>
-                        <div class="h-4 bg-gray-700 rounded w-5/6 mb-6"></div>
-                        <div class="flex justify-between">
-                            <div class="h-4 bg-gray-700 rounded w-1/4"></div>
-                            <div class="h-10 bg-gray-700 rounded w-1/3"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!-- Container for all sections with background video -->
+    <div class="relative">
+        <!-- Background Video Container for All Lower Sections -->
+        <div class="video-background-lower">
+            <video autoplay muted loop class="background-video-lower">
+                <source src="https://pjlzzuoplxrftrqbhbfl.supabase.co/storage/v1/object/public/background-video-forum-page/peaceful-wild-west-red-dead-redemption-2-moewalls-com.mp4" type="video/mp4">
+            </video>
+            <div class="video-overlay"></div>
         </div>
-    </section>
+        
+        <!-- Latest Releases -->
+        <section class="py-16 relative" id="latest">
+            <div class="container mx-auto px-4 relative z-10">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-10">
+                    <div>
+                        <h2 class="text-3xl font-bold mb-2">Latest Releases</h2>
+                        <p class="text-gray-400">Freshly repacked games with all updates included</p>
+                    </div>
+                    <a href="games.html" class="mt-4 md:mt-0 flex items-center text-cyan-400 hover:text-cyan-300 transition">
+                        View All Games <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+                
+                <!-- Search Results Section (hidden by default) -->
+                <div id="searchResults" style="display: none;">
+                    <div class="mb-6">
+                        <h3 class="text-2xl font-bold">Search Results</h3>
+                        <p class="text-gray-400">Found <span id="searchCount">0</span> games</p>
+                        <button id="clearSearch" class="text-cyan-400 hover:text-cyan-300 mt-2">
+                            <i class="fas fa-times mr-1"></i> Clear Search
+                        </button>
+                    </div>
+                    <div id="searchLoading" class="text-center py-8" style="display: none;">
+                        <i class="fas fa-spinner fa-spin text-4xl text-cyan-400"></i>
+                        <p class="mt-4 text-gray-400">Searching...</p>
+                    </div>
+                    <div id="searchResultsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+                    <div id="noResults" class="text-center py-8" style="display: none;">
+                        <p class="text-gray-400">No games found matching your search.</p>
+                    </div>
+                    <div id="searchError" class="text-center py-8 text-red-400" style="display: none;">
+                        <p>An error occurred while searching. Please try again.</p>
+                    </div>
+                    <div id="pagination" class="mt-8 flex justify-center" style="display: none;">
+                        <button id="prevPage" class="px-4 py-2 bg-gray-800 rounded-lg mr-2 hover:bg-gray-700 disabled:opacity-50">Previous</button>
+                        <div id="pageNumbers" class="flex space-x-2"></div>
+                        <button id="nextPage" class="px-4 py-2 bg-gray-800 rounded-lg ml-2 hover:bg-gray-700 disabled:opacity-50">Next</button>
+                    </div>
+                </div>
+                
+                <div id="latestReleases" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Latest games will be loaded here -->
+                    <div class="game-card steam-gradient rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition animate-pulse h-96">
+                        <div class="bg-gray-700 h-48 w-full"></div>
+                        <div class="p-6">
+                            <div class="h-6 bg-gray-700 rounded w-3/4 mb-4"></div>
+                            <div class="h-4 bg-gray-700 rounded w-full mb-2"></div>
+                            <div class="h-4 bg-gray-700 rounded w-5/6 mb-6"></div>
+                            <div class="flex justify-between">
+                                <div class="h-4 bg-gray-700 rounded w-1/4"></div>
+                                <div class="h-10 bg-gray-700 rounded w-1/3"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-card steam-gradient rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition animate-pulse h-96">
+                        <div class="bg-gray-700 h-48 w-full"></div>
+                        <div class="p-6">
+                            <div class="h-6 bg-gray-700 rounded w-3/4 mb-4"></div>
+                            <div class="h-4 bg-gray-700 rounded w-full mb-2"></div>
+                            <div class="h-4 bg-gray-700 rounded w-5/6 mb-6"></div>
+                            <div class="flex justify-between">
+                                <div class="h-4 bg-gray-700 rounded w-1/4"></div>
+                                <div class="h-10 bg-gray-700 rounded w-1/3"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-card steam-gradient rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition animate-pulse h-96">
+                        <div class="bg-gray-700 h-48 w-full"></div>
+                        <div class="p-6">
+                            <div class="h-6 bg-gray-700 rounded w-3/4 mb-4"></div>
+                            <div class="h-4 bg-gray-700 rounded w-full mb-2"></div>
+                            <div class="h-4 bg-gray-700 rounded w-5/6 mb-6"></div>
+                            <div class="flex justify-between">
+                                <div class="h-4 bg-gray-700 rounded w-1/4"></div>
+                                <div class="h-10 bg-gray-700 rounded w-1/3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
     <!-- CTA Section -->
     <section class="py-20 steam-gradient border-t border-b border-cyan-500/20 relative z-10">
         <div class="container mx-auto px-4 text-center">
@@ -485,6 +488,7 @@
             </div>
         </div>
     </footer>
+    </div> <!-- Close container for sections with background video -->
     <!-- Back to Top Button -->
     <button id="backToTop" class="fixed bottom-8 right-8 bg-cyan-600 hover:bg-cyan-700 text-white w-12 h-12 rounded-full flex items-center justify-center transition opacity-0 invisible">
         <i class="fas fa-arrow-up"></i>
