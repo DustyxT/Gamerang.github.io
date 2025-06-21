@@ -1,21 +1,48 @@
-// Import Supabase configuration
-import { supabase } from './supabase-config.js';
+// Gamesubmit functionality - Direct Supabase integration without server
+console.log('🚀 Loading gamesubmit.js...');
 
-// Use consistent naming with other modules
-const supabaseClient = supabase;
+// Global variables
+let supabaseClient = null;
+let currentUser = null;
+
+// Initialize Supabase client (fallback to window.supabase if module import fails)
+async function initializeSupabase() {
+    try {
+        if (window.supabase) {
+            supabaseClient = window.supabase;
+            console.log('✅ Using window.supabase client');
+            return true;
+        } else {
+            console.error('❌ Supabase client not available');
+            return false;
+        }
+    } catch (error) {
+        console.error('❌ Failed to initialize Supabase:', error);
+        return false;
+    }
+}
 
 // Check authentication status
 async function checkAuth() {
     try {
+        if (!supabaseClient) {
+            console.error('❌ Supabase client not initialized');
+            return false;
+        }
+
         const { data: { session }, error } = await supabaseClient.auth.getSession();
         if (error) {
             console.error('Auth error:', error);
             throw error;
         }
         if (!session) {
+            console.log('❌ No session found, redirecting to login');
             window.location.href = 'login.html';
             return false;
         }
+        
+        currentUser = session.user;
+        console.log('✅ User authenticated:', currentUser.email);
         return true;
     } catch (error) {
         console.error('Auth check failed:', error);
@@ -24,7 +51,7 @@ async function checkAuth() {
     }
 }
 
-// Enhanced storage bucket checking with better error handling
+// Check storage buckets
 async function checkBuckets() {
     try {
         console.log('🔍 Checking storage buckets...');
@@ -32,7 +59,9 @@ async function checkBuckets() {
         const { data: buckets, error } = await supabaseClient.storage.listBuckets();
         if (error) {
             console.error('❌ Error listing buckets:', error);
-            throw new Error(`Failed to access storage: ${error.message}`);
+            // Create bucket if it doesn't exist
+            await createRequiredBucket();
+            return true;
         }
         
         console.log('📦 Available buckets:', buckets.map(b => b.id));
@@ -42,70 +71,65 @@ async function checkBuckets() {
         const existingBuckets = buckets.map(bucket => bucket.id);
         
         if (!existingBuckets.includes(requiredBucket)) {
-            console.error(`❌ Missing storage bucket: ${requiredBucket}`);
-            console.log('Available buckets:', existingBuckets);
-            showStorageError();
-            throw new Error(`Storage bucket '${requiredBucket}' not found. Please ensure your Supabase setup includes the required storage bucket.`);
+            console.log(`📦 Creating missing bucket: ${requiredBucket}`);
+            await createRequiredBucket();
+        } else {
+            console.log('✅ Required storage bucket is available:', requiredBucket);
         }
         
-        console.log('✅ Required storage bucket is available:', requiredBucket);
-        await testBucketPermissions(requiredBucket);
         return true;
     } catch (error) {
         console.error('🚨 Bucket check failed:', error);
-        throw error;
+        showStorageWarning();
+        return false;
     }
 }
 
-// Test bucket permissions
-async function testBucketPermissions(bucketId) {
+// Create required storage bucket
+async function createRequiredBucket() {
     try {
-        console.log(`🔐 Testing permissions for bucket: ${bucketId}`);
+        const { data, error } = await supabaseClient.storage.createBucket('games-images', {
+            public: true,
+            allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+            fileSizeLimit: 52428800 // 50MB
+        });
         
-        const { data, error } = await supabaseClient.storage
-            .from(bucketId)
-            .list('', { limit: 1 });
-            
-        if (error) {
-            console.warn('⚠️ Bucket permission test failed:', error.message);
+        if (error && !error.message.includes('already exists')) {
+            console.error('❌ Failed to create bucket:', error);
+            showStorageWarning();
         } else {
-            console.log('✅ Bucket permissions test passed');
+            console.log('✅ Storage bucket created or already exists');
         }
     } catch (error) {
-        console.warn('⚠️ Could not test bucket permissions:', error.message);
+        console.error('❌ Error creating bucket:', error);
+        showStorageWarning();
     }
 }
 
-// Show storage error message to user
-function showStorageError() {
-    const existingError = document.querySelector('.storage-error-message');
-    if (existingError) existingError.remove();
+// Show storage warning
+function showStorageWarning() {
+    const existingWarning = document.querySelector('.storage-warning');
+    if (existingWarning) return;
     
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'storage-error-message bg-red-600 border border-red-500 text-white px-4 py-3 rounded mb-4';
-    errorDiv.innerHTML = `
+    const warningDiv = document.createElement('div');
+    warningDiv.className = 'storage-warning bg-yellow-600 border border-yellow-500 text-white px-4 py-3 rounded mb-4';
+    warningDiv.innerHTML = `
         <div class="flex items-center">
             <i class="fas fa-exclamation-triangle mr-2"></i>
             <div>
-                <strong>Storage Warning:</strong> Storage bucket 'games-images' not found. 
-                Please ensure your Supabase setup includes the required storage bucket.
-                <br>
-                <small>File uploads may not work properly. Please contact the administrator.</small>
+                <strong>Storage Notice:</strong> Image uploads may be limited. 
+                Contact administrator if you experience issues.
             </div>
         </div>
     `;
     
     const form = document.getElementById('gameSubmissionForm');
-    form.insertBefore(errorDiv, form.firstChild);
+    if (form) {
+        form.insertBefore(warningDiv, form.firstChild);
+    }
 }
 
-// Remove storage error message
-function removeStorageError() {
-    const existingError = document.querySelector('.storage-error-message');
-    if (existingError) existingError.remove();
-}
-
-// Generate unique file path for uploads
+// Generate unique file path
 function generateFilePath(userId, type, originalName) {
     const timestamp = Date.now();
     const fileExt = originalName.split('.').pop().toLowerCase();
@@ -113,131 +137,90 @@ function generateFilePath(userId, type, originalName) {
     return `${type}/${userId}/${timestamp}_${randomId}.${fileExt}`;
 }
 
-// Upload file with retry logic
-async function uploadFileWithRetry(file, filePath, maxRetries = 3) {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        try {
-            console.log(`📤 Uploading ${filePath} (attempt ${attempt}/${maxRetries})`);
-            
-            const { data, error } = await supabaseClient.storage
-                .from('games-images')
-                .upload(filePath, file);
+// Upload file to Supabase storage
+async function uploadFile(file, filePath) {
+    try {
+        console.log(`📤 Uploading ${filePath}...`);
+        
+        const { data, error } = await supabaseClient.storage
+            .from('games-images')
+            .upload(filePath, file, {
+                cacheControl: '3600',
+                upsert: true
+            });
 
-            if (error) {
-                if (error.message.includes('duplicate') || error.message.includes('already exists')) {
-                    // File already exists, try with new timestamp
-                    const newPath = generateFilePath(filePath.split('/')[1], filePath.split('/')[0], file.name);
-                    console.log(`🔄 File exists, retrying with new path: ${newPath}`);
-                    return await uploadFileWithRetry(file, newPath, maxRetries - attempt + 1);
-                }
-                throw error;
-            }
-
-            console.log(`✅ Upload successful: ${filePath}`);
-            
-            // Get public URL
-            const { data: publicUrl } = supabaseClient.storage
-                .from('games-images')
-                .getPublicUrl(filePath);
-            
-            return publicUrl.publicUrl;
-        } catch (error) {
-            console.error(`❌ Upload attempt ${attempt} failed:`, error);
-            if (attempt === maxRetries) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Wait before retry
+        if (error) {
+            console.error('❌ Upload error:', error);
+            throw error;
         }
+
+        console.log(`✅ Upload successful: ${filePath}`);
+        
+        // Get public URL
+        const { data: publicUrl } = supabaseClient.storage
+            .from('games-images')
+            .getPublicUrl(filePath);
+        
+        return publicUrl.publicUrl;
+    } catch (error) {
+        console.error(`❌ Upload failed:`, error);
+        throw error;
     }
 }
 
-// Handle file input changes and preview
+// Setup file input handlers
 function setupFileInputs() {
-    console.log('🎯 [v3] Setting up file inputs...');
+    console.log('🎯 Setting up file inputs...');
 
-        // --- Cover Image Setup ---
+    // Cover Image Setup
     const coverInput = document.getElementById('coverImage');
     const coverPreview = document.getElementById('coverPreview');
-    // The 'coverUploadArea' is now the <label for="coverImage">
-    const coverUploadArea = document.querySelector('label[for="coverImage"]'); // More direct selection
 
-    if (coverInput && coverPreview && coverUploadArea) {
-        console.log('📁 [v5] Cover input, preview, and new upload label found.');
-
-        // The following block is now redundant due to the <label for="coverImage">
-        // The native label behavior should handle the click automatically.
-        // Commenting out to rely on native label behavior first.
-        /*
-        if (!coverUploadArea.dataset.listenerAttached) {
-            coverUploadArea.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation(); 
-                console.log('🖱️ Cover upload area clicked. Triggering #coverImage.click()');
-                coverInput.click();
-            });
-            coverUploadArea.dataset.listenerAttached = 'true';
-        }
-        */
+    if (coverInput && coverPreview) {
+        console.log('📁 Cover input and preview found');
 
         coverInput.addEventListener('change', (e) => {
-            console.log('🖼️ Cover input changed.');
+            console.log('🖼️ Cover input changed');
             const file = e.target.files[0];
             if (file) {
                 if (file.size > 52428800) { // 50MB
                     alert('Cover image must be smaller than 50MB');
-                    coverInput.value = ''; return;
+                    coverInput.value = '';
+                    return;
                 }
+                
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    const img = coverPreview.querySelector('img') || document.createElement('img');
+                    let img = coverPreview.querySelector('img');
+                    if (!img) {
+                        img = document.createElement('img');
+                        img.className = 'preview-image';
+                        coverPreview.appendChild(img);
+                    }
                     img.src = event.target.result;
-                    img.className = 'preview-image';
-                    if (!coverPreview.querySelector('img')) coverPreview.appendChild(img);
                     coverPreview.classList.remove('hidden');
                 };
                 reader.readAsDataURL(file);
             }
         });
-    } else {
-        if (!coverInput) console.error('❌ Cover input element (#coverImage) NOT found!');
-        if (!coverPreview) console.error('❌ Cover preview element (#coverPreview) NOT found!');
-        if (!coverUploadArea) console.error('❌ Cover upload area (.file-upload for cover) NOT found!');
     }
 
-    // --- Screenshots Setup ---
+    // Screenshots Setup
     const screenshotsInput = document.getElementById('screenshots');
     const screenshotsPreview = document.getElementById('screenshotsPreview');
-    // The 'screenshotsUploadArea' is now the <label for="screenshots">
-    const screenshotsUploadArea = document.querySelector('label[for="screenshots"]'); // More direct selection
 
-    if (screenshotsInput && screenshotsPreview && screenshotsUploadArea) {
-        console.log('📷 [v4] Screenshots input, preview, and new upload label found.');
+    if (screenshotsInput && screenshotsPreview) {
+        console.log('📷 Screenshots input and preview found');
 
-        // The following block might be redundant now due to the <label for="screenshots">
-        // It's commented out to rely on the native label behavior first.
-        /*
-        if (!screenshotsUploadArea.dataset.listenerAttached) {
-            screenshotsUploadArea.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation(); 
-                console.log('🖱️ [v4] Screenshots upload label clicked (JS listener). Attempting to trigger #screenshots.click()');
-                document.getElementById('screenshots').click(); 
-            });
-            screenshotsUploadArea.dataset.listenerAttached = 'true';
-            console.log('📷 JS Click listener was attached to screenshotsUploadArea (label).');
-        } else {
-            console.log('📷 JS Click listener for screenshotsUploadArea (label) already attached or not needed.');
-        }
-        */
-        console.log('📷 [v4] Relying on native <label for=\"screenshots\"> behavior to trigger file dialog.');
-
-        // This event listener is still crucial for handling selected files
         screenshotsInput.addEventListener('change', (e) => {
-            console.log(`🖼️ [v4] Screenshots input changed. ${e.target.files.length} files selected.`);
+            console.log(`🖼️ Screenshots changed: ${e.target.files.length} files`);
             screenshotsPreview.innerHTML = '';
             const files = Array.from(e.target.files);
 
             if (files.length > 10) {
                 alert('Maximum 10 screenshots allowed');
-                screenshotsInput.value = ''; return;
+                screenshotsInput.value = '';
+                return;
             }
 
             if (files.length > 0) {
@@ -257,7 +240,7 @@ function setupFileInputs() {
 
             if (!allFilesValid) {
                 screenshotsInput.value = '';
-                screenshotsPreview.innerHTML = ''; 
+                screenshotsPreview.innerHTML = '';
                 return;
             }
 
@@ -267,7 +250,7 @@ function setupFileInputs() {
                     const div = document.createElement('div');
                     div.className = 'relative';
                     div.innerHTML = `
-                        <img src="${event.target.result}" alt="Screenshot Preview ${index + 1}" class="preview-image w-full rounded border-2 border-gray-600">
+                        <img src="${event.target.result}" alt="Screenshot ${index + 1}" class="preview-image w-full rounded border-2 border-gray-600">
                         <div class="absolute top-1 left-1 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">${index + 1}</div>
                     `;
                     screenshotsPreview.appendChild(div);
@@ -275,10 +258,6 @@ function setupFileInputs() {
                 reader.readAsDataURL(file);
             });
         });
-    } else {
-        if (!screenshotsInput) console.error('❌ Screenshots input element (#screenshots) NOT found!');
-        if (!screenshotsPreview) console.error('❌ Screenshots preview element (#screenshotsPreview) NOT found!');
-        if (!screenshotsUploadArea) console.error('❌ Screenshots upload area (.file-upload for screenshots) NOT found!');
     }
 }
 
@@ -299,22 +278,22 @@ window.addDownloadLink = function() {
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <label for="linkName${linkCount}" class="block text-gray-300 mb-1 text-sm">Link Name</label>
-                <input type="text" id="linkName${linkCount}" name="linkName[]" 
-                       class="w-full bg-gray-600 border border-gray-500 rounded px-3 py-1 requirement-input">
+                <label class="block text-gray-300 mb-1 text-sm">Link Name</label>
+                <input type="text" name="linkName[]" 
+                       class="w-full bg-gray-600 border border-gray-500 rounded px-3 py-1">
             </div>
             
             <div>
-                <label for="linkUrl${linkCount}" class="block text-gray-300 mb-1 text-sm">URL *</label>
-                <input type="url" id="linkUrl${linkCount}" name="linkUrl[]" required 
-                       class="w-full bg-gray-600 border border-gray-500 rounded px-3 py-1 requirement-input">
+                <label class="block text-gray-300 mb-1 text-sm">URL *</label>
+                <input type="url" name="linkUrl[]" required 
+                       class="w-full bg-gray-600 border border-gray-500 rounded px-3 py-1">
             </div>
         </div>
         
         <div class="mt-3">
-            <label for="linkNotes${linkCount}" class="block text-gray-300 mb-1 text-sm">Notes (optional)</label>
-            <textarea id="linkNotes${linkCount}" name="linkNotes[]" rows="2"
-                      class="w-full bg-gray-600 border border-gray-500 rounded px-3 py-1 requirement-input"></textarea>
+            <label class="block text-gray-300 mb-1 text-sm">Notes (optional)</label>
+            <textarea name="linkNotes[]" rows="2"
+                      class="w-full bg-gray-600 border border-gray-500 rounded px-3 py-1"></textarea>
         </div>
     `;
     
@@ -322,59 +301,52 @@ window.addDownloadLink = function() {
 };
 
 window.removeDownloadLink = function(button) {
-    button.closest('.download-link').remove();
+    const container = document.getElementById('downloadLinksContainer');
+    if (container.children.length > 1) {
+        button.closest('.download-link').remove();
+    }
 };
 
-// Handle form submission with improved file uploads
+// Handle form submission
 async function handleSubmit(e) {
     e.preventDefault();
     
     try {
-        // Show loading state
         const submitButton = e.target.querySelector('button[type="submit"]');
         const originalButtonText = submitButton.innerHTML;
         submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Submitting...';
         submitButton.disabled = true;
 
-        // Get the current user's session
-        const { data: { session }, error: authError } = await supabaseClient.auth.getSession();
-        if (authError || !session) {
+        if (!currentUser) {
             throw new Error('You must be logged in to submit a game');
         }
-        const userId = session.user.id;
 
-        // Remove any existing error messages
-        removeStorageError();
-
-        // Check if storage buckets exist before attempting uploads
-        await checkBuckets();
-
-        // Upload cover image with improved path structure
+        // Upload cover image
         let coverImageUrl = null;
         const coverImageFile = document.getElementById('coverImage').files[0];
         if (coverImageFile) {
-            console.log('📤 Starting cover image upload...');
-            const coverPath = generateFilePath(userId, 'covers', coverImageFile.name);
-            coverImageUrl = await uploadFileWithRetry(coverImageFile, coverPath);
+            console.log('📤 Uploading cover image...');
+            const coverPath = generateFilePath(currentUser.id, 'covers', coverImageFile.name);
+            coverImageUrl = await uploadFile(coverImageFile, coverPath);
             console.log('✅ Cover image uploaded:', coverImageUrl);
         }
 
-        // Upload screenshots with improved path structure
+        // Upload screenshots
         const screenshotUrls = [];
         const screenshotFiles = document.getElementById('screenshots').files;
         if (screenshotFiles.length > 0) {
-            console.log(`📤 Starting upload of ${screenshotFiles.length} screenshots...`);
+            console.log(`📤 Uploading ${screenshotFiles.length} screenshots...`);
             
             for (let i = 0; i < screenshotFiles.length; i++) {
                 const file = screenshotFiles[i];
-                const screenshotPath = generateFilePath(userId, 'screenshots', file.name);
-                const screenshotUrl = await uploadFileWithRetry(file, screenshotPath);
+                const screenshotPath = generateFilePath(currentUser.id, 'screenshots', file.name);
+                const screenshotUrl = await uploadFile(file, screenshotPath);
                 screenshotUrls.push(screenshotUrl);
                 console.log(`✅ Screenshot ${i + 1}/${screenshotFiles.length} uploaded`);
             }
         }
 
-        // Prepare the game data - NOW INCLUDING user_id (fixed in database)
+        // Prepare game data
         const gameData = {
             title: document.getElementById('gameTitle').value,
             description: document.getElementById('gameDescription').value,
@@ -413,31 +385,28 @@ async function handleSubmit(e) {
                 url: link.querySelector('input[name="linkUrl[]"]').value,
                 notes: link.querySelector('textarea[name="linkNotes[]"]').value || null
             })),
-            user_id: userId  // This will now work because we added the column
+            user_id: currentUser.id,
+            submitted_by: currentUser.email,
+            created_at: new Date().toISOString()
         };
 
-        console.log('📤 Submitting game data:', gameData);
+        console.log('📤 Submitting game data to Supabase...');
 
-        // Submit to server
-        const response = await fetch('/api/submit-game', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(gameData)
-        });
+        // Insert directly into Supabase
+        const { data, error } = await supabaseClient
+            .from('games')
+            .insert([gameData])
+            .select();
 
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-            console.error('Server error:', result);
-            throw new Error(result.message || 'Failed to submit game');
+        if (error) {
+            console.error('❌ Supabase error:', error);
+            throw new Error(`Database error: ${error.message}`);
         }
 
-        console.log('✅ Game submitted successfully:', result.game);
+        console.log('✅ Game submitted successfully:', data);
 
         // Show success message
-        alert('🎉 Game submitted successfully! Images have been uploaded to storage.');
+        alert('🎉 Game submitted successfully! Your submission is now pending review.');
         
         // Reset form
         document.getElementById('gameSubmissionForm').reset();
@@ -459,20 +428,27 @@ async function handleSubmit(e) {
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Initializing game submission page...');
     
-    // Check authentication first
-    if (await checkAuth()) {
-        console.log('✅ User authenticated, setting up form...');
-        
-        try {
+    // Initialize Supabase
+    if (await initializeSupabase()) {
+        // Check authentication
+        if (await checkAuth()) {
+            console.log('✅ User authenticated, setting up form...');
+            
+            // Check storage buckets
             await checkBuckets();
-            console.log('✅ Storage buckets verified');
-        } catch (error) {
-            console.warn('⚠️ Storage bucket check failed:', error.message);
-            showStorageError();
+            
+            // Setup form
+            setupFileInputs();
+            const form = document.getElementById('gameSubmissionForm');
+            if (form) {
+                form.addEventListener('submit', handleSubmit);
+                console.log('✅ Form setup complete');
+            } else {
+                console.error('❌ Form not found');
+            }
         }
-        
-        setupFileInputs();
-        document.getElementById('gameSubmissionForm').addEventListener('submit', handleSubmit);
-        console.log('✅ Form setup complete');
+    } else {
+        console.error('❌ Failed to initialize Supabase');
+        alert('❌ Failed to initialize application. Please refresh the page.');
     }
 }); 
