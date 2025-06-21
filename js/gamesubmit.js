@@ -428,6 +428,36 @@ async function handleSubmit(e) {
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Initializing game submission page...');
     
+    // Debug: Make sure body is visible
+    console.log('🔍 Body display style:', document.body.style.display);
+    console.log('🔍 Body computed style:', window.getComputedStyle(document.body).display);
+    
+    // Force body to be visible
+    document.body.style.display = 'block';
+    document.body.style.visibility = 'visible';
+    document.body.style.opacity = '1';
+    
+    console.log('🔍 After forcing visibility - Body display:', document.body.style.display);
+    
+    // Debug: Check if main elements exist
+    const header = document.querySelector('header');
+    const main = document.querySelector('main');
+    const form = document.getElementById('gameSubmissionForm');
+    
+    console.log('🔍 Header element found:', !!header);
+    console.log('🔍 Main element found:', !!main);
+    console.log('🔍 Form element found:', !!form);
+    
+    if (header) {
+        console.log('🔍 Header computed display:', window.getComputedStyle(header).display);
+        console.log('🔍 Header computed visibility:', window.getComputedStyle(header).visibility);
+    }
+    
+    if (main) {
+        console.log('🔍 Main computed display:', window.getComputedStyle(main).display);
+        console.log('🔍 Main computed visibility:', window.getComputedStyle(main).visibility);
+    }
+    
     // Initialize Supabase
     if (await initializeSupabase()) {
         // Check authentication
