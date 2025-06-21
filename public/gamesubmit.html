@@ -95,37 +95,7 @@
             }
         });
 
-        // Very simple authentication check
-        async function checkAuth() {
-            console.log('gamesubmit.html: Checking authentication...');
-            
-            try {
-                const { data, error } = await window.supabase.auth.getSession();
-                
-                if (data?.session) {
-                    console.log('gamesubmit.html: Valid session found, showing page');
-                    if (document.body) {
-                        document.body.style.display = '';
-                    }
-                } else {
-                    console.log('gamesubmit.html: No session found, redirecting to login');
-                    window.location.href = 'login.html';
-                }
-            } catch (err) {
-                console.error('gamesubmit.html: Auth error:', err);
-                // On error, redirect to login
-                window.location.href = 'login.html';
-            }
-        }
-
-        // Hide page initially - but only after DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            if (document.body) {
-                document.body.style.display = 'none';
-            }
-            // Check auth after a short delay
-            setTimeout(checkAuth, 500);
-        });
+        // Authentication will be handled by gamesubmit.js
     </script>
 </head>
 <body class="bg-gray-900 text-gray-100 font-sans">
