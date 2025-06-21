@@ -82,6 +82,17 @@
         footer {
             background-color: #0a192f !important;
         }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
     </style>
     <script>
         // Initialize Supabase client with production instance
@@ -205,7 +216,7 @@
                                 <span class="block">Click to upload cover image</span>
                                 <span class="block text-sm text-gray-400">Recommended size: 600x900px</span>
                             </label>
-                            <input type="file" id="coverImage" name="coverImage" accept="image/*" required style="display: none;">
+                            <input type="file" id="coverImage" name="coverImage" accept="image/*" required class="sr-only">
                             <div id="coverPreview" class="mt-2 hidden">
                                 <img src="#" alt="Cover Preview" class="preview-image">
                             </div>
@@ -219,7 +230,7 @@
                                 <span class="block text-sm text-gray-400">Hold Ctrl/Cmd to select multiple files</span>
                                 <span class="block text-sm text-gray-400">Recommended size: 1280x720px • Max 10 files</span>
                             </label>
-                            <input type="file" id="screenshots" name="screenshots" accept="image/*" multiple style="display: none;">
+                            <input type="file" id="screenshots" name="screenshots" accept="image/*" multiple class="sr-only">
                             <div id="screenshotsPreview" class="mt-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2"></div>
                         </div>
                     </div>

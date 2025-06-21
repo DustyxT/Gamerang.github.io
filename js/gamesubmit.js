@@ -321,6 +321,12 @@ async function handleSubmit(e) {
             throw new Error('You must be logged in to submit a game');
         }
 
+        // Remove required attribute from file inputs to prevent validation issues
+        const coverInput = document.getElementById('coverImage');
+        const screenshotsInput = document.getElementById('screenshots');
+        if (coverInput) coverInput.removeAttribute('required');
+        if (screenshotsInput) screenshotsInput.removeAttribute('required');
+
         // Upload cover image
         let coverImageUrl = null;
         const coverImageFile = document.getElementById('coverImage').files[0];
@@ -329,6 +335,8 @@ async function handleSubmit(e) {
             const coverPath = generateFilePath(currentUser.id, 'covers', coverImageFile.name);
             coverImageUrl = await uploadFile(coverImageFile, coverPath);
             console.log('✅ Cover image uploaded:', coverImageUrl);
+        } else {
+            console.log('⚠️ No cover image selected, proceeding without it');
         }
 
         // Upload screenshots
