@@ -455,7 +455,7 @@
             </div>
         </div>
     </header>
-    <!-- Hero Slider -->
+        <!-- Hero Slider -->
     <section class="slider-container relative">
         <!-- Section Title Badge -->
         <div class="absolute top-8 left-1/2 transform -translate-x-1/2 z-20">
@@ -481,30 +481,6 @@
             <a href="#latest" class="text-white animate-bounce hover:text-cyan-400 transition">
                 <i class="fas fa-chevron-down text-2xl"></i>
             </a>
-        </div>
-    </section>
-
-    <!-- Middle Background Video Section -->
-    <section class="relative w-full h-screen overflow-hidden">
-        <video autoplay muted loop class="absolute top-0 left-0 w-full h-full object-cover">
-            <source src="https://pjlzzuoplxrftrqbhbfl.supabase.co/storage/v1/object/public/background-video-forum-page/wildwest-background.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-        <div class="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
-            <div class="text-center text-white z-10 max-w-4xl mx-auto px-6">
-                <h2 class="text-4xl md:text-6xl font-bold mb-6 neon-text header-font">Wild West Gaming</h2>
-                <p class="text-xl md:text-2xl mb-8 text-gray-200">Experience the frontier like never before with our premium game collection</p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="games.html" class="btn-steam px-8 py-4 rounded-full inline-flex items-center space-x-2 text-lg">
-                        <i class="fas fa-gamepad"></i>
-                        <span>Explore Games</span>
-                    </a>
-                    <a href="forum.html" class="bg-transparent border-2 border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-black px-8 py-4 rounded-full inline-flex items-center space-x-2 text-lg transition-all duration-500">
-                        <i class="fas fa-users"></i>
-                        <span>Join Community</span>
-                    </a>
-                </div>
-            </div>
         </div>
     </section>
 
@@ -603,26 +579,6 @@
         </div>
     </section>
 
-    <!-- Bottom Background Video Section -->
-    <section class="relative w-full h-screen overflow-hidden">
-        <video autoplay muted loop class="absolute top-0 left-0 w-full h-full object-cover">
-            <source src="https://pjlzzuoplxrftrqbhbfl.supabase.co/storage/v1/object/public/background-video-forum-page/wildwest-background.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-        <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div class="text-center text-white z-10 max-w-4xl mx-auto px-6">
-                <h2 class="text-4xl md:text-6xl font-bold mb-6 neon-text header-font">Ready to Ride?</h2>
-                <p class="text-xl md:text-2xl mb-8 text-gray-200">Join thousands of gamers in the ultimate Wild West adventure</p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="games.html" class="btn-steam px-8 py-4 rounded-full inline-flex items-center space-x-2 text-lg">
-                        <i class="fas fa-download"></i>
-                        <span>Start Download</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Footer -->
     <footer class="steam-gradient pt-16 pb-8">
         <div class="container mx-auto px-4">
@@ -699,58 +655,6 @@
         });
 
         let allGameTitlesForSuggestions = []; // For search suggestions
-
-        // Improved slider functionality
-        function initSlider() {
-            const slides = document.querySelectorAll('#heroSliderContainer .slider-slide');
-            
-            if (slides.length === 0) {
-                console.log('No slides found, skipping slider initialization');
-                return;
-            }
-            
-            let currentSlide = 0;
-            let slideInterval;
-            const TRANSITION_INTERVAL = 5000; // 5 seconds between transitions
-
-            function showSlide(index) {
-                // Remove active class from all slides
-                slides.forEach((slide, i) => {
-                    if (i === index) {
-                        slide.style.opacity = '1';
-                        slide.classList.add('active');
-                    } else {
-                        slide.style.opacity = '0';
-                        slide.classList.remove('active');
-                    }
-                });
-                currentSlide = index;
-            }
-
-            function nextSlide() {
-                const nextIndex = (currentSlide + 1) % slides.length;
-                showSlide(nextIndex);
-            }
-
-            function startAutoSlide() {
-                // Clear any existing interval
-                if (slideInterval) {
-                    clearInterval(slideInterval);
-                }
-                // Only start auto-slide if there are multiple slides
-                if (slides.length > 1) {
-                    slideInterval = setInterval(nextSlide, TRANSITION_INTERVAL);
-                }
-            }
-
-            console.log(`Initializing slider with ${slides.length} slides`);
-            
-            // Initialize first slide
-            showSlide(0);
-            
-            // Start auto-advance
-            startAutoSlide();
-        }
 
         // Load most viewed games for hero slider
         async function loadMostViewedGames() {
@@ -883,6 +787,58 @@
                     `;
                 }
             }
+        }
+
+        // Improved slider functionality
+        function initSlider() {
+            const slides = document.querySelectorAll('#heroSliderContainer .slider-slide');
+            
+            if (slides.length === 0) {
+                console.log('No slides found, skipping slider initialization');
+                return;
+            }
+            
+            let currentSlide = 0;
+            let slideInterval;
+            const TRANSITION_INTERVAL = 5000; // 5 seconds between transitions
+
+            function showSlide(index) {
+                // Remove active class from all slides
+                slides.forEach((slide, i) => {
+                    if (i === index) {
+                        slide.style.opacity = '1';
+                        slide.classList.add('active');
+                    } else {
+                        slide.style.opacity = '0';
+                        slide.classList.remove('active');
+                    }
+                });
+                currentSlide = index;
+            }
+
+            function nextSlide() {
+                const nextIndex = (currentSlide + 1) % slides.length;
+                showSlide(nextIndex);
+            }
+
+            function startAutoSlide() {
+                // Clear any existing interval
+                if (slideInterval) {
+                    clearInterval(slideInterval);
+                }
+                // Only start auto-slide if there are multiple slides
+                if (slides.length > 1) {
+                    slideInterval = setInterval(nextSlide, TRANSITION_INTERVAL);
+                }
+            }
+
+            console.log(`Initializing slider with ${slides.length} slides`);
+            
+            // Initialize first slide
+            showSlide(0);
+            
+            // Start auto-advance
+            startAutoSlide();
         }
 
         // Load latest releases from Supabase
@@ -1102,12 +1058,13 @@
         }
 
         // Search functionality (modified for suggestions on index.html)
-        async function searchGames(query, page = 1) { 
+        async function searchGames(query, page = 1) {
+
             // This function will now primarily be for a full search result display if explicitly called,
             // e.g., if a user presses Enter and we decide NOT to redirect but show results on index.html.
             // For now, typing in search bar on index.html will primarily use displaySearchSuggestions.
             console.log('Full search on index.html triggered for:', query, 'Page:', page);
-            
+                        
             // The existing logic for searchResults, searchLoading etc. on index.html will be used here.
             // This part remains if we want to display full results on index.html upon a specific action (e.g. pressing enter without redirect)
             // For now, let's assume suggestions are the primary interaction from typing.
