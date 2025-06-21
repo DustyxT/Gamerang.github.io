@@ -98,10 +98,6 @@
                             Sign In
                         </button>
                     </form>
-
-                    <div class="mt-4 text-center">
-                        <p class="text-gray-400">Don't have an account? <a href="signup.html" class="text-purple-400 hover:text-purple-300">Sign Up</a></p>
-                    </div>
                 </div>
             </div>
 
@@ -215,7 +211,7 @@
                     } else if (error.message.includes('Email rate limit exceeded')) {
                         alert('Too many login attempts. Please wait a moment before trying again.');
                     } else if (error.message.includes('User not found')) {
-                        alert('No account found with this email address. Please sign up first or check your email.');
+                        alert('No account found with this email address. Please check your email and try again.');
                     } else {
                         alert(`Login failed: ${error.message}`);
                     }
